@@ -1,117 +1,122 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons'; // Usa el paquete correcto de Ionicons
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const items = [
+  {
+    id: '1',
+    image: 'https://via.placeholder.com/150',
+    title: 'Água FRIZE C/ Gás Limão 0,25L',
+    price: '€0,59',
+    sold: true,
+  },
+  {
+    id: '2',
+    image: 'https://via.placeholder.com/150',
+    title: 'Lorem Ipsum, dolor sit amet consectetuer',
+    user: '@user_nickname',
+    price: '',
+    sold: false,
+  },
+];
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+const App = () => {
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      {item.sold && (
+        <TouchableOpacity style={styles.soldTag}>
+          <Text style={styles.soldText}>Sold</Text>
+        </TouchableOpacity>
+      )}
+      <View style={styles.infoContainer}>
+        <Text style={styles.title}>{item.title}</Text>
+        {item.price ? <Text style={styles.price}>{item.price}</Text> : <Text style={styles.user}>{item.user}</Text>}
+      </View>
     </View>
   );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <View style={styles.container}>
+      <Text style={styles.header}>REDMEDIA</Text>
+      <FlatList
+        data={items}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One hola">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <View style={styles.footer}>
+        <Icon name="home-outline" size={30} color="black" />
+        <Icon name="search-outline" size={30} color="black" />
+        <Icon name="add-circle-outline" size={30} color="black" />
+        <Icon name="heart-outline" size={30} color="black" />
+        <Icon name="person-outline" size={30} color="black" />
+      </View>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
   },
-  sectionTitle: {
+  header: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    paddingVertical: 20,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  row: {
+    justifyContent: 'space-between',
   },
-  highlight: {
-    fontWeight: '700',
+  card: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 10,
+    width: '48%',
+  },
+  image: {
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
+  },
+  infoContainer: {
+    marginTop: 10,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  price: {
+    fontSize: 16,
+    color: '#000',
+  },
+  user: {
+    fontSize: 12,
+    color: '#aaa',
+  },
+  soldTag: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    position: 'absolute',
+    top: 10,
+    left: 10,
+  },
+  soldText: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderColor: '#ddd',
   },
 });
 
