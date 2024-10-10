@@ -1,4 +1,3 @@
-
 [
     {
       "id": "1",
@@ -14,5 +13,47 @@
       "user": "@user_nickname",
       "price": "",
       "sold": false
-    }
+    },
+    {
+        "id": "3",
+        "image": "https://images.unsplash.com/photo-1542293787938-c9e299b88094",
+        "title": "Café Expresso 250g",
+        "user": "@coffee_lovers",
+        "sold": true
+      },
+      {
+        "id": "4",
+        "image": "https://images.unsplash.com/photo-1574169208507-843761648276",
+        "title": "Teclado Mecánico RGB",
+        "user": "@tech_gadgets",
+        "sold": false
+      },
+      {
+        "id": "5",
+        "image": "https://images.unsplash.com/photo-1555685812-5b43d2a5b92b",
+        "title": "Cámara Fotográfica Canon",
+        "user": "@photography_world",
+        "sold": false
+      },
+      {
+        "id": "6",
+        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+        "title": "Auriculares Bluetooth Sony",
+        "user": "@music_enthusiasts",
+        "sold": true
+      },
+      {
+        "id": "7",
+        "image": "https://images.unsplash.com/photo-1593642532973-d31b6557fa68",
+        "title": "Laptop Dell Inspiron",
+        "user": "@tech_pros",
+        "sold": false
+      },
+      {
+        "id": "8",
+        "image": "https://images.unsplash.com/photo-1497493292307-31c376b6e479",
+        "title": "Bicicleta Eléctrica",
+        "user": "@eco_bike_riders",
+        "sold": false
+      }
   ]

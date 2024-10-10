@@ -1,8 +1,8 @@
-// src/components/ItemCard.js
+// src/components/Post.js
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-const ItemCard = ({ item }) => {
+const Post = ({ item }) => {
   return (
     <View style={styles.card}>
       <Image source={{ uri: item.image }} style={styles.image} />
@@ -21,7 +21,7 @@ const ItemCard = ({ item }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#f9f9f9',
+    
     borderRadius: 10,
     padding: 10,
     marginVertical: 10,
@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: 'bold',
+    color: '#000',
   },
   price: {
     fontSize: 16,
@@ -62,4 +63,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ItemCard;
+export default Post;
