@@ -1,0 +1,18 @@
+
+[
+    {
+      "id": "1",
+      "image": "https://via.placeholder.com/150",
+      "title": "Água FRIZE C/ Gás Limão 0,25L",
+      "price": "€0,59",
+      "sold": true
+    },
+    {
+      "id": "2",
+      "image": "https://via.placeholder.com/150",
+      "title": "Lorem Ipsum, dolor sit amet consectetuer",
+      "user": "@user_nickname",
+      "price": "",
+      "sold": false
+    }
+  ]
