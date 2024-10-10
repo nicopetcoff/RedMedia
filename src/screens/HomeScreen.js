@@ -28,10 +28,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     paddingVertical: 20,
-    color: '#000',
+    color: 'black',
   },
   row: {
-    justifyContent: 'space-between',
+    justifyContent: 'space-between', // Espaciado entre las columnas
   },
 });
 
