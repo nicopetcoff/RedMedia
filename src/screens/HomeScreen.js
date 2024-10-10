@@ -42,10 +42,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'black',
+    textAlign: 'left', // Cambiado a 'left' para alinear a la izquierda
   },
   row: {
     justifyContent: 'space-between',
-    paddingHorizontal: 10, // Añadimos espacio horizontal para las columnas
+    paddingHorizontal: 10,
   },
 });
 
