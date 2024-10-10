@@ -16,10 +16,11 @@ const Tab = createBottomTabNavigator();
 
 const HomeStackScreen = () => {
   return (
-    <Stack.Navigator>
-      {/* Cambiamos el nombre a algo más descriptivo como MainTab */}
-      <Stack.Screen name="MainTab" component={BottomTabNavigator} options={{ headerShown: false }} />
-      <Stack.Screen name="PostDetail" component={PostDetail} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* Ocultar encabezado para todas las pantallas */}
+      <Stack.Screen name="MainTab" component={BottomTabNavigator} />
+      {/* Mostrar el header solo en PostDetail */}
+      <Stack.Screen name="PostDetail" component={PostDetail} options={{ headerShown: true }} />
     </Stack.Navigator>
   );
 };
@@ -29,6 +30,7 @@ const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerShown: false, // Ocultar encabezado para todas las pantallas del Tab Navigator
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
@@ -48,6 +50,7 @@ const BottomTabNavigator = () => {
         },
         tabBarActiveTintColor: 'black',
         tabBarInactiveTintColor: 'gray',
+        tabBarShowLabel: false, // Ocultar los títulos de las pestañas
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />

@@ -1,59 +1,58 @@
 [
-    {
-      "id": "1",
-      "image": "https://via.placeholder.com/150",
-      "title": "Água FRIZE C/ Gás Limão 0,25L",
-      "price": "€0,59",
-      "sold": true
-    },
-    {
-      "id": "2",
-      "image": "https://via.placeholder.com/150",
-      "title": "Lorem Ipsum, dolor sit amet consectetuer",
-      "user": "@user_nickname",
-      "price": "",
-      "sold": false
-    },
-    {
-        "id": "3",
-        "image": "https://images.unsplash.com/photo-1542293787938-c9e299b88094",
-        "title": "Café Expresso 250g",
-        "user": "@coffee_lovers",
-        "sold": true
-      },
-      {
-        "id": "4",
-        "image": "https://images.unsplash.com/photo-1574169208507-843761648276",
-        "title": "Teclado Mecánico RGB",
-        "user": "@tech_gadgets",
-        "sold": false
-      },
-      {
-        "id": "5",
-        "image": "https://images.unsplash.com/photo-1555685812-5b43d2a5b92b",
-        "title": "Cámara Fotográfica Canon",
-        "user": "@photography_world",
-        "sold": false
-      },
-      {
-        "id": "6",
-        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-        "title": "Auriculares Bluetooth Sony",
-        "user": "@music_enthusiasts",
-        "sold": true
-      },
-      {
-        "id": "7",
-        "image": "https://images.unsplash.com/photo-1593642532973-d31b6557fa68",
-        "title": "Laptop Dell Inspiron",
-        "user": "@tech_pros",
-        "sold": false
-      },
-      {
-        "id": "8",
-        "image": "https://images.unsplash.com/photo-1497493292307-31c376b6e479",
-        "title": "Bicicleta Eléctrica",
-        "user": "@eco_bike_riders",
-        "sold": false
-      }
-  ]
+  {
+    "id": "1",
+    "image": "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
+    "title": "Água FRIZE C/ Gás Limão 0,25L",
+    "price": "€0,59",
+    "sold": true
+  },
+  {
+    "id": "2",
+    "image": "https://images.unsplash.com/photo-1491553895911-0055eca6402d",
+    "title": "Lorem Ipsum, dolor sit amet consectetuer",
+    "user": "@user_nickname",
+    "sold": false
+  },
+  {
+    "id": "3",
+    "image": "https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "title": "Café Expresso 250g",
+    "price": "€2,99",
+    "sold": true
+  },
+  {
+    "id": "4",
+    "image": "https://images.unsplash.com/photo-1574169208507-843761648276",
+    "title": "Teclado Mecánico RGB",
+    "price": "€99,99",
+    "sold": false
+  },
+  {
+    "id": "5",
+    "image": "https://images.unsplash.com/photo-1519183071298-a2962b69a355",
+    "title": "Cámara Fotográfica Canon",
+    "price": "€799,99",
+    "sold": false
+  },
+  {
+    "id": "6",
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+    "title": "Auriculares Bluetooth Sony",
+    "price": "€199,99",
+    "sold": true
+  },
+  {
+    "id": "7",
+    "image": "https://images.unsplash.com/photo-1593642532973-d31b6557fa68",
+    "title": "Laptop Dell Inspiron",
+    "price": "€1.299,99",
+    "sold": false
+  },
+  {
+    "id": "8",
+    "image": "https://images.unsplash.com/photo-1574462922451-6cdbca1d6369",
+    "title": "Bicicleta Eléctrica",
+    "price": "€1.999,99",
+    "sold": false
+  }
+]
