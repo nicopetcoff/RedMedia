@@ -5,17 +5,13 @@ import { useNavigation } from '@react-navigation/native';
 const Post = ({ item }) => {
   const navigation = useNavigation();
 
+  // Verificamos si item.image es un array, si lo es, tomamos el primer elemento.
+  const imageUri = Array.isArray(item.image) ? item.image[0] : item.image;
+
   return (
     <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PostDetail', { item })}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      
-      {/*
-      {item.sold && (
-        <View style={styles.soldTag}>
-          <Text style={styles.soldText}>Sold</Text>
-        </View>
-      )}
-      */} 
+      <Image source={{ uri: imageUri }} style={styles.image} />
+
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.user}>{item.user}</Text>
@@ -26,48 +22,34 @@ const Post = ({ item }) => {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 10,
-    marginHorizontal: 5, // Más margen horizontal para espaciado entre columnas
-    width: '47%',  // Ajusta a 47% para evitar que las tarjetas se amontonen
+    marginVertical: 5,
+    marginHorizontal: 5,
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     position: 'relative',
   },
   image: {
     width: '100%',
-    height: 150,
+    height: undefined,
+    aspectRatio: 1, // Mantenemos la relación de aspecto
     borderRadius: 10,
-    resizeMode: 'cover', // Asegura que las imágenes se ajusten bien sin deformarse
+    resizeMode: 'cover', // Aseguramos que la imagen mantenga su proporción
   },
   infoContainer: {
-    marginTop: 10,
+    marginTop: 8,
     alignItems: 'center',
   },
   title: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#000',
     textAlign: 'center',
-    color: '#333',
   },
   user: {
-    fontSize: 12,
-    color: '#aaa',
+    fontSize: 14,
+    color: '#555',
     textAlign: 'center',
-  },
-  soldTag: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    position: 'absolute',
-    bottom: 10,
-    left: '50%',
-    transform: [{ translateX: -25 }],
-  },
-  soldText: {
-    color: '#fff',
-    fontSize: 12,
   },
 });
 

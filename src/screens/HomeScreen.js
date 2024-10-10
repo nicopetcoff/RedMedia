@@ -1,18 +1,22 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import Post from '../components/Post'; // Importamos el componente Post
-import posts from '../data/posts.json'; // Importamos el JSON con los datos
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
+import Post from '../components/Post';
+import posts from '../data/posts.json';
 
 const HomeScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>REDMEDIA</Text>
+      <View style={styles.headerContainer}>
+        <Image source={require('../assets/logo.png')} style={styles.logo} />
+        <Text style={styles.header}>REDMEDIA</Text>
+      </View>
       <FlatList
         data={posts}
         renderItem={({ item }) => <Post item={item} />}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.row}
+        showsVerticalScrollIndicator={false} // Ocultar el indicador de scroll vertical para una experiencia más limpia
       />
     </View>
   );
@@ -24,14 +28,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 10,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    paddingVertical: 20,
     color: 'black',
   },
   row: {
-    justifyContent: 'space-between', // Espaciado entre las columnas
+    justifyContent: 'space-between',
+    paddingHorizontal: 10, // Añadimos espacio horizontal para las columnas
   },
 });
 
