@@ -1,0 +1,40 @@
+[
+    {
+      "id": 1,
+      "name": "Carlos Diaz",
+      "username": "carlos",
+      "avatar": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400",
+      "coverImage": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400",
+      "bio": "Amante de la moda y el estilo.",
+      "level": 4,
+      "postsCount": 2,
+      "followers": 1500,
+      "following": 200,
+      "posts": [
+        {
+          "id": 2,
+          "title": "Estilando mi camisa un rato",
+          "image": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Maria Rodriguez",
+      "username": "@maria",
+      "avatar": "https://randomuser.me/api/portraits/women/3.jpg",
+      "coverImage": "https://example.com/maria-cover.jpg",
+      "bio": "Viajera apasionada y fotógrafa.",
+      "level": 3,
+      "postsCount": 3,
+      "followers": 2100,
+      "following": 350,
+      "posts": [
+        {
+          "id": 3,
+          "title": "Viajando por el mundo",
+          "image": "https://images.pexels.com/photos/34950/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=400"
+        }
+      ]
+    }
+  ]

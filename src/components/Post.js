@@ -32,24 +32,24 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: undefined,
-    aspectRatio: 1, // Mantenemos la relación de aspecto
+    aspectRatio: 1,
     borderRadius: 10,
-    resizeMode: 'cover', // Aseguramos que la imagen mantenga su proporción
+    resizeMode: 'cover',
   },
   infoContainer: {
     marginTop: 8,
-    alignItems: 'center',
+    alignItems: 'flex-start', // Cambiado a 'flex-start' para alinear a la izquierda
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
-    textAlign: 'center',
+    textAlign: 'left', // Cambiado a 'left' para alinear a la izquierda
   },
   user: {
     fontSize: 14,
     color: '#555',
-    textAlign: 'center',
+    textAlign: 'left', // Cambiado a 'left' para alinear a la izquierda
   },
 });
 

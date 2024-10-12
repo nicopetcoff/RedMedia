@@ -13,9 +13,30 @@
       "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400",
       "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400"
     ],
-    "title": "Estilando mi camisa roja un rato",
-    "user": "@carlos",
-    "sold": false
+    "title": "Estilando mi camisa un rato",
+    "user": "carlos",
+    "userAvatar": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "location": "Buenos Aires, Argentina",
+    "sold": false,
+    "likes": 1500,
+    "comments": [
+      {
+        "username": "juan1989",
+        "comment": "Great style!"
+      },
+      {
+        "username": "laura_b",
+        "comment": "I love it!"
+      },
+      {
+        "username": "fashion_queen",
+        "comment": "Where did you get that shirt?"
+      },
+      {
+        "username": "lucas_r",
+        "comment": "Looking sharp!"
+      }
+    ]
   },
   {
     "id": "3",
@@ -27,7 +48,24 @@
     ],
     "title": "Viajando por el mundo",
     "user": "@maria",
-    "sold": false
+    "userAvatar": "https://randomuser.me/api/portraits/women/3.jpg",
+    "location": "Madrid, Spain",
+    "sold": false,
+    "likes": 2100,
+    "comments": [
+      {
+        "username": "traveler101",
+        "comment": "Amazing views!"
+      },
+      {
+        "username": "explorer98",
+        "comment": "I need to visit this place!"
+      },
+      {
+        "username": "adventure_junkie",
+        "comment": "Best trip ever!"
+      }
+    ]
   },
   {
     "id": "4",
@@ -45,7 +83,20 @@
     ],
     "title": "Walking around the city",
     "user": "@mario",
-    "sold": false
+    "userAvatar": "https://randomuser.me/api/portraits/men/5.jpg",
+    "location": "Rome, Italy",
+    "sold": false,
+    "likes": 1200,
+    "comments": [
+      {
+        "username": "johnny_walker",
+        "comment": "Beautiful city!"
+      },
+      {
+        "username": "city_explorer",
+        "comment": "Rome is incredible!"
+      }
+    ]
   },
   {
     "id": "6",
@@ -56,7 +107,20 @@
     ],
     "title": "Viendo las estrellas",
     "user": "@camila",
-    "sold": false
+    "userAvatar": "https://randomuser.me/api/portraits/women/6.jpg",
+    "location": "Santiago, Chile",
+    "sold": false,
+    "likes": 980,
+    "comments": [
+      {
+        "username": "stargazer",
+        "comment": "Incredible view!"
+      },
+      {
+        "username": "cosmos_lover",
+        "comment": "The night sky is so clear!"
+      }
+    ]
   },
   {
     "id": "7",
@@ -75,6 +139,23 @@
     ],
     "title": "La mejor playa de la ciudad",
     "user": "@laura",
-    "sold": false
+    "userAvatar": "https://randomuser.me/api/portraits/women/8.jpg",
+    "location": "Miami, USA",
+    "sold": false,
+    "likes": 5000,
+    "comments": [
+      {
+        "username": "beachlover",
+        "comment": "What a beautiful beach!"
+      },
+      {
+        "username": "surfergirl",
+        "comment": "I love this spot!"
+      },
+      {
+        "username": "ocean_vibes",
+        "comment": "Best place to relax!"
+      }
+    ]
   }
 ]
