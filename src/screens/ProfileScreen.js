@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import usersData from '../data/users.json'; // Importamos el archivo JSON con los usuarios
 import Post from '../components/Post'; // Importamos el componente Post
-import posts from '../data/posts.json'; // Importamos los posts de prueba
+import postsData from '../data/posts.json'; // Importamos los posts de prueba
 
 const { width: windowWidth } = Dimensions.get('window'); // Obtener el ancho de la ventana
 
@@ -31,6 +31,9 @@ const ProfileScreen = ({ route }) => {
       </View>
     );
   }
+
+  // Filtramos los posts que pertenecen al usuario actual
+  const userPosts = postsData.filter(post => post.user === user.username);
 
   // Verificación explícita de que los valores followers y following existen y son números válidos
   const followersCount = typeof user.followers === 'number' ? user.followers : 0;
@@ -63,7 +66,7 @@ const ProfileScreen = ({ route }) => {
         {/* Estadísticas a la derecha */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statText}>{user.postsCount || 0}</Text>
+            <Text style={styles.statText}>{userPosts.length || 0}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statItem}>
@@ -91,7 +94,7 @@ const ProfileScreen = ({ route }) => {
 
   return (
     <FlatList
-      data={posts} // Los posts del usuario
+      data={userPosts} // Usamos los posts filtrados del usuario
       renderItem={({ item }) => <Post item={item} />} // Usa el componente Post
       keyExtractor={(item) => item.id.toString()}
       numColumns={2} // Mostramos 2 columnas
