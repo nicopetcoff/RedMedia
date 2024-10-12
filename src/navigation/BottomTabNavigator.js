@@ -9,7 +9,7 @@ import HomeStackScreen from './HomeStackScreen'; // Importamos HomeStackScreen
 import SearchScreen from '../screens/SearchScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import NotificationScreen from '../screens/NotificationScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import LoggedInUserProfileScreen from '../screens/LoggedInUserProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -45,7 +45,7 @@ const BottomTabNavigator = () => {
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="CreatePost" component={CreatePostScreen} />
       <Tab.Screen name="Notifications" component={NotificationScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={LoggedInUserProfileScreen} />
     </Tab.Navigator>
   );
 };
