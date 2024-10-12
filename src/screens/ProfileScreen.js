@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import usersData from '../data/users.json'; // Importamos el archivo JSON con los usuarios
+import Post from '../components/Post'; // Importamos el componente Post
+import posts from '../data/posts.json'; // Importamos los posts de prueba
+
+const { width: windowWidth } = Dimensions.get('window'); // Obtener el ancho de la ventana
 
 const ProfileScreen = ({ route }) => {
   const { username } = route.params || {}; // Recibimos el 'username' desde la navegación
@@ -28,40 +32,74 @@ const ProfileScreen = ({ route }) => {
     );
   }
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
+  // Verificación explícita de que los valores followers y following existen y son números válidos
+  const followersCount = typeof user.followers === 'number' ? user.followers : 0;
+  const followingCount = typeof user.following === 'number' ? user.following : 0;
+
+  // Renderizado del encabezado del perfil
+  const renderProfileHeader = () => (
+    <View>
       {/* Imagen de fondo */}
       {user.coverImage && (
         <Image 
           source={{ uri: user.coverImage }} 
-          style={styles.coverImage} 
+          style={[styles.coverImage, { width: windowWidth }]} // Ajustamos el ancho de la imagen al de la pantalla
           resizeMode="cover" // Aseguramos que la imagen cubra todo el área del cover
         />
       )}
 
       {/* Información del perfil */}
-      <View style={styles.profileContainer}>
-        {user.avatar && <Image source={{ uri: user.avatar }} style={styles.avatar} />}
-        {user.name && <Text style={styles.name}>{user.name}</Text>}
-        {user.username && <Text style={styles.username}>@{user.username}</Text>}
-
-        <View style={styles.statsContainer}>
-          <Text style={styles.statText}>{user.postsCount || 0} Posts</Text>
-          <Text style={styles.statText}>{user.followers || 0} Followers</Text>
-          <Text style={styles.statText}>{user.following || 0} Following</Text>
+      <View style={styles.profileInfoContainer}>
+        <View style={styles.userSection}>
+          {/* Avatar */}
+          {user.avatar && <Image source={{ uri: user.avatar }} style={styles.avatar} />}
+          {/* Nombre y username debajo del avatar */}
+          <View style={styles.userDetails}>
+            {user.name && <Text style={styles.name}>{user.name}</Text>}
+            {user.username && <Text style={styles.username}>@{user.username}</Text>}
+          </View>
         </View>
 
-        {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
-        {user.level && <Text style={styles.level}>Nivel: {user.level}</Text>}
-
-        {/* Botón de seguir */}
-        <TouchableOpacity style={styles.followButton} onPress={toggleFollow}>
-          <Text style={styles.followButtonText}>
-            {isFollowing ? 'Unfollow' : 'Follow'}
-          </Text>
-        </TouchableOpacity>
+        {/* Estadísticas a la derecha */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statText}>{user.postsCount || 0}</Text>
+            <Text style={styles.statLabel}>Posts</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statText}>{followersCount}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statText}>{followingCount}</Text>
+            <Text style={styles.statLabel}>Following</Text>
+          </View>
+        </View>
       </View>
-    </ScrollView>
+
+      {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
+      {user.level && <Text style={styles.level}>Nivel: {user.level}</Text>}
+
+      {/* Botón de seguir */}
+      <TouchableOpacity style={styles.followButton} onPress={toggleFollow}>
+        <Text style={styles.followButtonText}>
+          {isFollowing ? 'Unfollow' : 'Follow'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={posts} // Los posts del usuario
+      renderItem={({ item }) => <Post item={item} />} // Usa el componente Post
+      keyExtractor={(item) => item.id.toString()}
+      numColumns={2} // Mostramos 2 columnas
+      columnWrapperStyle={styles.columnWrapper} // Estilo para las columnas
+      ListHeaderComponent={renderProfileHeader} // Renderizamos el perfil como encabezado
+      contentContainerStyle={styles.postsContainer} // Estilo para el contenedor de los posts
+      showsVerticalScrollIndicator={false} // Ocultamos el indicador de scroll vertical
+    />
   );
 };
 
@@ -69,6 +107,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: '#fff',
+    paddingBottom: 20,
   },
   errorContainer: {
     flex: 1,
@@ -80,15 +119,19 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   coverImage: {
-    width: '100%',
-    height: 200,  // Ajusta la altura de la imagen de fondo
+    height: 200, // Altura fija de la imagen de fondo
+    width: '100%', // Aseguramos que ocupe todo el ancho de la pantalla
   },
-  profileContainer: {
-    textAlign: 'left',
-    textcolor: 'black',
-    alignItems: 'flex-start',  // Alinea los elementos a la izquierda
-    marginTop: -50,  // Ajusta la posición del avatar
-    paddingHorizontal: 20, // Añade un padding general a la izquierda
+  profileInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginTop: -30,
+    alignItems: 'center',
+  },
+  userSection: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   avatar: {
     width: 100,
@@ -96,60 +139,71 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 3,
     borderColor: '#fff',
-    marginLeft: 0, // Mueve el avatar hacia la izquierda
+  },
+  userDetails: {
+    marginTop: 10,
   },
   name: {
     color: 'black',
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 5, // Reduce el espacio superior
-    marginLeft: 10, // Mueve el nombre hacia la izquierda
   },
   username: {
     fontSize: 14,
     color: 'gray',
-    marginBottom: 3, // Reduce el espacio inferior
-    marginLeft: 10, // Mueve el username hacia la izquierda
+    marginTop: 2,
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginVertical: 8,
-    paddingHorizontal: 10, // Espacio a los lados para las estadísticas
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  statItem: {
+    marginLeft: 20,
   },
   statText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'center',
   },
   bio: {
     fontSize: 14,
     color: 'gray',
     textAlign: 'left',
-    marginHorizontal: 10, // Mueve la bio hacia la izquierda
-    marginBottom: 1,  // Reduce el espacio inferior
-    marginTop: 3,     // Mueve la bio más cerca del username
+    marginHorizontal: 20,
+    marginVertical: 10,
   },
   level: {
     fontSize: 14,
     color: 'black',
-    marginVertical: 1,  // Reduce el margen superior e inferior
-    marginLeft: 10, // Mueve el nivel hacia la izquierda
+    marginLeft: 20,
+    marginBottom: 10,
   },
   followButton: {
     backgroundColor: '#439CEE',
     borderRadius: 8,
     paddingHorizontal: 30,
     paddingVertical: 10,
-    marginTop: 3,  // Reduce el espacio entre el nivel y el botón de seguir
-    marginLeft: 10, // Mueve el botón de seguir hacia la izquierda
-    height: 40,
-    width: 300,
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   followButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  postsContainer: {
+    paddingBottom: 30, // Espacio al final para evitar superposición
+  },
+  columnWrapper: {
+    justifyContent: 'space-between', // Asegura que los dos posts se distribuyan correctamente
+    marginBottom: 10, // Espacio entre filas de posts
   },
 });
 
