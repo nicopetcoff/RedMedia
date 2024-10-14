@@ -1,0 +1,37 @@
+[
+    {
+      "id": "1",
+      "type":"Comment",
+      "user": "@Laura_Gimenez",
+      "text": "commented: 'Que buena foto!'",
+      "time" : "9:05 pm"
+    },
+    {
+      "id": "2",
+      "type":"Trending",
+      "user": "@Martin_Selco",
+      "text": "Like on your post",
+      "time": "9:10 pm"
+    },
+    {
+      "id": "3",
+      "type":"Followed",
+      "user": "@Dario_Beto",
+      "text": "started following you",
+      "time": "9:55 pm"
+    },
+    {
+      "id": "4",
+      "type":"Comment",
+      "user": "@Laura_Gimenez",
+      "text": "commented: 'Que buenaa!'",
+      "time": "Yesterday"
+    },
+    {
+      "id": "5",
+      "type":"Comment",
+      "user": "@Laura_Gimenez",
+      "text": "commented: 'Que buena foto!'",
+      "time": "Yesterday"
+    }
+  ]
