@@ -1,12 +1,12 @@
 // src/components/Notification.js
 import React from 'react';
-import {View, Text, StyleSheet,Image} from 'react-native';
+import {View, Text, StyleSheet, Image,TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 const Notification = ({item}) => {
   const navigation = useNavigation();
 
-  const getImage=()=> {
+  const getImage = () => {
     switch (item.type) {
       case 'Trending':
         return require('../assets/like.png');
@@ -17,38 +17,44 @@ const Notification = ({item}) => {
       default:
         return require('../assets/comment.png');
     }
-  }
+  };
 
   return (
     <View style={styles.Notification}>
-        <Image source={getImage()} style={styles.imagen} />
-        <View style={styles.activityItem}>
-            <Text style={styles.activityType}>{item.type}</Text>
-            <View style={styles.action}>
-                {item.icon}
-                <Text style={styles.activityUser}>{item.user}</Text>
-                <Text style={styles.activityText}>{item.text}</Text>
-            </View>
-            <Text style={styles.activityTime}>{item.time}</Text>
+      <Image source={getImage()} style={styles.imagen} />
+      <View style={styles.activityItem}>
+        <Text style={styles.activityType}>{item.type}</Text>
+        <View style={styles.action}>
+          {item.icon}
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('Profile', {username: item.user})
+            } style={styles.action}>
+            <Text style={styles.activityUser}>{item.user}</Text>
+            <Text style={styles.activityText}>{item.text}</Text>
+          </TouchableOpacity>
         </View>
+        <Text style={styles.activityTime}>{item.time}</Text>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-    Notification: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
+  Notification: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   activityItem: {
-    marginLeft:10,
-    padding: 2,
+    marginLeft: 10,
+    padding: 1,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(242, 244, 245, 0.5)',
     flex: 1,
   },
   activityType: {
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
     lineHeight: 22,
     fontSize: 17,
     color: 'black',
@@ -68,6 +74,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: 'black',
+    fontFamily: 'Roboto',
   },
   activityTime: {
     marginTop: 5,

@@ -1,14 +1,22 @@
 // src/screens/NotificationScreen.js
 import React from 'react';
-import {View, Text,FlatList, StyleSheet} from 'react-native';
+import {View, Text, FlatList, StyleSheet,TouchableOpacity} from 'react-native';
 import Notification from '../components/Notification';
 import notificaciones from '../data/notificaciones.json';
+import BackIcon from '../assets/back.svg'; // Icono personalizado de regreso
+import { useNavigation } from '@react-navigation/native';
 
 const NotificationScreen = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>Activity</Text>
+        <TouchableOpacity
+          onPress={() =>navigation.goBack()}
+          style={styles.icon}>
+          <BackIcon />
+        </TouchableOpacity>
+        <Text style={styles.title}>Activity</Text>
       </View>
       <FlatList
         data={notificaciones}
@@ -24,19 +32,26 @@ const NotificationScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fcfcfc',
     paddingHorizontal: 10,
   },
   headerContainer: {
-    paddingVertical: 30,
+    height: 100,
+    backgroundColor: '#fcfcfc',
   },
-  header: {
+  icon: {
+    width: 24,
+    height: 24,
+    marginTop: 20,
+  },
+  title: {
     fontSize: 26,
     fontFamily: 'Roboto',
     fontWeight: 'bold',
     color: 'black',
+    flex: 1,
+    textAlign: 'center',
     alignSelf: 'center',
-    marginTop: 10,
   },
   separator: {
     height: 1,
