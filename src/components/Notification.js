@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
   activityItem: {
-    padding: 10,
+    marginLeft:10,
+    padding: 2,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(242, 244, 245, 0.5)',
     flex: 1,

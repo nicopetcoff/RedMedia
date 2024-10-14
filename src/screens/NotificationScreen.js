@@ -15,6 +15,7 @@ const NotificationScreen = () => {
         renderItem={({item}) => <Notification item={item} />}
         keyExtractor={item => item.id}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
