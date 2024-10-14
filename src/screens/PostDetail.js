@@ -1,55 +1,105 @@
-import React from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import PostHeader from '../components/PostHeader';
+import PostImage from '../components/PostImage';
+import PostInteractionBar from '../components/PostInteractionBar';
+import PostComments from '../components/PostComments';
+import LocationIcon from '../assets/location.svg';
 
-const { width } = Dimensions.get('window');
+const PostDetail = ({ route, navigation }) => {
+  const { item } = route.params || {};
 
-const PostDetail = ({ route }) => {
-  const { item } = route.params; // Recibe el post a través de las rutas
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
-  const renderImage = ({ item }) => (
-    <Image source={{ uri: item }} style={styles.image} />
-  );
+  useEffect(() => {
+    if (item?.sold) {
+      navigation.goBack();
+    }
+  }, [item, navigation]);
+
+  if (!item || item.sold) {
+    return null;
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Verificamos si el item tiene un array de imágenes */}
-      <FlatList
-        data={Array.isArray(item.image) ? item.image : [item.image]} // Aseguramos que siempre sea un array
-        renderItem={renderImage}
-        keyExtractor={(image, index) => index.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-      />
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.user}>{item.user}</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Navegación al perfil del usuario al hacer clic en el avatar */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Profile', { username: item.user })}
+      >
+        <PostHeader
+          userAvatar={item.userAvatar}
+          user={item.user}
+          isFollowing={isFollowing}
+          setIsFollowing={setIsFollowing}
+        />
+      </TouchableOpacity>
+      
+      <View style={styles.titleContainer}>
+        {item.title && <Text style={styles.title}>{item.title}</Text>}
+      </View>
+      <PostImage images={item.image} />
+      {item.location && (
+        <View style={styles.locationContainer}>
+          <LocationIcon width={16} height={16} style={styles.icon} />
+          <Text style={styles.location}>{item.location}</Text>
+        </View>
+      )}
+      <PostInteractionBar isLiked={isLiked} setIsLiked={setIsLiked} />
+      <View style={styles.line} />
+      <View style={styles.likeSection}>
+        <Text style={styles.likeText}>
+          Liked by <Text style={styles.boldText}>{item.likes || 0}</Text>
+        </Text>
+      </View>
+      <PostComments comments={item.comments} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    alignItems: 'center',
+    flexGrow: 1,
     backgroundColor: '#fff',
+    paddingBottom: 20,
   },
-  image: {
-    width: width - 40, // Ajustamos la imagen para que ocupe el ancho disponible
-    height: 300,
-    borderRadius: 10,
-    marginHorizontal: 10, // Añadimos margen para espacio entre las imágenes
+  titleContainer: {
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: 'bold',
-    marginVertical: 20,
+    color: '#000',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    marginTop: 10,
+  },
+  location: {
+    fontSize: 12,
+    color: '#555',
+  },
+  line: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginHorizontal: 50,
+    marginVertical: 5,
+  },
+  likeSection: {
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  likeText: {
+    fontSize: 14,
     color: '#333',
   },
-  user: {
-    fontSize: 18,
-    color: '#555',
-  }
+  boldText: {
+    fontWeight: 'bold',
+  },
 });
 
 export default PostDetail;
