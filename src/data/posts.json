@@ -366,5 +366,30 @@
         "comment": "Love the turquoise water!"
       }
     ]
+  },
+  {
+    "id": "17",
+    "image": [
+      "https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=400",
+      "https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=400",
+      "https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=400",
+      "https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=400"
+    ],
+    "title": "Día de playa",
+    "user": "@laura",
+    "userAvatar": "https://randomuser.me/api/portraits/women/8.jpg",
+    "location": "Cancún, Mexico",
+    "sold": false,
+    "likes": 5200,
+    "comments": [
+      {
+        "username": "sunseeker",
+        "comment": "Cancún is paradise!"
+      },
+      {
+        "username": "beach_bum",
+        "comment": "Love the turquoise water!"
+      }
+    ]
   }
 ]
