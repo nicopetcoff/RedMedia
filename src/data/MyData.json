@@ -1,0 +1,11 @@
+{
+    "avatar": "https://randomuser.me/api/portraits/men/10.jpg", 
+    "coverImage": "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=400", 
+    "name": "John Doe",
+    "username": "@john_doe",
+    "bio": "Desarrollador de software y apasionado de la tecnología.",
+    "level": 5,
+    "postsCount": 123,
+    "followers": 2000,
+    "following": 3500
+}

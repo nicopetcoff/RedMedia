@@ -8,8 +8,9 @@ import ProfileIcon from '../assets/profile.svg';
 import HomeStackScreen from './HomeStackScreen'; // Importamos HomeStackScreen
 import SearchScreen from '../screens/SearchScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
-import NotificationScreen from '../screens/NotificationScreen';
+import NotificationStackScreen from './NotificationStackScreen';
 import LoggedInUserProfileScreen from '../screens/LoggedInUserProfileScreen';
+import MyProfile from '../components/MyProfileHeader';
 
 const Tab = createBottomTabNavigator();
 
@@ -44,7 +45,7 @@ const BottomTabNavigator = () => {
       <Tab.Screen name="HomeStack" component={HomeStackScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="CreatePost" component={CreatePostScreen} />
-      <Tab.Screen name="Notifications" component={NotificationScreen} />
+      <Tab.Screen name="Notifications" component={NotificationStackScreen} />
       <Tab.Screen name="Profile" component={LoggedInUserProfileScreen} />
     </Tab.Navigator>
   );

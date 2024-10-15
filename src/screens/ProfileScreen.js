@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   coverImage: {
-    height: 200, // Altura fija de la imagen de fondo
+    height: 120, // Altura fija de la imagen de fondo
     width: '100%', // Aseguramos que ocupe todo el ancho de la pantalla
   },
   profileInfoContainer: {
