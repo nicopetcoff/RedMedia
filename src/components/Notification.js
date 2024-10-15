@@ -28,7 +28,7 @@ const Notification = ({item}) => {
           {item.icon}
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('Profile', {username: item.user})
+              navigation.navigate('StackProfile', {username: item.user})
             } style={styles.action}>
             <Text style={styles.activityUser}>{item.user}</Text>
             <Text style={styles.activityText}>{item.text}</Text>

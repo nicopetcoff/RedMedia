@@ -16,7 +16,7 @@ const NotificationStackScreen = ({navigation}) => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="Profile"
+        name="StackProfile"
         component={ProfileScreen} // Añadimos la nueva pantalla de perfil
         options={{
           headerTitle: '', // Eliminamos el título del header
