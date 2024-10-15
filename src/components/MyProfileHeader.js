@@ -72,7 +72,12 @@ const MyProfileHeader = () => {
       </View>
 
       {MyData.bio && <Text style={styles.bio}>{MyData.bio}</Text>}
-      {MyData.level && <Text style={styles.level}>Nivel: {MyData.level}</Text>}
+      <View style={styles.buttonAllign}> 
+        {MyData.level && <Text style={styles.level}>Nivel: {MyData.level}</Text>}
+        <TouchableOpacity onPress={console.log("guardados")}>
+          <Image source={require('../assets/guardar.png')} style={{width: 24, height: 24, marginRight: 20}} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

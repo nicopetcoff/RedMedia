@@ -46,7 +46,7 @@ const BottomTabNavigator = () => {
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="CreatePost" component={CreatePostScreen} />
       <Tab.Screen name="Notifications" component={NotificationStackScreen} />
-      <Tab.Screen name="Profile" component={MyProfile} />
+      <Tab.Screen name="Profile" component={LoggedInUserProfileScreen} />
     </Tab.Navigator>
   );
 };

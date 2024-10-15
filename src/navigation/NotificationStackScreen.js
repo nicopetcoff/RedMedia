@@ -11,7 +11,7 @@ const NotificationStackScreen = ({navigation}) => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Notifications"
+        name="Activity"
         component={NotificationScreen}
         options={{headerShown: false}}
       />
