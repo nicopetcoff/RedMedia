@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import { useDispatch } from 'react-redux';  // Importamos useDispatch
-import { signIn } from '../redux/authSlice';  // Importamos la acción signIn
-import { signIn as signInAPI } from '../controller/miApp.controller';  // Función para pegarle al backend
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from 'react-native';
+import { useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { signIn } from '../redux/authSlice';
+import { signIn as signInAPI } from '../controller/miApp.controller';
 
 const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();  // Instanciamos dispatch de Redux
+  const dispatch = useDispatch();
 
   const handleSignIn = async () => {
     try {
@@ -15,18 +24,25 @@ const SignInScreen = ({ navigation }) => {
       const response = await signInAPI(userData);
 
       if (response.token) {
-        // Si el login es exitoso, guardamos el usuario y token en Redux
+        // Guardar token en AsyncStorage
+        await AsyncStorage.setItem('userToken', response.token);
+        
+        // Despachar la acción para actualizar el estado de autenticación
         dispatch(signIn({ user: response.user, token: response.token }));
 
-        // Redirigir a la página principal
+        // Navegar a la pantalla principal (BottomTabNavigator)
         navigation.replace('AppNavigator');
       } else {
-        Alert.alert('Error', 'Login fallido, por favor intenta de nuevo.');
+        Alert.alert('Error', 'Login failed, please try again.');
       }
     } catch (error) {
-      console.error('Error durante el login:', error);
-      Alert.alert('Error', 'Algo salió mal durante el login.');
+      console.error('Error during login:', error);
+      Alert.alert('Error', 'Something went wrong during login.');
     }
+  };
+
+  const handleForgotPassword = () => {
+    navigation.navigate('ForgotPassword'); // Navegar a la pantalla de Forgot Password
   };
 
   return (
@@ -54,6 +70,12 @@ const SignInScreen = ({ navigation }) => {
         secureTextEntry={true}
       />
 
+      {/* Navegación a Forgot Password */}
+      <TouchableOpacity onPress={handleForgotPassword}>
+        <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+      </TouchableOpacity>
+
+      {/* Botón de inicio de sesión */}
       <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
         <Text style={styles.signInButtonText}>Login</Text>
       </TouchableOpacity>
@@ -95,6 +117,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 15,
     color: 'black',
+  },
+  forgotPasswordText: {
+    color: '#4285F4',
+    fontSize: 14,
+    alignSelf: 'flex-end',
+    marginBottom: 30,
   },
   signInButton: {
     backgroundColor: '#4285F4',
