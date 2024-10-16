@@ -1,45 +1,43 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native'; // Mantén la importación por si la necesitas después
-// import BottomTabNavigator from './src/navigation/BottomTabNavigator'; // Comentar esto por ahora
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './src/screens/LoginScreen'; // Importamos la pantalla de Login
-import SignUpScreen from './src/screens/SignUpScreen'; // Importamos la pantalla de registro
-import SignInScreen from './src/screens/SignInScreen'; // Importamos la pantalla de Sign In
+import { Provider } from 'react-redux';
+import store from './src/redux/store';  // Importa el store configurado
+import LoginScreen from './src/screens/LoginScreen';
+import SignInScreen from './src/screens/SignInScreen';
+import SignUpScreen from './src/screens/SignUpScreen';
+import BottomTabNavigator from './src/navigation/BottomTabNavigator';
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        {/* Pantalla de Login */}
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
-          options={{ headerShown: false }} // Ocultamos el header para el login
-        />
-        {/* Pantalla de SignUp */}
-        <Stack.Screen 
-          name="SignUp" 
-          component={SignUpScreen} 
-          options={{ headerShown: false }} // Ocultamos el header para el registro
-        />
-        {/* Pantalla de SignIn */}
-        <Stack.Screen 
-          name="SignIn" 
-          component={SignInScreen} 
-          options={{ headerShown: false }} // Ocultamos el header para la pantalla de Sign In
-        />
-      
-      </Stack.Navigator>
-
-      {/* Comentado el BottomTabNavigator por ahora 
-      /*
+    <Provider store={store}>
       <NavigationContainer>
-        <BottomTabNavigator />
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
+            name="SignIn" 
+            component={SignInScreen} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="SignUp" 
+            component={SignUpScreen} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="AppNavigator" 
+            component={BottomTabNavigator} 
+            options={{ headerShown: false }} 
+          />
+        </Stack.Navigator>
       </NavigationContainer>
-       */}
-    </NavigationContainer>
+    </Provider>
   );
 };
 

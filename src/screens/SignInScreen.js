@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import { signIn as signInAPI } from '../controller/miApp.controller'; // Llamada al backend
+import { useDispatch } from 'react-redux';  // Importamos useDispatch
+import { signIn } from '../redux/authSlice';  // Importamos la acción signIn
+import { signIn as signInAPI } from '../controller/miApp.controller';  // Función para pegarle al backend
 
-const SignInScreen = () => {
+const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();  // Instanciamos dispatch de Redux
 
-  // Función para manejar el inicio de sesión
   const handleSignIn = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password.");
-      return;
-    }
-
     try {
       const userData = { email, password };
-      const response = await signInAPI(userData);  // Llamada a la función en miApp.controller
+      const response = await signInAPI(userData);
 
       if (response.token) {
-        Alert.alert("Success", "Login successful!");
-        // Aquí puedes agregar la lógica para cuando el login sea exitoso, sin navegación por ahora.
+        // Si el login es exitoso, guardamos el usuario y token en Redux
+        dispatch(signIn({ user: response.user, token: response.token }));
+
+        // Redirigir a la página principal
+        navigation.replace('AppNavigator');
       } else {
-        Alert.alert("Error", "Invalid credentials. Please try again.");
+        Alert.alert('Error', 'Login fallido, por favor intenta de nuevo.');
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      Alert.alert("Error", "An error occurred during login. Please try again later.");
+      console.error('Error durante el login:', error);
+      Alert.alert('Error', 'Algo salió mal durante el login.');
     }
   };
 
@@ -53,10 +53,6 @@ const SignInScreen = () => {
         onChangeText={setPassword}
         secureTextEntry={true}
       />
-
-      <TouchableOpacity>
-        <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-      </TouchableOpacity>
 
       <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
         <Text style={styles.signInButtonText}>Login</Text>
@@ -99,12 +95,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 15,
     color: 'black',
-  },
-  forgotPasswordText: {
-    color: '#4285F4',
-    fontSize: 14,
-    alignSelf: 'flex-end',
-    marginBottom: 30,
   },
   signInButton: {
     backgroundColor: '#4285F4',
