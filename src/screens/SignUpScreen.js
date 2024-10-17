@@ -44,7 +44,7 @@ const SignUpScreen = () => {
     <View style={styles.container}>
       {/* Logo */}
       <Image 
-        source={require('../assets/logo.png')} // Asegúrate de tener el logo en tu carpeta assets
+        source={require('../assets/imgs/logo.png')} // Asegúrate de tener el logo en tu carpeta assets
         style={styles.logo}
       />
       <Text style={styles.title}>Create your account</Text>
