@@ -8,7 +8,7 @@ import NotificationIcon from '../assets/imgs/heart.svg';
 import ProfileIcon from '../assets/imgs/profile.svg';
 import HomeStackScreen from './HomeStackScreen'; // Stack de la pantalla Home
 import SearchScreen from '../screens/SearchScreen';
-import CreatePostScreen from '../screens/CreatePostScreen';
+import ImagePickerScreen from '../screens/ImagePickerScreen';
 import NotificationStackScreen from './NotificationStackScreen';
 import LoggedInUserProfileScreen from '../screens/LoggedInUserProfileScreen';
 
@@ -44,7 +44,7 @@ const BottomTabNavigator = () => {
     >
       <Tab.Screen name="HomeStack" component={HomeStackScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="CreatePost" component={CreatePostScreen} />
+      <Tab.Screen name="CreatePost" component={ImagePickerScreen} />
       <Tab.Screen name="Notifications" component={NotificationStackScreen} />
       <Tab.Screen name="Profile" component={LoggedInUserProfileScreen} />
     </Tab.Navigator>
