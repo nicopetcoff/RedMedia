@@ -47,7 +47,7 @@ const SignInScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo} />
+      <Image source={require('../assets/imgs/logo.png')} style={styles.logo} />
       <Text style={styles.title}>REDMEDIA</Text>
       <Text style={styles.welcomeText}>Welcome back</Text>
 
