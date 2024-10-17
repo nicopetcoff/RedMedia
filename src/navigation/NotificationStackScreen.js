@@ -2,7 +2,7 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {TouchableOpacity} from 'react-native';
 import ProfileScreen from '../screens/ProfileScreen'; // Importa la nueva pantalla de perfil
-import BackIcon from '../assets/back.svg'; // Icono personalizado de regreso
+import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso
 import NotificationScreen from '../screens/NotificationScreen';
 
 const Stack = createStackNavigator();

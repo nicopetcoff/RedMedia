@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import PostDetail from '../screens/PostDetail';
 import ProfileScreen from '../screens/ProfileScreen'; // Importa la nueva pantalla de perfil
-import BackIcon from '../assets/back.svg'; // Icono personalizado de regreso
+import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso
 
 const Stack = createStackNavigator();
 

@@ -9,13 +9,13 @@ const Notification = ({item}) => {
   const getImage = () => {
     switch (item.type) {
       case 'Trending':
-        return require('../assets/like.png');
+        return require('../assets/imgs/like.png');
       case 'Comment':
-        return require('../assets/comment.png');
+        return require('../assets/imgs/comment.png');
       case 'Followed':
-        return require('../assets/followed.png');
+        return require('../assets/imgs/followed.png');
       default:
-        return require('../assets/comment.png');
+        return require('../assets/imgs/comment.png');
     }
   };
 
