@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -9,6 +9,7 @@ import SignInScreen from './src/screens/SignInScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen'; // Nueva pantalla Forgot Password
 import BottomTabNavigator from './src/navigation/BottomTabNavigator';
+import SplashScreen from './src/screens/SplashScreen'; // Importamos el SplashScreen
 import { restoreToken } from './src/redux/authSlice';
 
 const Stack = createStackNavigator();
@@ -64,9 +65,22 @@ const AppNavigator = () => {
 };
 
 const App = () => {
+  const [isShowSplashScreen, setIsShowSplashScreen] = useState(true);
+
+  useEffect(() => {
+    // Mostrar el splash screen durante 2 segundos
+    setTimeout(() => {
+      setIsShowSplashScreen(false);
+    }, 2000);
+  }, []);
+
   return (
     <Provider store={store}>
-      <AppNavigator />
+      {isShowSplashScreen ? (
+        <SplashScreen />
+      ) : (
+        <AppNavigator />
+      )}
     </Provider>
   );
 };

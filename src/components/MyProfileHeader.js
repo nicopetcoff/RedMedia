@@ -18,6 +18,15 @@ const MyProfileHeader = () => {
   const followingCount =
     typeof MyData.following === 'number' ? MyData.following : 0;
 
+    const handleEditPress = () => {
+      console.log('Editar');
+    };
+  
+    const handleSavedPress = () => {
+      console.log('Guardados');
+    };
+  
+
   return (
     <View style={styles.container}>
       {/* Imagen de fondo */}
@@ -40,7 +49,7 @@ const MyProfileHeader = () => {
             {/* Botón de editar */}
             <TouchableOpacity
               style={styles.edit}
-              onPress={console.log("Editar")}>
+              onPress={handleEditPress}>
               <Text style={styles.editButtonText}> Editar
               </Text>
             </TouchableOpacity>
@@ -74,8 +83,8 @@ const MyProfileHeader = () => {
       {MyData.bio && <Text style={styles.bio}>{MyData.bio}</Text>}
       <View style={styles.buttonAllign}> 
         {MyData.level && <Text style={styles.level}>Nivel: {MyData.level}</Text>}
-        <TouchableOpacity onPress={console.log("guardados")}>
-          <Image source={require('../assets/guardar.png')} style={{width: 24, height: 24, marginRight: 20}} />
+        <TouchableOpacity onPress={handleSavedPress}>
+          <Image source={require('../assets/imgs/guardar.png')} style={{width: 24, height: 24, marginRight: 20}} />
         </TouchableOpacity>
       </View>
     </View>

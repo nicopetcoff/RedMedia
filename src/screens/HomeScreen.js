@@ -43,7 +43,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Image source={require('../assets/logo.png')} style={styles.logo} />
+        <Image source={require('../assets/imgs/logo.png')} style={styles.logo} />
         <Text style={styles.header}>REDMEDIA</Text>
       </View>
       <FlatList

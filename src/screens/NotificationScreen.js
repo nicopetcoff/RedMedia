@@ -3,7 +3,7 @@ import React from 'react';
 import {View, Text, FlatList, StyleSheet,TouchableOpacity} from 'react-native';
 import Notification from '../components/Notification';
 import notificaciones from '../data/notificaciones.json';
-import BackIcon from '../assets/back.svg'; // Icono personalizado de regreso
+import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso
 import { useNavigation } from '@react-navigation/native';
 
 const NotificationScreen = () => {

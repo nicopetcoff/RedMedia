@@ -9,13 +9,14 @@ import posts from '../data/MyPosts' // Importamos el archivo JSON con los datos 
 const LoggedInUserProfileScreen = () => {
   return (
     <View style={styles.container}>
-      <MyProfileHeader />
+      
       <FlatList
         data={posts}
         renderItem={({item}) => <Post item={item} />}
         keyExtractor={item => item.id}
         numColumns={2}
         columnWrapperStyle={styles.row}
+        ListHeaderComponent={<MyProfileHeader />} 
         showsVerticalScrollIndicator={false} // Ocultar el indicador de scroll vertical para una experiencia más limpia
       />
     </View>

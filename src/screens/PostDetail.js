@@ -4,7 +4,7 @@ import PostHeader from '../components/PostHeader';
 import PostImage from '../components/PostImage';
 import PostInteractionBar from '../components/PostInteractionBar';
 import PostComments from '../components/PostComments';
-import LocationIcon from '../assets/location.svg';
+import LocationIcon from '../assets/imgs/location.svg';
 
 const PostDetail = ({ route, navigation }) => {
   const { item } = route.params || {};

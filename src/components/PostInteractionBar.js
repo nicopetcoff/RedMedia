@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import LikeIcon from '../assets/like.svg';
-import FilledLikeIcon from '../assets/filled_like.svg';
-import CommentIcon from '../assets/comentar.svg';
-import InterestIcon from '../assets/intereses.svg';
+import LikeIcon from '../assets/imgs/like.svg';
+import FilledLikeIcon from '../assets/imgs/filled_like.svg';
+import CommentIcon from '../assets/imgs/comentar.svg';
+import InterestIcon from '../assets/imgs/intereses.svg';
 
 const PostInteractionBar = ({ isLiked, setIsLiked }) => {
   return (

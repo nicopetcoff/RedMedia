@@ -1,16 +1,15 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import HomeIcon from '../assets/home.svg'; // Importa tu archivo SVG
-import SearchIcon from '../assets/search.svg';
-import CreatePostIcon from '../assets/add_circle.svg';
-import NotificationIcon from '../assets/heart.svg';
-import ProfileIcon from '../assets/profile.svg';
+import HomeIcon from '../assets/imgs/home.svg'; // Importa tu archivo SVG
+import SearchIcon from '../assets/imgs/search.svg';
+import CreatePostIcon from '../assets/imgs/add_circle.svg';
+import NotificationIcon from '../assets/imgs/heart.svg';
+import ProfileIcon from '../assets/imgs/profile.svg';
 import HomeStackScreen from './HomeStackScreen'; // Importamos HomeStackScreen
 import SearchScreen from '../screens/SearchScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import NotificationStackScreen from './NotificationStackScreen';
 import LoggedInUserProfileScreen from '../screens/LoggedInUserProfileScreen';
-import MyProfile from '../components/MyProfileHeader';
 
 const Tab = createBottomTabNavigator();
 
