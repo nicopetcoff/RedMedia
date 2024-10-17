@@ -9,7 +9,7 @@ const App = () => {
   const [isShowSplashScreen, setIsShowSplashScreen] = useState(true);
 
   useEffect(() => {
-    // Mostrar el splash screen durante 2 segundos
+    
     setTimeout(() => {
       setIsShowSplashScreen(false);
     }, 2000);

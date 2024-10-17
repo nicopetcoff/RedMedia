@@ -1,8 +1,8 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {TouchableOpacity} from 'react-native';
-import ProfileScreen from '../screens/ProfileScreen'; // Importa la nueva pantalla de perfil
-import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso
+import ProfileScreen from '../screens/ProfileScreen';
+import BackIcon from '../assets/imgs/back.svg';
 import NotificationScreen from '../screens/NotificationScreen';
 
 const Stack = createStackNavigator();
@@ -17,9 +17,9 @@ const NotificationStackScreen = ({navigation}) => {
       />
       <Stack.Screen
         name="StackProfile"
-        component={ProfileScreen} // Añadimos la nueva pantalla de perfil
+        component={ProfileScreen}
         options={{
-          headerTitle: '', // Eliminamos el título del header
+          headerTitle: '',
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}

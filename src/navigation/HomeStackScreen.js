@@ -1,7 +1,6 @@
-// src/navigation/HomeStackScreen.js
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { TouchableOpacity } from 'react-native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {TouchableOpacity} from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import PostDetail from '../screens/PostDetail';
 import ProfileScreen from '../screens/ProfileScreen'; // Pantalla de perfil
@@ -9,23 +8,23 @@ import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado
 
 const Stack = createStackNavigator();
 
-const HomeStackScreen = ({ navigation }) => {
+const HomeStackScreen = ({navigation}) => {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerShown: false }}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="PostDetail"
         component={PostDetail}
         options={{
-          headerTitle: '', // No mostramos el título
+          headerTitle: '',
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => navigation.goBack()} // Vuelve a la pantalla anterior
-              style={{ marginLeft: 10 }}>
+              onPress={() => navigation.goBack()}
+              style={{marginLeft: 10}}>
               <BackIcon width={24} height={24} />
             </TouchableOpacity>
           ),
@@ -33,13 +32,13 @@ const HomeStackScreen = ({ navigation }) => {
       />
       <Stack.Screen
         name="Profile"
-        component={ProfileScreen} // Pantalla de perfil
+        component={ProfileScreen} 
         options={{
-          headerTitle: '', // Sin título
+          headerTitle: '',
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => navigation.goBack()} // Vuelve a la pantalla anterior
-              style={{ marginLeft: 10 }}>
+              onPress={() => navigation.goBack()} 
+              style={{marginLeft: 10}}>
               <BackIcon width={24} height={24} />
             </TouchableOpacity>
           ),

@@ -1,4 +1,3 @@
-// src/navigation/AppNavigator.js
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -18,7 +17,7 @@ const AppNavigator = () => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
   useEffect(() => {
-    // Cargar el token del almacenamiento persistente
+    
     const loadToken = async () => {
       const userToken = await AsyncStorage.getItem('userToken');
       if (userToken) {
