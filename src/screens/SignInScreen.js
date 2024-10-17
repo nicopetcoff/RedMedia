@@ -24,13 +24,13 @@ const SignInScreen = ({ navigation }) => {
       const response = await signInAPI(userData);
 
       if (response.token) {
-        // Guardar token en AsyncStorage
+        
         await AsyncStorage.setItem('userToken', response.token);
         
-        // Despachar la acción para actualizar el estado de autenticación
+        
         dispatch(signIn({ user: response.user, token: response.token }));
 
-        // Navegar a la pantalla principal (MainApp)
+        
         navigation.replace('MainApp');
       } else {
         Alert.alert('Error', 'Login failed, please try again.');
@@ -42,7 +42,7 @@ const SignInScreen = ({ navigation }) => {
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword'); // Navegar a la pantalla de Forgot Password
+    navigation.navigate('ForgotPassword'); 
   };
 
   return (
@@ -70,12 +70,12 @@ const SignInScreen = ({ navigation }) => {
         secureTextEntry={true}
       />
 
-      {/* Navegación a Forgot Password */}
+      
       <TouchableOpacity onPress={handleForgotPassword}>
         <Text style={styles.forgotPasswordText}>Forgot password?</Text>
       </TouchableOpacity>
 
-      {/* Botón de inicio de sesión */}
+      
       <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
         <Text style={styles.signInButtonText}>Login</Text>
       </TouchableOpacity>

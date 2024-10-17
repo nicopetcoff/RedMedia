@@ -24,7 +24,7 @@ const PostDetail = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Navegación al perfil del usuario al hacer clic en el avatar */}
+      
       <TouchableOpacity
         onPress={() => navigation.navigate('Profile', { username: item.user })}
       >

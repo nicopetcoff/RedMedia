@@ -42,14 +42,14 @@ const SignUpScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
+      
       <Image 
         source={require('../assets/imgs/logo.png')} // Asegúrate de tener el logo en tu carpeta assets
         style={styles.logo}
       />
       <Text style={styles.title}>Create your account</Text>
 
-      {/* Campo de entrada de email */}
+      
       <TextInput
         style={styles.input}
         placeholder="Enter your email"
@@ -61,7 +61,7 @@ const SignUpScreen = () => {
         textContentType="emailAddress"
       />
 
-      {/* Campo de entrada de password */}
+      
       <TextInput
         style={styles.input}
         placeholder="Enter your password"
@@ -71,7 +71,7 @@ const SignUpScreen = () => {
         onChangeText={setPassword}
       />
 
-      {/* Campo de entrada de nombre */}
+      
       <TextInput
         style={styles.input}
         placeholder="Enter your name"
@@ -80,7 +80,7 @@ const SignUpScreen = () => {
         onChangeText={setName}
       />
 
-      {/* Campo de entrada de apellido */}
+      
       <TextInput
         style={styles.input}
         placeholder="Enter your LastName"
@@ -89,7 +89,7 @@ const SignUpScreen = () => {
         onChangeText={setLastName}
       />
 
-      {/* Campo de entrada de nickname */}
+      
       <TextInput
         style={styles.input}
         placeholder="Enter your nick"
@@ -98,7 +98,7 @@ const SignUpScreen = () => {
         onChangeText={setNick}
       />
 
-      {/* Botón de registro */}
+      
       <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
         <Text style={styles.signUpButtonText}>Sign up</Text>
       </TouchableOpacity>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#000', // Cambié a negro para que coincida con el estilo de la imagen
+    color: '#000',
   },
   input: {
     width: '100%',
@@ -133,17 +133,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
-    color: '#000', // El texto será negro
+    color: '#000',
   },
   signUpButton: {
-    backgroundColor: '#4285F4', // Botón azul
+    backgroundColor: '#4285F4', 
     paddingVertical: 12,
     paddingHorizontal: 60,
     borderRadius: 5,
     marginTop: 10,
   },
   signUpButtonText: {
-    color: '#fff', // Texto blanco
+    color: '#fff', 
     fontSize: 16,
     fontWeight: 'bold',
   },

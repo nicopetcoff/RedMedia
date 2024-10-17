@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {StyleSheet, View, Image, Animated,Text} from 'react-native';
+import {StyleSheet, View, Image, Animated, Text} from 'react-native';
 import logo from '../assets/imgs/logo.png';
 
 export default function SplashScreen() {
@@ -15,9 +15,9 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.imageContainer, {opacity: fadeAnimation}]}>
+      <Animated.View style={{opacity: fadeAnimation, alignItems: 'center'}}>
         <Image style={styles.image} source={logo} />
-        <Text style={styles.tittle}>REDMEDIA</Text>
+        <Text style={styles.title}>REDMEDIA</Text>
       </Animated.View>
     </View>
   );
@@ -26,27 +26,21 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
-  },
-  imageContainer: {
-    marginTop: 200,
-    flex:1,
-    borderRadius: 20,
-    height: 200,
-    width: 200,
+    backgroundColor: '#fff',
   },
   image: {
-    height: 300,
-    width: 300,
-    resizeMode: 'cover',
+    height: 150,
+    width: 150,
+    marginBottom: 20,
+    resizeMode: 'contain',
   },
-  tittle: {
+  title: {
     fontSize: 40,
     fontFamily: 'Roboto',
     fontWeight: 'bold',
-    color: 'black',
-    position: 'absolute',
-    bottom: 150,
+    color: '#333',
+    textAlign: 'center',
   },
 });

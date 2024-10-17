@@ -1,4 +1,3 @@
-// ForgotPasswordScreen.js
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
@@ -6,7 +5,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
 
   const handleSendInstructions = () => {
-    // Aquí puedes agregar la lógica para enviar el correo de recuperación
     console.log("Email para recuperación de contraseña:", email);
   };
 

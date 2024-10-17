@@ -1,4 +1,3 @@
-// src/navigation/BottomTabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeIcon from '../assets/imgs/home.svg';
@@ -6,7 +5,7 @@ import SearchIcon from '../assets/imgs/search.svg';
 import CreatePostIcon from '../assets/imgs/add_circle.svg';
 import NotificationIcon from '../assets/imgs/heart.svg';
 import ProfileIcon from '../assets/imgs/profile.svg';
-import HomeStackScreen from './HomeStackScreen'; // Stack de la pantalla Home
+import HomeStackScreen from './HomeStackScreen'; 
 import SearchScreen from '../screens/SearchScreen';
 import ImagePickerScreen from '../screens/ImagePickerScreen';
 import NotificationStackScreen from './NotificationStackScreen';
