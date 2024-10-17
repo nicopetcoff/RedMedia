@@ -1,5 +1,4 @@
 // src/navigation/AppNavigator.js
-
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -9,8 +8,8 @@ import LoginScreen from '../screens/LoginScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
-import BottomTabNavigator from './BottomTabNavigator';
-import { restoreToken } from '../redux/authSlice';
+import BottomTabNavigator from './BottomTabNavigator'; // Flujo principal
+import { restoreToken } from '../redux/authSlice'; // Maneja la restauración del token
 
 const Stack = createStackNavigator();
 
@@ -19,7 +18,7 @@ const AppNavigator = () => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
   useEffect(() => {
-    // Función para cargar el token desde AsyncStorage
+    // Cargar el token del almacenamiento persistente
     const loadToken = async () => {
       const userToken = await AsyncStorage.getItem('userToken');
       if (userToken) {
@@ -32,32 +31,19 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={isAuthenticated ? 'AppNavigator' : 'Login'}>
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen 
-          name="SignIn" 
-          component={SignInScreen} 
-          options={{ headerShown: false }} 
-        />
-        <Stack.Screen 
-          name="SignUp" 
-          component={SignUpScreen} 
-          options={{ headerShown: false }} 
-        />
-        <Stack.Screen 
-          name="ForgotPassword" 
-          component={ForgotPasswordScreen} 
-          options={{ headerShown: false }} 
-        />
-        <Stack.Screen 
-          name="AppNavigator" 
-          component={BottomTabNavigator} 
-          options={{ headerShown: false }} 
-        />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          // Si está autenticado, mostramos la app principal (MainApp)
+          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+        ) : (
+          // Si no está autenticado, mostramos el flujo de autenticación
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

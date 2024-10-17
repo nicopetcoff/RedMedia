@@ -1,11 +1,12 @@
+// src/navigation/BottomTabNavigator.js
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import HomeIcon from '../assets/imgs/home.svg'; // Importa tu archivo SVG
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import HomeIcon from '../assets/imgs/home.svg';
 import SearchIcon from '../assets/imgs/search.svg';
 import CreatePostIcon from '../assets/imgs/add_circle.svg';
 import NotificationIcon from '../assets/imgs/heart.svg';
 import ProfileIcon from '../assets/imgs/profile.svg';
-import HomeStackScreen from './HomeStackScreen'; // Importamos HomeStackScreen
+import HomeStackScreen from './HomeStackScreen'; // Stack de la pantalla Home
 import SearchScreen from '../screens/SearchScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import NotificationStackScreen from './NotificationStackScreen';
@@ -13,8 +14,7 @@ import LoggedInUserProfileScreen from '../screens/LoggedInUserProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
-const TabBarIcon = ({route, color, size}) => {
-  // Usamos diferentes íconos dependiendo de la ruta
+const TabBarIcon = ({ route, color, size }) => {
   switch (route.name) {
     case 'HomeStack':
       return <HomeIcon width={size} height={size} />;
@@ -34,13 +34,14 @@ const TabBarIcon = ({route, color, size}) => {
 const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={({route}) => ({
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: props => <TabBarIcon route={route} {...props} />,
         tabBarActiveTintColor: 'black',
         tabBarInactiveTintColor: 'gray',
         tabBarShowLabel: false,
-      })}>
+      })}
+    >
       <Tab.Screen name="HomeStack" component={HomeStackScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="CreatePost" component={CreatePostScreen} />

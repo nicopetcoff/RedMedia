@@ -1,3 +1,4 @@
+// src/redux/authSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
@@ -22,7 +23,7 @@ const authSlice = createSlice({
     },
     restoreToken: (state, action) => {
       state.token = action.payload.token;
-      state.isAuthenticated = !!action.payload.token;
+      state.isAuthenticated = !!action.payload.token; // Si hay token, está autenticado
     },
   },
 });

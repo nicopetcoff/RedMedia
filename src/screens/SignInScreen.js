@@ -30,8 +30,8 @@ const SignInScreen = ({ navigation }) => {
         // Despachar la acción para actualizar el estado de autenticación
         dispatch(signIn({ user: response.user, token: response.token }));
 
-        // Navegar a la pantalla principal (BottomTabNavigator)
-        navigation.replace('AppNavigator');
+        // Navegar a la pantalla principal (MainApp)
+        navigation.replace('MainApp');
       } else {
         Alert.alert('Error', 'Login failed, please try again.');
       }

@@ -1,10 +1,11 @@
+// src/navigation/HomeStackScreen.js
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TouchableOpacity } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import PostDetail from '../screens/PostDetail';
-import ProfileScreen from '../screens/ProfileScreen'; // Importa la nueva pantalla de perfil
-import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso
+import ProfileScreen from '../screens/ProfileScreen'; // Pantalla de perfil
+import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado
 
 const Stack = createStackNavigator();
 
@@ -20,10 +21,10 @@ const HomeStackScreen = ({ navigation }) => {
         name="PostDetail"
         component={PostDetail}
         options={{
-          headerTitle: '', 
+          headerTitle: '', // No mostramos el título
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.goBack()} // Vuelve a la pantalla anterior
               style={{ marginLeft: 10 }}>
               <BackIcon width={24} height={24} />
             </TouchableOpacity>
@@ -32,12 +33,12 @@ const HomeStackScreen = ({ navigation }) => {
       />
       <Stack.Screen
         name="Profile"
-        component={ProfileScreen} // Añadimos la nueva pantalla de perfil
+        component={ProfileScreen} // Pantalla de perfil
         options={{
-          headerTitle: '', // Eliminamos el título del header
+          headerTitle: '', // Sin título
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.goBack()} // Vuelve a la pantalla anterior
               style={{ marginLeft: 10 }}>
               <BackIcon width={24} height={24} />
             </TouchableOpacity>
