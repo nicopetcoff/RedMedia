@@ -6,6 +6,7 @@ const urlWebServices = {
   getPosts: urlApi + "api/posts",         // Ruta para obtener los posts
   signUp: urlApi + "api/users/signup",    // Nueva ruta para registrar usuarios
   signIn: urlApi + "api/users/singin",    // Nueva ruta para iniciar sesión
+  getNotifications: urlApi + "api/users/notificaciones", // Ruta para obtener las notificaciones
 };
 
 export default urlWebServices;

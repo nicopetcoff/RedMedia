@@ -2,11 +2,13 @@
 import React from 'react';
 import {View, Text, FlatList, StyleSheet,TouchableOpacity} from 'react-native';
 import Notification from '../components/Notification';
-import notificaciones from '../data/notificaciones.json';
+import { getNotifications } from '../controller/miApp.controller';
 import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso
 import { useNavigation } from '@react-navigation/native';
 
 const NotificationScreen = () => {
+  const notificaciones=getNotifications();
+  console.log(notificaciones);
   const navigation = useNavigation();
   return (
     <View style={styles.container}>
