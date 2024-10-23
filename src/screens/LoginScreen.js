@@ -3,32 +3,30 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
-  const navigation = useNavigation(); // Hook de navegación para movernos entre pantallas
+  const navigation = useNavigation();
 
   const handleGooglePress = () => {
     console.log("Google Sign In button pressed");
   };
 
   const handleEmailSignUp = () => {
-    // Navegamos a la pantalla de registro cuando se presiona "Sign up with Email"
     navigation.navigate('SignUp');
   };
 
   const handleSignInPress = () => {
-    // Navegamos a la pantalla de Sign In cuando se presiona "Sign in"
     navigation.navigate('SignIn');
   };
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
       <Image 
+
         source={require('../assets/imgs/logo.png')} // Asegúrate de tener la imagen del logo en tu carpeta assets
+
         style={styles.logo}
       />
       <Text style={styles.title}>REDMEDIA</Text>
 
-      {/* Botón de Google */}
       <TouchableOpacity style={styles.googleButton} onPress={handleGooglePress}>
         <View style={styles.googleButtonContent}>
           <Image
@@ -39,7 +37,6 @@ const LoginScreen = () => {
         </View>
       </TouchableOpacity>
 
-      {/* Otras opciones de registro */}
       <Text style={styles.signInText}>
         Already have an account?{' '}
         <Text style={styles.signInLink} onPress={handleSignInPress}>Sign in</Text>
@@ -51,7 +48,6 @@ const LoginScreen = () => {
         <View style={styles.line} />
       </View>
 
-      {/* Botón de "Sign up with Email" */}
       <TouchableOpacity style={styles.emailButton} onPress={handleEmailSignUp}>
         <Text style={styles.emailButtonText}>Sign up with Email</Text>
       </TouchableOpacity>
@@ -127,13 +123,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   emailButton: {
-    marginTop: 10, // Añade espacio arriba
+    marginTop: 10,
   },
   emailButtonText: {
     color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
-    textTransform: 'uppercase', // Poner el texto en mayúsculas como en la imagen
+    textTransform: 'uppercase',
   },
 });
 
