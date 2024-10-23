@@ -1,4 +1,5 @@
 import urlWebServices from "./webServices";
+import { useSelector } from 'react-redux';
 
 // Función para obtener los posts
 export const getPosts = async function () {
@@ -18,7 +19,6 @@ export const getPosts = async function () {
     }
 
     let data = await response.json();
-    console.log("esto trae", data);
     return data;  // Aquí debería devolver los datos del backend.
   } catch (error) {
     console.error("Error:", error);
@@ -62,7 +62,6 @@ export const signUp = async (userData) => {
 
 export const signIn = async (userData) => {
   let url = urlWebServices.signIn;  // URL para el endpoint de inicio de sesión
-  console.log("URL de inicio de sesión:", url);
 
   try {
     let response = await fetch(url, {
