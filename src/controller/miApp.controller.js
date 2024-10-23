@@ -1,4 +1,5 @@
 import urlWebServices from "./webServices";
+import { useSelector } from 'react-redux';
 
 // Función para obtener los posts
 export const getPosts = async function () {
@@ -82,36 +83,6 @@ export const signIn = async (userData) => {
     let data = await response.json();
     console.log("Respuesta del servidor:", data);
     return data;  // Aquí se devuelven los datos del backend (como el token)
-
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-};
-
-// Función para obtener las notificaciones
-export const getNotifications = async function (email) {
-  let url = urlWebServices.getNotifications;  // URL para el endpoint de notificaciones
-
-  try {
-    let response = await fetch(url, {
-      method: "GET",
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email,
-      }),  // Convertimos los datos del usuario a formato JSON
-    });
-
-    if (!response.ok) {
-      throw new Error("Error al obtener las notificaciones: " + response.status);
-    }
-
-    let data = await response.json();
-    console.log("Respuesta del servidor:", data);
-    return data;  // Aquí se devuelven los datos del backend (como las notificaciones)
 
   } catch (error) {
     console.error("Error:", error);
