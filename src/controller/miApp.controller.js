@@ -1,4 +1,5 @@
 import urlWebServices from "./webServices";
+import { useSelector } from 'react-redux';
 
 export const getPosts = async function () {
   let url = urlWebServices.getPosts;
@@ -16,7 +17,7 @@ export const getPosts = async function () {
     }
 
     let data = await response.json();
-    return data;
+    return data;  // Aquí debería devolver los datos del backend.
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -56,7 +57,7 @@ export const signUp = async (userData) => {
 };
 
 export const signIn = async (userData) => {
-  let url = urlWebServices.signIn;
+  let url = urlWebServices.signIn;  // URL para el endpoint de inicio de sesión
 
   try {
     let response = await fetch(url, {
@@ -84,6 +85,7 @@ export const signIn = async (userData) => {
   }
 };
 
+// Función nueva añadida
 export const sendPasswordResetEmail = async (email) => {
   let url = urlWebServices.passwordReset;
 
