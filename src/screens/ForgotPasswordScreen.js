@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { sendPasswordResetEmail } from '../controller/miApp.controller';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
 
-  const handleSendInstructions = () => {
-    console.log("Email para recuperación de contraseña:", email);
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSendInstructions = async () => {
+    if (!isValidEmail(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      const response = await sendPasswordResetEmail(email);
+
+      if (response.success) {
+        Alert.alert('Success', 'Instructions to reset your password have been sent.');
+      } else {
+        Alert.alert('Error', 'Failed to send password reset instructions. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      Alert.alert('Error', 'An error occurred while sending the email. Please try again.');
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Forgot Password</Text>
       <Text style={styles.subtitle}>Don't Worry I'll Help you</Text>
-      <Text style={styles.instructionText}>Please enter your email address to reset your password</Text>
+      <Text style={styles.instructionText}>
+        Please enter your email address to reset your password
+      </Text>
 
       <TextInput
         style={styles.input}

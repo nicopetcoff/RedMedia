@@ -1,9 +1,7 @@
 import urlWebServices from "./webServices";
 
-// Función para obtener los posts
 export const getPosts = async function () {
   let url = urlWebServices.getPosts;
-  console.log("url", url);
 
   try {
     let response = await fetch(url, {
@@ -18,23 +16,21 @@ export const getPosts = async function () {
     }
 
     let data = await response.json();
-    console.log("esto trae", data);
-    return data;  // Aquí debería devolver los datos del backend.
+    return data;
   } catch (error) {
     console.error("Error:", error);
     throw error;
   }
 };
 
-// Nueva función para enviar los datos de registro al backend
 export const signUp = async (userData) => {
-  let url = urlWebServices.signUp;  // URL para el endpoint de registro
+  let url = urlWebServices.signUp;
 
   try {
     let response = await fetch(url, {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json',  // Aseguramos que el backend interprete el cuerpo como JSON
+        'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
       body: JSON.stringify({
@@ -42,7 +38,7 @@ export const signUp = async (userData) => {
         lastName: userData.lastName,
         email: userData.email,
         password: userData.password,
-        nick: userData.nick, // El backend espera este campo como 'nick'
+        nick: userData.nick,
       }),
     });
 
@@ -51,8 +47,7 @@ export const signUp = async (userData) => {
     }
 
     let data = await response.json();
-    console.log("Respuesta del servidor:", data);
-    return data;  // Devolvemos la respuesta del servidor
+    return data;
 
   } catch (error) {
     console.error("Error:", error);
@@ -61,20 +56,19 @@ export const signUp = async (userData) => {
 };
 
 export const signIn = async (userData) => {
-  let url = urlWebServices.signIn;  // URL para el endpoint de inicio de sesión
-  console.log("URL de inicio de sesión:", url);
+  let url = urlWebServices.signIn;
 
   try {
     let response = await fetch(url, {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json',  // Añadir este encabezado para que el backend interprete el JSON
+        'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
       body: JSON.stringify({
         email: userData.email,
         password: userData.password,
-      }),  // Convertimos los datos del usuario a formato JSON
+      }),
     });
 
     if (!response.ok) {
@@ -82,11 +76,36 @@ export const signIn = async (userData) => {
     }
 
     let data = await response.json();
-    console.log("Respuesta del servidor:", data);
-    return data;  // Aquí se devuelven los datos del backend (como el token)
+    return data;
 
   } catch (error) {
     console.error("Error:", error);
+    throw error;
+  }
+};
+
+export const sendPasswordResetEmail = async (email) => {
+  let url = urlWebServices.passwordReset;
+
+  try {
+    let response = await fetch(url, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al enviar el correo de recuperación: " + response.status);
+    }
+
+    let data = await response.json();
+    return data;
+
+  } catch (error) {
+    console.error("Error al enviar el correo de recuperación:", error);
     throw error;
   }
 };
