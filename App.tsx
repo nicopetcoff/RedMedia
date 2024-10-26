@@ -1,9 +1,8 @@
 // App.js
 import React, { useState, useEffect } from 'react';
-import { Provider } from 'react-redux';
-import store from './src/redux/store';
 import SplashScreen from './src/screens/SplashScreen'; // Importamos el SplashScreen
 import AppNavigator from './src/navigation/AppNavigator'; // Importamos la nueva navegación
+import { AuthProvider } from './src/context/AuthProvider';
 
 const App = () => {
   const [isShowSplashScreen, setIsShowSplashScreen] = useState(true);
@@ -16,13 +15,11 @@ const App = () => {
   }, []);
 
   return (
-    <Provider store={store}>
-      {isShowSplashScreen ? (
-        <SplashScreen />
-      ) : (
+    <AuthProvider>
+      
         <AppNavigator />
-      )}
-    </Provider>
+      
+    </AuthProvider>
   );
 };
 

@@ -57,6 +57,7 @@ export const signUp = async (userData) => {
 };
 
 export const signIn = async (userData) => {
+  console.log("userData",userData);
   let url = urlWebServices.signIn;  // URL para el endpoint de inicio de sesión
 
   try {

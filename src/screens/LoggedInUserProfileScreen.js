@@ -1,18 +1,15 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { View, StyleSheet, FlatList, Button } from 'react-native';
 import MyProfileHeader from '../components/MyProfileHeader';
 import Post from '../components/Post';
 import posts from '../data/MyPosts';
-import { useDispatch } from 'react-redux';
-import { signOut } from '../redux/authSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useToggleContext } from '../context/AuthProvider';
 
 const LoggedInUserProfileScreen = () => {
-  const dispatch = useDispatch();
+  const {signOut} = useToggleContext()
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('userToken');
-    dispatch(signOut());
+    signOut();
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -8,39 +8,20 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signIn } from '../redux/authSlice';
+import { useUserContext } from '../context/AuthProvider';
+import { useToggleContext } from '../context/AuthProvider';
 import { signIn as signInAPI } from '../controller/miApp.controller';
 
 const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
+  const authState=useUserContext();
+  const {login}=useToggleContext();
 
   const handleSignIn = async () => {
-    try {
-      const userData = { email, password };
-      const response = await signInAPI(userData);
-
-      if (response.token) {
-        
-        await AsyncStorage.setItem('userToken', response.token);
-        
-        
-        dispatch(signIn({ user: response.user, token: response.token }));
-
-        
-        navigation.replace('MainApp');
-      } else {
-        Alert.alert('Error', 'Login failed, please try again.');
-      }
-    } catch (error) {
-      console.error('Error during login:', error);
-      Alert.alert('Error', 'Something went wrong during login.');
-    }
+    await login({ email, password });
   };
-
   const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword'); 
   };
