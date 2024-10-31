@@ -90,3 +90,23 @@ export const signIn = async (userData) => {
     throw error;
   }
 };
+
+export const publishPost = async (postData) => {
+  try {
+    let url = urlWebServices.postPost;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postData),
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'Post published successfully' };
+    } else {
+      return { success: false, message: 'Failed to publish post' };
+    }
+  } catch (error) {
+    console.error('Error publishing post:', error);
+    return { success: false, message: 'Failed to connect to backend' };
+  }
+};
