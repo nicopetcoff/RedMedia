@@ -8,6 +8,8 @@ const urlWebServices = {
   signIn: urlApi + "api/users/singin",    // Nueva ruta para iniciar sesión
   passwordReset: urlApi + 'api//password-reset/request',
   getNotifications: urlApi + "api/users/notificaciones", // Ruta para obtener las notificaciones
+  postPost: urlApi + "api/post",          //Ruta para publicar un post
+  searchUsers: urlApi +"api/users"        //Ruta para buscar los usuarios por nick
 };
 
 export default urlWebServices;
