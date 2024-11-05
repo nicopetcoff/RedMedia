@@ -4,23 +4,16 @@ import { Picker } from '@react-native-picker/picker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Geolocation from 'react-native-geolocation-service';
 import Geocoder from 'react-native-geocoding';
-import { publishPost } from './miApp.controller';
+import { publishPost } from '../controller/miApp.controller';
 
-// Configura tu clave de API de Google Maps
-Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc'); // Reemplaza con tu clave de API
+Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc');
 
 const ImagePickerScreen = () => {
-  const [selectedImages, setSelectedImages] = useState([
-    { id: '1', uri: 'https://i.pinimg.com/736x/44/b1/0c/44b10c08db645d8f4fc0075c63669e67.jpg' },
-    { id: '2', uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaB7ofgJGrfAXvfjxN8k__Wlwa0144-eit1Q&s' },
-    { id: '3', uri: 'https://c.wallhere.com/photos/3e/f2/animals_kittens_cat_pink_baby_animals-148208.jpg!d' },
-    { id: '4', uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaB7ofgJGrfAXvfjxN8k__Wlwa0144-eit1Q&s' },
-    { id: '5', uri: 'https://c.wallhere.com/photos/3e/f2/animals_kittens_cat_pink_baby_animals-148208.jpg!d' },
-  ]);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('Loading current location...');
-  const [selectedLocation, setSelectedLocation] = useState(''); // Nuevo estado para la ubicación seleccionada
+  const [selectedLocation, setSelectedLocation] = useState('');
 
   useEffect(() => {
     const getCurrentLocation = async () => {
@@ -84,7 +77,7 @@ const ImagePickerScreen = () => {
   }, []);
 
   const openGallery = () => {
-    // Verificar si ya se alcanzó el límite de 10 imágenes
+    // Verifica si ya se alcanzó el límite de 10 imágenes
     if (selectedImages.length >= 10) {
       alert('You can only add up to 10 images.');
       return;
@@ -92,13 +85,13 @@ const ImagePickerScreen = () => {
     launchImageLibrary(
       {
         mediaType: 'photo',
-        selectionLimit: 10 - selectedImages.length, // Limitar a las imágenes que faltan para completar 10
+        selectionLimit: 10 - selectedImages.length,
       },
       (response) => {
         if (response.assets) {
           // Filtrar solo las nuevas imágenes que se pueden agregar sin exceder el límite de 10
           const newImages = response.assets.map(asset => ({ id: asset.uri, uri: asset.uri }));
-          const totalImages = [...selectedImages, ...newImages].slice(0, 10); // Limitar la lista a un máximo de 10
+          const totalImages = [...selectedImages, ...newImages].slice(0, 10);
           setSelectedImages(totalImages);
         }
       }
@@ -122,7 +115,7 @@ const ImagePickerScreen = () => {
       images: selectedImages.map(image => image.uri),
     };
 
-    const result = await publishPost(postData);  // Llama a publishPost desde el controlador
+    const result = await publishPost(postData);  //Se llama a publishPost desde el controlador
 
     if (result.success) {
       Alert.alert('Success', result.message);
@@ -146,7 +139,7 @@ const ImagePickerScreen = () => {
       <View>
         <TouchableOpacity onPress={openGallery} style={styles.selectButton}>
           <Text style={styles.selectButtonText}>Open Gallery</Text>
-        </TouchableOpacity> 
+        </TouchableOpacity>
         <FlatList
           data={selectedImages}
           keyExtractor={(item) => item.id}
@@ -191,7 +184,6 @@ const ImagePickerScreen = () => {
         >
           <Picker.Item label={location} value={location} style={styles.input} />
           <Picker.Item label="Quilmes" value="change" style={styles.input}/>
-          {/* Puedes agregar más opciones de ubicación aquí */}
         </Picker>
       </View>
     </ScrollView>
@@ -304,14 +296,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   imageWrapper: {
-    width: 300, // Ajusta el ancho del contenedor de imagen
-    height: 300, // Ajusta la altura del contenedor de imagen
+    width: 300,
+    height: 300,
     margin: 5,
     position: 'relative',
   },
   image: {
-    width: '100%', // Asegúrate de que ocupe el ancho completo del contenedor
-    height: '100%', // Asegúrate de que ocupe el alto completo del contenedor
+    width: '100%',
+    height: '100%',
     borderRadius: 10,
   },
   removeButton: {
