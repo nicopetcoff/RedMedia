@@ -32,13 +32,12 @@ const NotificationScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: StatusBar.currentHeight || 20, // Altura de la barra de estado, con un valor predeterminado.
     flex: 1,
     backgroundColor: '#fcfcfc',
     paddingHorizontal: 10,
   },
   headerContainer: {
-    height: 100,
+    height: 60, // Reducido para ajustarse mejor
     backgroundColor: '#fcfcfc',
     flexDirection: 'row',
     alignItems: 'center',
@@ -50,7 +49,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   title: {
-    fontSize: 26,
+    fontSize: 22, // Reducido para evitar desbordes
     fontFamily: 'Roboto',
     fontWeight: 'bold',
     color: 'black',
