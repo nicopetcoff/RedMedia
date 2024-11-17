@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import usersData from '../data/users.json';
@@ -29,15 +30,17 @@ const SearchScreen = () => {
       );
       setFilteredUsers(filtered);
     } else {
-      setFilteredUsers([]); // Si el campo de búsqueda está vacío, no mostrar nada
+      setFilteredUsers([]); 
     }
   };
 
-  // Renderizar cada usuario en el FlatList
+  
   const renderUserItem = ({ item }) => (
     <TouchableOpacity
       style={styles.userItem}
-      onPress={() => navigation.navigate('UserProfile', { username: item.username })}
+      onPress={() =>
+        navigation.navigate('UserProfile', { username: item.username })
+      }
     >
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
       <View style={styles.userInfo}>
@@ -48,67 +51,74 @@ const SearchScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Encabezado con botón de retroceso */}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+      
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <BackIcon width={24} height={24} fill="none" />
+          <BackIcon width={24} height={24}  />
         </TouchableOpacity>
       </View>
 
-      {/* Campo de búsqueda centrado */}
+      
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <SearchIcon width={20} height={20} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar usuarios"
+            placeholder="Search users..."
             value={searchText}
             onChangeText={handleSearch}
+            placeholderTextColor="#999"
           />
         </View>
       </View>
 
-      {/* Lista de usuarios filtrados, solo se muestra si hay resultados */}
-      {searchText.length > 0 && filteredUsers.length > 0 && (
+      
+      {searchText.length > 0 && (
         <FlatList
           data={filteredUsers}
           renderItem={renderUserItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={
+            <Text style={styles.noResultsText}>No users found</Text>
+          }
           showsVerticalScrollIndicator={false}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: StatusBar.currentHeight || 20, // Alternativa a expo-constants
+  safeArea: {
     flex: 1,
     backgroundColor: '#fff',
   },
   header: {
-    padding: 10,
-    paddingTop: 20, // Espacio extra para evitar superposición con la barra de estado
-    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   backButton: {
-    marginLeft: 10,
+    marginRight: 10,
   },
   searchContainer: {
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 10,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f2f2f2',
-    borderRadius: 10,
-    paddingLeft: 10,
+    borderRadius: 8,
+    paddingHorizontal: 10,
     width: '90%',
     height: 40,
   },
@@ -118,6 +128,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    color: '#000',
   },
   listContainer: {
     paddingHorizontal: 10,
@@ -145,6 +156,12 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 14,
     color: 'gray',
+  },
+  noResultsText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: 'gray',
+    marginTop: 20,
   },
 });
 

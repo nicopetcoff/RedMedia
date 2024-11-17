@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,16 +13,16 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import Geolocation from 'react-native-geolocation-service';
 import Geocoder from 'react-native-geocoding';
-import {publishPost, getUserData} from '../controller/miApp.controller';
-import {useUserContext} from '../context/AuthProvider';
-import {useFocusEffect} from '@react-navigation/native';
+import { publishPost, getUserData } from '../controller/miApp.controller';
+import { useUserContext } from '../context/AuthProvider';
+import { useFocusEffect } from '@react-navigation/native';
 
-Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc');
+Geocoder.init('YOUR_GOOGLE_API_KEY'); // Reemplaza con tu API Key.
 
-const ImagePickerScreen = ({navigation}) => {
+const ImagePickerScreen = ({ navigation }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -32,9 +32,9 @@ const ImagePickerScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true);
 
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => setIsEnabled((prev) => !prev);
   const deleteLocation = () => setSelectedLocation('');
-  const {token} = useUserContext();
+  const { token } = useUserContext();
 
   const fetchUserData = async () => {
     try {
@@ -50,7 +50,7 @@ const ImagePickerScreen = ({navigation}) => {
       if (token) {
         fetchUserData();
       }
-    }, [token]),
+    }, [token])
   );
 
   const requestLocationPermission = async () => {
@@ -66,10 +66,7 @@ const ImagePickerScreen = ({navigation}) => {
           title: 'Location Permission',
           message:
             'This app needs access to your location to show your current position.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
+        }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
@@ -86,48 +83,27 @@ const ImagePickerScreen = ({navigation}) => {
         }
 
         Geolocation.getCurrentPosition(
-          async position => {
-            const {latitude, longitude} = position.coords;
+          async (position) => {
+            const { latitude, longitude } = position.coords;
             try {
               const response = await Geocoder.from(latitude, longitude);
-              const addressComponents = response.results[0].address_components;
-
-              let city = '';
-              let state = '';
-              let country = '';
-
-              addressComponents.forEach(component => {
-                if (component.types.includes('locality')) {
-                  city = component.long_name;
-                }
-                if (component.types.includes('administrative_area_level_1')) {
-                  state = component.short_name;
-                }
-                if (component.types.includes('country')) {
-                  country = component.short_name;
-                }
-              });
-
-              const formattedLocation = `${city}, ${state}, ${country}`;
-              setLocation(formattedLocation || 'Location not found');
-              setSelectedLocation(formattedLocation || 'Location not found');
+              const address = response.results[0].formatted_address || 'Location not found';
+              setLocation(address);
+              setSelectedLocation(address);
             } catch (error) {
-              console.error('Geocoding error:', error);
               setLocation('Error getting location details');
             }
           },
-          error => {
-            console.error('Geolocation error:', error);
+          (error) => {
             setLocation('Error getting location');
           },
           {
             enableHighAccuracy: true,
             timeout: 15000,
             maximumAge: 10000,
-          },
+          }
         );
       } catch (error) {
-        console.error('Location permission error:', error);
         setLocation('Error requesting location permission');
       }
     };
@@ -136,9 +112,7 @@ const ImagePickerScreen = ({navigation}) => {
   }, []);
 
   const requestCameraPermission = async () => {
-    if (Platform.OS === 'ios') {
-      return true; // iOS maneja los permisos a través del info.plist
-    }
+    if (Platform.OS === 'ios') return true;
 
     try {
       const granted = await PermissionsAndroid.request(
@@ -146,10 +120,7 @@ const ImagePickerScreen = ({navigation}) => {
         {
           title: 'Photo Permission',
           message: 'This app needs access to your photos to upload images.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
+        }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
@@ -162,10 +133,7 @@ const ImagePickerScreen = ({navigation}) => {
     try {
       const hasPermission = await requestCameraPermission();
       if (!hasPermission) {
-        Alert.alert(
-          'Permission Denied',
-          'Permission to access gallery is required!',
-        );
+        Alert.alert('Permission Denied', 'Permission to access gallery is required!');
         return;
       }
 
@@ -177,27 +145,24 @@ const ImagePickerScreen = ({navigation}) => {
       const options = {
         mediaType: 'photo',
         selectionLimit: 10 - selectedImages.length,
-        quality: 0.8,
       };
 
       const result = await launchImageLibrary(options);
 
       if (!result.didCancel && result.assets) {
-        const newImages = result.assets.map(asset => ({
+        const newImages = result.assets.map((asset) => ({
           id: asset.uri,
           uri: asset.uri,
         }));
-        const totalImages = [...selectedImages, ...newImages].slice(0, 10);
-        setSelectedImages(totalImages);
+        setSelectedImages((prev) => [...prev, ...newImages].slice(0, 10));
       }
     } catch (error) {
-      console.error('Error picking image:', error);
       Alert.alert('Error', 'Failed to pick image');
     }
   };
 
-  const removeImage = id => {
-    setSelectedImages(selectedImages.filter(image => image.id !== id));
+  const removeImage = (id) => {
+    setSelectedImages(selectedImages.filter((image) => image.id !== id));
   };
 
   const handlePush = async () => {
@@ -220,10 +185,10 @@ const ImagePickerScreen = ({navigation}) => {
 
     try {
       const postData = {
-        title: title.trim(),
-        description: description.trim(),
+        title,
+        description,
         location: selectedLocation,
-        images: selectedImages.map(image => image.uri),
+        images: selectedImages.map((image) => image.uri),
         user: userData.usernickname,
         userAvatar: userData.avatar,
       };
@@ -247,31 +212,24 @@ const ImagePickerScreen = ({navigation}) => {
         Alert.alert('Error', result.message || 'Failed to publish post');
       }
     } catch (error) {
-      console.error('Error en handlePush:', error);
       Alert.alert('Error', 'Failed to publish post');
     } finally {
       setLoading(false);
     }
   };
 
-  const isPublishDisabled =
-    !title.trim() || selectedImages.length === 0 || loading;
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text> </Text>
-        <TouchableOpacity onPress={handlePush} disabled={isPublishDisabled}>
-          <Text
-            style={[
-              styles.publishText,
-              isPublishDisabled && styles.publishTextDisabled,
-            ]}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.goBackText}>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handlePush} disabled={!title.trim() || selectedImages.length === 0 || loading}>
+          <Text style={[styles.publishText, (!title.trim() || selectedImages.length === 0 || loading) && styles.disabledText]}>
             {loading ? 'Publishing...' : 'Push'}
           </Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.profileContainer}>
         <Image
           source={{
@@ -285,7 +243,6 @@ const ImagePickerScreen = ({navigation}) => {
           @{userData?.usernickname || 'Loading...'}
         </Text>
       </View>
-
       <TouchableOpacity
         onPress={openGallery}
         style={[
@@ -299,15 +256,14 @@ const ImagePickerScreen = ({navigation}) => {
             : 'Open Gallery'}
         </Text>
       </TouchableOpacity>
-
       {selectedImages.length > 0 && (
         <FlatList
           data={selectedImages}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           horizontal
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <View style={styles.imageContainer}>
-              <Image source={{uri: item.uri}} style={styles.selectedImage} />
+              <Image source={{ uri: item.uri }} style={styles.selectedImage} />
               <TouchableOpacity
                 style={styles.removeImageButton}
                 onPress={() => removeImage(item.id)}>
@@ -319,7 +275,6 @@ const ImagePickerScreen = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
         />
       )}
-
       <View style={styles.inputContainer}>
         <Text style={styles.textTitles}>Title</Text>
         <TextInput
@@ -348,9 +303,8 @@ const ImagePickerScreen = ({navigation}) => {
         <View style={styles.switchContainer}>
           <Text>Use Actual Location</Text>
           <Switch
-            trackColor={{false: '#767577', true: '#81b0ff'}}
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
             onValueChange={() => {
               deleteLocation();
               toggleSwitch();
@@ -385,12 +339,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 16,
   },
-  publishText: {
-    color: '#007AFF',
+  goBackText: {
     fontSize: 16,
-    marginTop: 50,
+    color: '#007AFF',
   },
-  publishTextDisabled: {
+  publishText: {
+    fontSize: 16,
+    color: '#007AFF',
+  },
+  disabledText: {
     color: '#999',
   },
   textTitles: {

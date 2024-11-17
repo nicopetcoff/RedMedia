@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Linking,
   TouchableOpacity,
-  Platform,
   StatusBar,
   SafeAreaView
 } from "react-native";
@@ -69,9 +68,8 @@ const HomeScreen = () => {
   }, [navigation]);
 
   const adIndices = useMemo(() => {
-    return posts.map((_, index) => (index + 1) % 4 === 0
-      ? Math.floor(Math.random() * ads.length)
-      : null
+    return posts.map((_, index) =>
+      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null
     );
   }, [posts, ads]);
 
@@ -81,7 +79,7 @@ const HomeScreen = () => {
     if (adIndex !== null && ads[adIndex]) {
       const randomAd = ads[adIndex];
       return (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.adContainer}
           onPress={() => Linking.openURL(randomAd.Url)}
         >
@@ -93,7 +91,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
       );
     }
-  
+
     return (
       <View style={styles.postContainer}>
         <Post item={item} source="Home" />
@@ -120,10 +118,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar 
-        barStyle="dark-content"
-        backgroundColor="#ffffff"
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Image
@@ -158,12 +153,12 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
+    paddingTop: 0, // Eliminamos cualquier padding adicional
   },
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   headerContainer: {
     flexDirection: "row",
@@ -172,18 +167,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#efefef",
-    backgroundColor: '#fff',
-    ...Platform.select({
-      android: {
-        elevation: 4,
-      },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-      },
-    }),
+    backgroundColor: "#fff",
   },
   logo: {
     width: 50,
@@ -194,7 +178,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "black",
-    fontFamily: Platform.OS === 'ios' ? "System" : "Roboto",
   },
   listContent: {
     paddingHorizontal: 10,
@@ -208,50 +191,16 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     marginBottom: 15,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    ...Platform.select({
-      android: {
-        elevation: 3,
-      },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-    }),
   },
   adContainer: {
     flex: 1,
     marginHorizontal: 5,
     marginBottom: 15,
-    borderRadius: 10,
-    overflow: "hidden",
     height: 200,
-    backgroundColor: '#fff',
-    ...Platform.select({
-      android: {
-        elevation: 3,
-      },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-    }),
   },
   adImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 10,
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
   },
   skeletonContainer: {
     flex: 1,
@@ -260,25 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 15,
     paddingTop: 10,
-    backgroundColor: '#fff',
-  },
-  skeleton: {
-    width: "47%",
-    height: 150,
-    marginBottom: 15,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    ...Platform.select({
-      android: {
-        elevation: 1,
-      },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 1,
-      },
-    }),
+    backgroundColor: "#fff",
   },
 });
 
