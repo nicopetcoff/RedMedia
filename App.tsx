@@ -1,28 +1,43 @@
 // App.js
-import React, { useState, useEffect } from 'react';
-import { Provider } from 'react-redux';
-import store from './src/redux/store';
-import SplashScreen from './src/screens/SplashScreen'; // Importamos el SplashScreen
-import AppNavigator from './src/navigation/AppNavigator'; // Importamos la nueva navegación
+import React, { useEffect } from "react";
+import { AuthProvider } from "./src/context/AuthProvider";
+import AppNavigator from "./src/navigation/AppNavigator";
+import NetInfo from "@react-native-community/netinfo";
+import { Alert, StatusBar } from "react-native";
+import RNRestart from 'react-native-restart';
 
 const App = () => {
-  const [isShowSplashScreen, setIsShowSplashScreen] = useState(true);
+  const unsubscribe = NetInfo.addEventListener((state) => {
+    if (!state.isConnected) {
+      Alert.alert(
+        "Sin conexion a internet",
+        "Por favor conectese a internet para poder usar la aplicacion",
+        [{ 
+          text: "Reintentar", 
+          onPress: () => RNRestart.Restart() 
+        }]
+      );
+    }
+  });
 
   useEffect(() => {
-    
-    setTimeout(() => {
-      setIsShowSplashScreen(false);
-    }, 2000);
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   return (
-    <Provider store={store}>
-      {isShowSplashScreen ? (
-        <SplashScreen />
-      ) : (
+    <>
+      <StatusBar 
+        barStyle="dark-content" 
+        backgroundColor="#ffffff" 
+      />
+      <AuthProvider>
         <AppNavigator />
-      )}
-    </Provider>
+      </AuthProvider>
+    </>
   );
 };
 

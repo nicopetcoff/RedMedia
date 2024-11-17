@@ -28,11 +28,17 @@ const Notification = ({item}) => {
           {item.icon}
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('StackProfile', {username: item.user})
+              navigation.navigate('profile', {username: item.user})
             } style={styles.action}>
             <Text style={styles.activityUser}>{item.user}</Text>
+            </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={() => 
+              navigation.navigate('PostDetail', {item: item.post})}>
             <Text style={styles.activityText}>{item.text}</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>     
+
         </View>
         <Text style={styles.activityTime}>{item.time}</Text>
       </View>

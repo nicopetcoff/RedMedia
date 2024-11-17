@@ -1,67 +1,150 @@
 import React, { useState } from 'react';
-import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import {
+  View,
+  TextInput,
+  FlatList,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import usersData from '../data/users.json';
+import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de retroceso
+import SearchIcon from '../assets/imgs/search.svg'; // Icono de búsqueda personalizado
 
 const SearchScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const users = [
-    { id: '1', username: '@juan_perez', profileImage: "https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Zm90byUyMGRlJTIwcGVyZmlsfGVufDB8fDB8fHww"},
-    { id: '2', username: '@juanperez', profileImage: "https://png.pngtree.com/png-vector/20210706/ourlarge/pngtree-blank-whatsapp-bussiness-man-photo-profile-png-image_3562846.jpg"},
-    // Puedes agregar más usuarios aquí
-  ];
+  const navigation = useNavigation();
+  const [searchText, setSearchText] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
-  const filteredUsers = users.filter(user => user.username.includes(searchQuery));
+  // Función para filtrar usuarios basándose en el texto de búsqueda
+  const handleSearch = (text) => {
+    setSearchText(text);
+    if (text) {
+      const filtered = usersData.filter((user) =>
+        user.name.toLowerCase().includes(text.toLowerCase()) ||
+        user.username.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers([]); // Si el campo de búsqueda está vacío, no mostrar nada
+    }
+  };
+
+  // Renderizar cada usuario en el FlatList
+  const renderUserItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.userItem}
+      onPress={() => navigation.navigate('UserProfile', { username: item.username })}
+    >
+      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <View style={styles.userInfo}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.username}>@{item.username}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Buscar"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-      <FlatList
-        data={filteredUsers}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.userItem}>
-            <Image source={{ uri: item.profileImage }} style={styles.profileImage} />
-            <Text style={styles.username}>{item.username}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {/* Encabezado con botón de retroceso */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <BackIcon width={24} height={24} fill="none" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Campo de búsqueda centrado */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <SearchIcon width={20} height={20} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar usuarios"
+            value={searchText}
+            onChangeText={handleSearch}
+          />
+        </View>
+      </View>
+
+      {/* Lista de usuarios filtrados, solo se muestra si hay resultados */}
+      {searchText.length > 0 && filteredUsers.length > 0 && (
+        <FlatList
+          data={filteredUsers}
+          renderItem={renderUserItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: StatusBar.currentHeight || 20, // Alternativa a expo-constants
     flex: 1,
-    padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
+  },
+  header: {
+    padding: 10,
+    paddingTop: 20, // Espacio extra para evitar superposición con la barra de estado
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginLeft: 10,
+  },
+  searchContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    paddingLeft: 10,
+    width: '90%',
+    height: 40,
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
+    flex: 1,
+    fontSize: 16,
+  },
+  listContainer: {
     paddingHorizontal: 10,
-    marginBottom: 16,
   },
   userItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderBottomColor: '#ccc',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
     borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     marginRight: 10,
   },
-  username: {
+  userInfo: {
+    flexDirection: 'column',
+  },
+  name: {
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  username: {
+    fontSize: 14,
+    color: 'gray',
   },
 });
 
