@@ -5,6 +5,8 @@ import AppNavigator from "./src/navigation/AppNavigator";
 import NetInfo from "@react-native-community/netinfo";
 import { Alert, StatusBar } from "react-native";
 import RNRestart from 'react-native-restart';
+import SplashScreen from 'react-native-splash-screen';
+
 
 const App = () => {
   const unsubscribe = NetInfo.addEventListener((state) => {
@@ -19,6 +21,10 @@ const App = () => {
       );
     }
   });
+
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
 
   useEffect(() => {
     return () => {

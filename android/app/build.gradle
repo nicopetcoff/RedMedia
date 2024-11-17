@@ -59,6 +59,7 @@ android {
 dependencies {
     // React Native Core
     implementation("com.facebook.react:react-android")
+    implementation project(':react-native-splash-screen')
 
     // Hermes or JSC Runtime
     if (hermesEnabled.toBoolean()) {
