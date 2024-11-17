@@ -3,190 +3,312 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   Dimensions,
   TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
-import MyData from '../data/MyData.json'; // Importamos el archivo JSON con los datos del usuario
+import {useNavigation} from '@react-navigation/native';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {updateUserProfile} from '../controller/miApp.controller';
+import {useUserContext} from '../context/AuthProvider';
 
-const MyProfileHeader = () => {
-  const {width: windowWidth} = Dimensions.get('window'); // Obtener el ancho de la ventana
+const {width: windowWidth} = Dimensions.get('window');
 
-  // Verificación explícita de que los valores followers y following existen y son números válidos
-  const followersCount =
-    typeof MyData.followers === 'number' ? MyData.followers : 0;
-  const followingCount =
-    typeof MyData.following === 'number' ? MyData.following : 0;
+const MyProfileHeader = ({userData}) => {
+  const navigation = useNavigation();
+  const {token} = useUserContext();
+  const [loading, setLoading] = useState(false);
 
-    const handleEditPress = () => {
-      console.log('Editar');
-    };
-  
-    const handleSavedPress = () => {
-      console.log('Guardados');
-    };
-  
+  const handleEditPress = () => {
+    navigation.navigate('EditProfile', {avatar: userData?.avatar});
+  };
+
+  const formatNumber = num => {
+    if (!num) return '0';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const requestGalleryPermission = async () => {
+    if (Platform.OS === 'ios') {
+      return true; // iOS maneja los permisos a través del info.plist
+    }
+
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        {
+          title: 'Gallery Permission',
+          message:
+            'This app needs access to your gallery to update your cover image.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
+  const handleUpdateCover = async () => {
+    try {
+      const hasPermission = await requestGalleryPermission();
+
+      if (!hasPermission) {
+        Alert.alert('Error', 'Permission to access gallery is required.');
+        return;
+      }
+
+      const options = {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 2000,
+        maxWidth: 2000,
+      };
+
+      const result = await launchImageLibrary(options);
+
+      if (!result.didCancel && result.assets && result.assets[0]) {
+        setLoading(true);
+        try {
+          const response = await updateUserProfile(
+            {
+              coverImage: result.assets[0].uri,
+            },
+            token,
+          );
+
+          if (response.data && response.data.coverImage) {
+            Alert.alert('Success', 'Cover image updated successfully');
+            // Aquí podrías actualizar el estado global del usuario si es necesario
+          }
+        } catch (error) {
+          Alert.alert('Error', 'Failed to update cover image');
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Error selecting image');
+      console.error(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* Imagen de fondo */}
-      {MyData.coverImage && (
+      <TouchableOpacity
+        onPress={handleUpdateCover}
+        style={styles.coverContainer}
+        disabled={loading}>
         <Image
-          source={{uri: MyData.coverImage}}
-          style={[styles.coverImage, {width: windowWidth}]} // Ajustamos el ancho de la imagen al de la pantalla
-          resizeMode="cover" // Aseguramos que la imagen cubra todo el área del cover
+          source={
+            userData?.coverImage
+              ? {uri: userData.coverImage}
+              : require('../assets/imgs/portadaDefault.png')
+          }
+          style={styles.coverImage}
         />
-      )}
-
-      {/* Información del perfil */}
-      <View style={styles.profileInfoContainer}>
-        <View style={styles.MyDataSection}>
-          <View style={styles.buttonAllign}>
-            {/* Avatar */}
-            {MyData.avatar && (
-              <Image source={{uri: MyData.avatar}} style={styles.avatar} />
-            )}
-            {/* Botón de editar */}
-            <TouchableOpacity
-              style={styles.edit}
-              onPress={handleEditPress}>
-              <Text style={styles.editButtonText}> Editar
-              </Text>
-            </TouchableOpacity>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color="#fff" />
           </View>
-          {/* Nombre y username debajo del avatar */}
-          <View style={styles.MyDataDetails}>
-            <View>
-              {MyData.name && <Text style={styles.name}>{MyData.name}</Text>}
-              {MyData.username && (
-                <Text style={styles.MyDataname}>{MyData.username}</Text>
-              )}
-            </View>
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statText}>{MyData.postsCount || 0}</Text>
-                <Text style={styles.statLabel}>Posts</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statText}>{followersCount}</Text>
-                <Text style={styles.statLabel}>Followers</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statText}>{followingCount}</Text>
-                <Text style={styles.statLabel}>Following</Text>
-              </View>
-            </View>
+        ) : (
+          <View style={styles.changeCoverButton}>
+            <Text style={styles.changeCoverText}>Change Cover</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      <View style={styles.avatarContainer}>
+        <Image
+          source={
+            userData?.avatar
+              ? {uri: userData.avatar}
+              : require('../assets/imgs/avatarDefault.jpg')
+          }
+          style={styles.avatar}
+        />
+      </View>
+
+      <View style={styles.editButtonContainer}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={handleEditPress}
+          disabled={loading}>
+          <Text style={styles.editButtonText}>Edit</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.mainContent}>
+        <View style={styles.userInfo}>
+          <Text style={styles.name}>
+            {userData?.nombre} {userData?.apellido}
+          </Text>
+          <Text style={styles.username}>@{userData?.usernickname}</Text>
+          <Text style={styles.bio}>
+            {userData?.bio ? userData.bio : 'No bio yet'}
+          </Text>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>
+              {formatNumber(userData?.postsCount)}
+            </Text>
+            <Text style={styles.statLabel}>Posts</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>
+              {formatNumber(userData?.followersCount)}
+            </Text>
+            <Text style={styles.statLabel}>Followers</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>
+              {formatNumber(userData?.followingCount)}
+            </Text>
+            <Text style={styles.statLabel}>Following</Text>
           </View>
         </View>
       </View>
 
-      {MyData.bio && <Text style={styles.bio}>{MyData.bio}</Text>}
-      <View style={styles.buttonAllign}> 
-        {MyData.level && <Text style={styles.level}>Nivel: {MyData.level}</Text>}
-        <TouchableOpacity onPress={handleSavedPress}>
-          <Image source={require('../assets/imgs/guardar.png')} style={{width: 24, height: 24, marginRight: 20}} />
-        </TouchableOpacity>
+      <View style={styles.levelContainer}>
+        <Text style={styles.level}>Level: {userData?.level || 0}</Text>
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
-    marginTop: 0,
+    backgroundColor: '#fff',
+  },
+  coverContainer: {
+    position: 'relative',
   },
   coverImage: {
-    height: 120, // Altura fija de la imagen de fondo
-    width: '100%', // Aseguramos que ocupe todo el ancho de la pantalla
+    width: windowWidth,
+    height: 150,
+    resizeMode: 'cover',
   },
-  profileInfoContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginTop: -30,
-    alignItems: 'center',
+  changeCoverButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
   },
-  MyDataSection: {
-    flexDirection: 'column',
+  changeCoverText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
   },
-  buttonAllign: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  loadingContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  avatarContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 15,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 85,
+    height: 85,
+    borderRadius: 42.5,
     borderWidth: 3,
     borderColor: '#fff',
   },
-  MyDataDetails: {
-    marginTop: 10,
-    flexDirection: 'row',
+  editButtonContainer: {
+    position: 'absolute',
+    top: 160,
+    right: 15,
   },
-  name: {
-    color: 'black',
-    fontFamily: 'Roboto',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  MyDataname: {
-    fontFamily: 'Roboto',
-    fontSize: 16,
-    color: 'gray',
-    marginTop: 2,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    width: '80%',
-  },
-  statItem: {
-    marginRight: 20,
-  },
-  statText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: 'gray',
-    textAlign: 'center',
-  },
-  bio: {
-    fontSize: 14,
-    color: 'gray',
-    textAlign: 'left',
-    marginHorizontal: 20,
-    marginVertical: 10,
-  },
-  level: {
-    fontSize: 14,
-    color: 'black',
-    marginLeft: 20,
-    marginBottom: 10,
-  },
-  edit: {
-    backgroundColor: '#1FA1FF',
-    borderRadius: 8,
-    width: 124,
+  editButton: {
+    backgroundColor: '#1DA1F2',
+    paddingHorizontal: 20,
+    paddingVertical: 6,
+    borderRadius: 20,
+    width: 100,
     height: 35,
-    marginTop: 15,
+    alignItems: 'center',
   },
   editButtonText: {
     color: '#fff',
-    fontWeight: 'semi-bold',
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  mainContent: {
+    marginTop: 40,
+    paddingHorizontal: 15,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
     fontFamily: 'Roboto',
-    textAlign: 'center',
-    lineHeight: 30,
   },
-  postsContainer: {
-    paddingBottom: 30, // Espacio al final para evitar superposición
+  username: {
+    fontSize: 14,
+    color: '#657786',
+    marginTop: 1,
+    marginBottom: 4,
+    fontFamily: 'Roboto',
   },
-  columnWrapper: {
-    justifyContent: 'space-between', // Asegura que los dos posts se distribuyan correctamente
-    marginBottom: 10, // Espacio entre filas de posts
+  bio: {
+    fontSize: 14,
+    color: '#000',
+    fontFamily: 'Roboto',
+    marginBottom: 4,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: -45,
+  },
+  statItem: {
+    alignItems: 'center',
+    marginLeft: 20,
+  },
+  statNumber: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 1,
+    fontFamily: 'Roboto',
+  },
+  statLabel: {
+    color: '#657786',
+    fontSize: 12,
+    fontFamily: 'Roboto',
+  },
+  levelContainer: {
+    paddingHorizontal: 15,
+    marginTop: 8,
+    marginBottom: 10,
+  },
+  level: {
+    fontSize: 14,
+    color: '#14171A',
+    fontFamily: 'Roboto',
   },
 });
 

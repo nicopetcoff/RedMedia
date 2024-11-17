@@ -1,12 +1,26 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+// PostHeader.js
+import React from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
-const PostHeader = ({ userAvatar, user, isFollowing, setIsFollowing }) => {
+const PostHeader = ({
+  userAvatar,
+  user,
+  isFollowing,
+  setIsFollowing,
+  isOwnPost,
+}) => {
   return (
     <View style={styles.headerContainer}>
       <View style={styles.headerLeft}>
         {userAvatar && (
-          <Image source={{ uri: userAvatar }} style={styles.avatar} />
+          <Image
+            source={
+              typeof userAvatar === "string"
+                ? { uri: userAvatar }
+                : require("../assets/imgs/avatarDefault.jpg")
+            }
+            style={styles.avatar}
+          />
         )}
         {user && (
           <View style={styles.userInfo}>
@@ -14,30 +28,39 @@ const PostHeader = ({ userAvatar, user, isFollowing, setIsFollowing }) => {
           </View>
         )}
       </View>
-      <TouchableOpacity
-        style={styles.followButton}
-        onPress={() => setIsFollowing(!isFollowing)}
-      >
-        <Text style={styles.followButtonText}>
-          {isFollowing ? 'Unfollow' : 'Follow'}
-        </Text>
-      </TouchableOpacity>
+      {!isOwnPost && (
+        <TouchableOpacity
+          style={[styles.followButton, isFollowing && styles.followingButton]}
+          onPress={() => {
+            console.log("Follow button pressed");
+            setIsFollowing(!isFollowing);
+          }}
+        >
+          <Text
+            style={[
+              styles.followButtonText,
+              isFollowing && styles.followingButtonText,
+            ]}
+          >
+            {isFollowing ? "Unfollw" : "Follow"}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 15,
-    paddingTop: 15,
-    marginBottom: 10,
+    paddingVertical: 12,
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   avatar: {
     width: 40,
@@ -48,23 +71,32 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   username: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#000",
+    fontFamily: "Roboto",
   },
   followButton: {
-    backgroundColor: '#439CEE',
-    borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    width: 90,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#1DA1F2",
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    minWidth: 90,
+    alignItems: "center",
+  },
+  followingButton: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#1DA1F2",
   },
   followButtonText: {
-    fontSize: 13,
-    color: '#fff',
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "500",
+    fontFamily: "Roboto",
+  },
+  followingButtonText: {
+    color: "#1DA1F2",
   },
 });
 

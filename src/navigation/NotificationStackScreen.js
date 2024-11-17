@@ -1,32 +1,31 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import {TouchableOpacity} from 'react-native';
 import ProfileScreen from '../screens/ProfileScreen';
-import BackIcon from '../assets/imgs/back.svg';
 import NotificationScreen from '../screens/NotificationScreen';
+import PostDetail from '../screens/PostDetail';
 
 const Stack = createStackNavigator();
 
-const NotificationStackScreen = ({navigation}) => {
+const NotificationStackScreen = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="Activity"
         component={NotificationScreen}
-        options={{headerShown: false}}
+        options={{headerShown:false}}
       />
       <Stack.Screen
-        name="StackProfile"
+        name="profile"
         component={ProfileScreen}
         options={{
           headerTitle: '',
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{marginLeft: 10}}>
-              <BackIcon width={24} height={24} />
-            </TouchableOpacity>
-          ),
+        }}
+      />
+      <Stack.Screen
+        name="PostDetail"
+        component={PostDetail}
+        options={{
+          headerTitle: '',
         }}
       />
     </Stack.Navigator>

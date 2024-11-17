@@ -1,190 +1,373 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, FlatList, ScrollView, PermissionsAndroid, Platform, Alert} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { launchImageLibrary } from 'react-native-image-picker';
+import React, {useState, useEffect, useCallback} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  ScrollView,
+  Alert,
+  Switch,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
+import {launchImageLibrary} from 'react-native-image-picker';
 import Geolocation from 'react-native-geolocation-service';
 import Geocoder from 'react-native-geocoding';
-import { publishPost } from '../controller/miApp.controller';
+import {publishPost, getUserData} from '../controller/miApp.controller';
+import {useUserContext} from '../context/AuthProvider';
+import {useFocusEffect} from '@react-navigation/native';
 
 Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc');
 
-const ImagePickerScreen = () => {
+const ImagePickerScreen = ({navigation}) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('Loading current location...');
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const deleteLocation = () => setSelectedLocation('');
+  const {token} = useUserContext();
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getUserData(token);
+      setUserData(response.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (token) {
+        fetchUserData();
+      }
+    }, [token]),
+  );
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      const auth = await Geolocation.requestAuthorization('whenInUse');
+      return auth === 'granted';
+    }
+
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission',
+          message:
+            'This app needs access to your location to show your current position.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return false;
+  };
 
   useEffect(() => {
     const getCurrentLocation = async () => {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location.',
-            buttonPositive: 'OK',
-            buttonNegative: 'Cancel',
-          }
-        );
-
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          console.warn('Permission denied for location');
-          setLocation('Permission denied');
+      try {
+        const hasPermission = await requestLocationPermission();
+        if (!hasPermission) {
+          setLocation('Location permission denied');
           return;
         }
-      }
 
-      Geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          Geocoder.from(latitude, longitude)
-            .then(json => {
-              const addressComponents = json.results[0].address_components;
+        Geolocation.getCurrentPosition(
+          async position => {
+            const {latitude, longitude} = position.coords;
+            try {
+              const response = await Geocoder.from(latitude, longitude);
+              const addressComponents = response.results[0].address_components;
+
               let city = '';
               let state = '';
               let country = '';
 
               addressComponents.forEach(component => {
-                if (component.types.includes("locality")) {
+                if (component.types.includes('locality')) {
                   city = component.long_name;
                 }
-                if (component.types.includes("administrative_area_level_1")) {
-                  state = component.short_name;  // short_name para obtener abreviación (ej. CA)
+                if (component.types.includes('administrative_area_level_1')) {
+                  state = component.short_name;
                 }
-                if (component.types.includes("country")) {
-                  country = component.short_name; // short_name para obtener abreviación (ej. US)
+                if (component.types.includes('country')) {
+                  country = component.short_name;
                 }
               });
 
               const formattedLocation = `${city}, ${state}, ${country}`;
               setLocation(formattedLocation || 'Location not found');
-            })
-            .catch(error => {
-              console.warn(error);
-              setLocation('Unknown location');
-            });
-        },
-        (error) => {
-          console.warn('Geolocation error:', error);
-          setLocation('Location not available');
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-      );
+              setSelectedLocation(formattedLocation || 'Location not found');
+            } catch (error) {
+              console.error('Geocoding error:', error);
+              setLocation('Error getting location details');
+            }
+          },
+          error => {
+            console.error('Geolocation error:', error);
+            setLocation('Error getting location');
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 10000,
+          },
+        );
+      } catch (error) {
+        console.error('Location permission error:', error);
+        setLocation('Error requesting location permission');
+      }
     };
 
     getCurrentLocation();
   }, []);
 
-  const openGallery = () => {
-    // Verifica si ya se alcanzó el límite de 10 imágenes
-    if (selectedImages.length >= 10) {
-      alert('You can only add up to 10 images.');
-      return;
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'ios') {
+      return true; // iOS maneja los permisos a través del info.plist
     }
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        selectionLimit: 10 - selectedImages.length,
-      },
-      (response) => {
-        if (response.assets) {
-          // Filtrar solo las nuevas imágenes que se pueden agregar sin exceder el límite de 10
-          const newImages = response.assets.map(asset => ({ id: asset.uri, uri: asset.uri }));
-          const totalImages = [...selectedImages, ...newImages].slice(0, 10);
-          setSelectedImages(totalImages);
-        }
-      }
-    );
+
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        {
+          title: 'Photo Permission',
+          message: 'This app needs access to your photos to upload images.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
   };
 
-  const removeImage = (id) => {
+  const openGallery = async () => {
+    try {
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Permission to access gallery is required!',
+        );
+        return;
+      }
+
+      if (selectedImages.length >= 10) {
+        Alert.alert('Limit Reached', 'You can only add up to 10 images.');
+        return;
+      }
+
+      const options = {
+        mediaType: 'photo',
+        selectionLimit: 10 - selectedImages.length,
+        quality: 0.8,
+      };
+
+      const result = await launchImageLibrary(options);
+
+      if (!result.didCancel && result.assets) {
+        const newImages = result.assets.map(asset => ({
+          id: asset.uri,
+          uri: asset.uri,
+        }));
+        const totalImages = [...selectedImages, ...newImages].slice(0, 10);
+        setSelectedImages(totalImages);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
+
+  const removeImage = id => {
     setSelectedImages(selectedImages.filter(image => image.id !== id));
   };
 
   const handlePush = async () => {
-    if (!title || !description || selectedImages.length === 0) {
-      Alert.alert('Error', 'Please fill all fields and select at least one image');
+    if (!title.trim()) {
+      Alert.alert('Error', 'Please enter a title');
       return;
     }
 
-    const postData = {
-      title,
-      description,
-      location: selectedLocation || location,
-      images: selectedImages.map(image => image.uri),
-    };
+    if (selectedImages.length === 0) {
+      Alert.alert('Error', 'Please select at least one image');
+      return;
+    }
 
-    const result = await publishPost(postData);  //Se llama a publishPost desde el controlador
+    if (!userData) {
+      Alert.alert('Error', 'User data not available');
+      return;
+    }
 
-    if (result.success) {
-      Alert.alert('Success', result.message);
-    } else {
-      Alert.alert('Error', result.message);
+    setLoading(true);
+
+    try {
+      const postData = {
+        title: title.trim(),
+        description: description.trim(),
+        location: selectedLocation,
+        images: selectedImages.map(image => image.uri),
+        user: userData.usernickname,
+        userAvatar: userData.avatar,
+      };
+
+      const result = await publishPost(postData, token);
+
+      if (result.success) {
+        Alert.alert('Success', 'Post published successfully', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setTitle('');
+              setDescription('');
+              setSelectedImages([]);
+              setSelectedLocation('');
+              navigation.goBack();
+            },
+          },
+        ]);
+      } else {
+        Alert.alert('Error', result.message || 'Failed to publish post');
+      }
+    } catch (error) {
+      console.error('Error en handlePush:', error);
+      Alert.alert('Error', 'Failed to publish post');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const isPublishDisabled =
+    !title.trim() || selectedImages.length === 0 || loading;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text> </Text>
-        <TouchableOpacity onPress={handlePush} disabled={!(title && description && selectedImages.length)}>
-          <Text style={styles.publishText}>Push</Text>
+        <TouchableOpacity onPress={handlePush} disabled={isPublishDisabled}>
+          <Text
+            style={[
+              styles.publishText,
+              isPublishDisabled && styles.publishTextDisabled,
+            ]}>
+            {loading ? 'Publishing...' : 'Push'}
+          </Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.profileContainer}>
-        <Image source={{ uri: 'https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Zm90byUyMGRlJTIwcGVyZmlsfGVufDB8fDB8fHww' }} style={styles.profileImage} />
-        <Text style={styles.username}>@juan_perez</Text>
+        <Image
+          source={{
+            uri:
+              userData?.avatar ||
+              'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
+          }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.username}>
+          @{userData?.usernickname || 'Loading...'}
+        </Text>
       </View>
-      <View>
-        <TouchableOpacity onPress={openGallery} style={styles.selectButton}>
-          <Text style={styles.selectButtonText}>Open Gallery</Text>
-        </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={openGallery}
+        style={[
+          styles.selectButton,
+          selectedImages.length >= 10 && styles.selectButtonDisabled,
+        ]}
+        disabled={selectedImages.length >= 10}>
+        <Text style={styles.selectButtonText}>
+          {selectedImages.length >= 10
+            ? 'Maximum images selected'
+            : 'Open Gallery'}
+        </Text>
+      </TouchableOpacity>
+
+      {selectedImages.length > 0 && (
         <FlatList
           data={selectedImages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           horizontal
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <View style={styles.imageContainer}>
-              <Image source={{ uri: item.uri }} style={styles.selectedImage} />
-              <TouchableOpacity style={styles.removeImageButton} onPress={() => removeImage(item.id)}>
-                <Text style={styles.removeImageText}>X</Text>
+              <Image source={{uri: item.uri}} style={styles.selectedImage} />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => removeImage(item.id)}>
+                <Text style={styles.removeImageText}>✕</Text>
               </TouchableOpacity>
             </View>
           )}
           contentContainerStyle={styles.flatListContainer}
           showsHorizontalScrollIndicator={false}
         />
-      </View>
+      )}
+
       <View style={styles.inputContainer}>
         <Text style={styles.textTitles}>Title</Text>
         <TextInput
           style={styles.input}
           placeholder="Write something..."
           value={title}
-          onChangeText={(text) => setTitle(text)}
+          onChangeText={setTitle}
           maxLength={60}
+          editable={!loading}
         />
-        <Text style={styles.characterCount}>{180 - title.length}</Text>
+        <Text style={styles.characterCount}>{60 - title.length}</Text>
+
         <Text style={styles.textTitles}>Description</Text>
         <TextInput
           style={[styles.input, styles.descriptionInput]}
           placeholder="Write something..."
           value={description}
-          onChangeText={(text) => setDescription(text)}
+          onChangeText={setDescription}
           maxLength={300}
           multiline
+          editable={!loading}
         />
-        <Text style={styles.characterCount}>{400 - description.length}</Text>
+        <Text style={styles.characterCount}>{300 - description.length}</Text>
+
         <Text style={styles.textTitles}>Location</Text>
-        <Picker
-          selectedValue={selectedLocation}
-          style={styles.locationPicker}
-          onValueChange={(itemValue) => setSelectedLocation(itemValue)}
-        >
-          <Picker.Item label={location} value={location} style={styles.input} />
-          <Picker.Item label="Quilmes" value="change" style={styles.input}/>
-        </Picker>
+        <View style={styles.switchContainer}>
+          <Text>Use Actual Location</Text>
+          <Switch
+            trackColor={{false: '#767577', true: '#81b0ff'}}
+            thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={() => {
+              deleteLocation();
+              toggleSwitch();
+            }}
+            value={isEnabled}
+          />
+        </View>
+        {isEnabled ? (
+          <Text style={styles.locationText}>{location}</Text>
+        ) : (
+          <TextInput
+            style={styles.input}
+            placeholder="Enter location"
+            onChangeText={setSelectedLocation}
+            editable={!loading}
+          />
+        )}
       </View>
     </ScrollView>
   );
@@ -195,7 +378,6 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#FFF',
     flexGrow: 1,
-    justifyContent: 'flex-start',
   },
   header: {
     flexDirection: 'row',
@@ -203,18 +385,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 16,
   },
-  cancelText: {
-    color: '#007AFF',
-    fontSize: 16,
-  },
   publishText: {
     color: '#007AFF',
     fontSize: 16,
+    marginTop: 50,
+  },
+  publishTextDisabled: {
+    color: '#999',
   },
   textTitles: {
-    color: "#000000",
+    color: '#000',
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 5,
     fontSize: 18,
   },
   profileContainer: {
@@ -245,85 +427,74 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 5,
     right: 5,
-    backgroundColor: '#FF0000',
+    backgroundColor: 'rgba(255, 0, 0, 0.8)',
     borderRadius: 12,
     width: 24,
     height: 24,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   removeImageText: {
     color: '#FFF',
     fontWeight: 'bold',
-  },
-  flatListContainer: {
-    paddingVertical: 8,
-  },
-  inputContainer: {
-    marginTop: 20,
-    },
-  input: {
-    height: 40,
-    borderColor: '#CCC',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 12,
-    fontSize: 17,
-  },
-  descriptionInput: {
-    height: 80,
-    textAlignVertical: 'top',
-    fontSize: 17,
-  },
-  locationPicker: {
-    borderColor: '#CCC',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    fontSize: 12,
   },
   selectButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#007AFF',
     padding: 10,
-    borderRadius: 5,
-    marginBottom: 16,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  selectButtonDisabled: {
+    backgroundColor: '#999',
   },
   selectButtonText: {
-    color: '#fff',
+    color: '#FFF',
     textAlign: 'center',
-  },
-  imageScroll: {
-    flexDirection: 'row',
-  },
-  imageWrapper: {
-    width: 300,
-    height: 300,
-    margin: 5,
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-  },
-  removeButton: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 50,
-    padding: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  removeText: {
-    color: '#fff',
     fontSize: 16,
   },
+  flatListContainer: {
+    marginBottom: 20,
+  },
+  inputContainer: {
+    marginTop: 10,
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    padding: 8,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
   characterCount: {
-    color: 'gray',
-     fontSize: 15,
-     marginBottom: 8,
+    textAlign: 'right',
+    color: '#999',
+    marginBottom: 15,
+    fontSize: 12,
+  },
+  locationPicker: {
+    width: '100%',
+    height: 40,
+    marginBottom: 20,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 16,
+  },
+  locationText: {
+    padding: 8,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 5,
+    color: '#666',
   },
 });
 
