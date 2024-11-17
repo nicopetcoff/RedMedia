@@ -20,7 +20,7 @@ import { publishPost, getUserData } from '../controller/miApp.controller';
 import { useUserContext } from '../context/AuthProvider';
 import { useFocusEffect } from '@react-navigation/native';
 
-Geocoder.init('YOUR_GOOGLE_API_KEY'); // Reemplaza con tu API Key.
+Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc'); // Reemplaza con tu API Key.
 
 const ImagePickerScreen = ({ navigation }) => {
   const [selectedImages, setSelectedImages] = useState([]);
