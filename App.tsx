@@ -1,25 +1,49 @@
 // App.js
-import React, { useState, useEffect } from 'react';
-import SplashScreen from './src/screens/SplashScreen'; // Importamos el SplashScreen
-import AppNavigator from './src/navigation/AppNavigator'; // Importamos la nueva navegación
-import { AuthProvider } from './src/context/AuthProvider';
+import React, { useEffect } from "react";
+import { AuthProvider } from "./src/context/AuthProvider";
+import AppNavigator from "./src/navigation/AppNavigator";
+import NetInfo from "@react-native-community/netinfo";
+import { Alert, StatusBar } from "react-native";
+import RNRestart from 'react-native-restart';
+import SplashScreen from 'react-native-splash-screen';
+
 
 const App = () => {
-  const [isShowSplashScreen, setIsShowSplashScreen] = useState(true);
+  const unsubscribe = NetInfo.addEventListener((state) => {
+    if (!state.isConnected) {
+      Alert.alert(
+        "Sin conexion a internet",
+        "Por favor conectese a internet para poder usar la aplicacion",
+        [{ 
+          text: "Reintentar", 
+          onPress: () => RNRestart.Restart() 
+        }]
+      );
+    }
+  });
 
   useEffect(() => {
-    
-    setTimeout(() => {
-      setIsShowSplashScreen(false);
-    }, 2000);
+    SplashScreen.hide();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   return (
-    <AuthProvider>
-      
+    <>
+      <StatusBar 
+        barStyle="dark-content" 
+        backgroundColor="#ffffff" 
+      />
+      <AuthProvider>
         <AppNavigator />
-      
-    </AuthProvider>
+      </AuthProvider>
+    </>
   );
 };
 

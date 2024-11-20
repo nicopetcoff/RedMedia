@@ -12,7 +12,7 @@ const PostInteractionBar = ({ isLiked, setIsLiked }) => {
         {/* Botón de like */}
         <TouchableOpacity onPress={() => setIsLiked(!isLiked)} style={styles.iconButton}>
           {isLiked ? (
-            <FilledLikeIcon width={24} height={24} fill="red" />
+            <FilledLikeIcon width={24} height={24} />
           ) : (
             <LikeIcon width={24} height={24} />
           )}

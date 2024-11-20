@@ -1,10 +1,8 @@
-// src/context/AuthContext.js
-import React, {useState, useEffect, useContext} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {signIn as signInAPI} from '../controller/miApp.controller';
-import {Alert} from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { signIn as signInAPI } from '../controller/miApp.controller';
+import { Alert } from 'react-native';
+import * as Keychain from 'react-native-keychain';
 
-// Crear el contexto
 const AuthContext = React.createContext();
 const toggleContext = React.createContext();
 
@@ -16,86 +14,87 @@ export function useToggleContext() {
   return useContext(toggleContext);
 }
 
-export const AuthProvider = ({children}) => {
-  // Estado para guardar los datos de autenticación
+export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     user: null,
     token: null,
     isAuthenticated: false,
   });
+  const [loading, setLoading] = useState(true);
 
-  // Restaurar token de AsyncStorage al cargar la aplicación
   useEffect(() => {
     const fetchData = async () => {
-      const token = await AsyncStorage.getItem('token');
-      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      try {
+        // Obtener token
+        const tokenCredentials = await Keychain.getGenericPassword({ service: 'token' });
+        const token = tokenCredentials ? tokenCredentials.password : null;
 
-      if (token && user) {
-        setAuthState({
-          user,
-          token,
-          isAuthenticated: true,
-        });
+        // Obtener datos del usuario
+        const userCredentials = await Keychain.getGenericPassword({ service: 'user' });
+        const userString = userCredentials ? userCredentials.password : null;
+
+        if (token && userString) {
+          const user = JSON.parse(userString);
+          setAuthState({
+            user,
+            token,
+            isAuthenticated: true,
+          });
+        }
+      } catch (error) {
+        console.error('Error al recuperar los datos de autenticación:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  // Función para iniciar sesión y guardar datos en AsyncStorage
-  const login = userData => {
-    const fetchData = async () => {
-      try {
-        const response = await signInAPI(userData);
-        if (response.token) {
-          AsyncStorage.setItem('token', response.token);
-          AsyncStorage.setItem('user', JSON.stringify(userData.email));
-          
-        } else {
-          Alert.alert('Error', 'Login failed, please try again.');
-        }
-      } catch (error) {
-        console.error('Error during login:', error);
-        Alert.alert('Error', 'Something went wrong during login.');
+  const login = async (userData) => {
+    try {
+      const response = await signInAPI(userData);
+
+      if (response.token) {
+        const user = response.user || { email: userData.email };
+        const userString = JSON.stringify(user);
+
+        // Guardar token
+        await Keychain.setGenericPassword('username', String(response.token), { service: 'token' });
+        // Guardar datos del usuario
+        await Keychain.setGenericPassword('username', userString, { service: 'user' });
+
+        setAuthState({
+          user,
+          token: response.token,
+          isAuthenticated: true,
+        });
+      } else {
+        Alert.alert('Error', 'Inicio de sesión fallido. Por favor, inténtalo de nuevo.');
       }
-    };
-
-    fetchData();
-    setAuthState({
-      user: userData.user,
-      token: userData.token,
-      isAuthenticated: true,
-    });
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
   };
 
-  // Función para cerrar sesión y limpiar AsyncStorage
-  const signOut = () => {
-    AsyncStorage.removeItem('token');
-    AsyncStorage.removeItem('user');
-    setAuthState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-    });
-  };
+  const signOut = async () => {
+    try {
+      // Eliminar token y datos del usuario
+      await Keychain.resetGenericPassword({ service: 'token' });
+      await Keychain.resetGenericPassword({ service: 'user' });
 
-  // Función para restaurar el token y validar la autenticación
-  const restoreToken = token => {
-    const user = JSON.parse(AsyncStorage.getItem('user'));
-
-    if (token && user) {
       setAuthState({
-        user,
-        token,
-        isAuthenticated: true,
+        user: null,
+        token: null,
+        isAuthenticated: false,
       });
-    } else {
-      signOut();
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
     }
   };
 
   return (
-    <AuthContext.Provider value={authState}>
-      <toggleContext.Provider value={{login, signOut, restoreToken}}>
+    <AuthContext.Provider value={{ ...authState, loading }}>
+      <toggleContext.Provider value={{ login, signOut }}>
         {children}
       </toggleContext.Provider>
     </AuthContext.Provider>

@@ -12,30 +12,26 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
   const handleSendInstructions = async () => {
     if (!isValidEmail(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      Alert.alert('E-mail invalido', 'Por favor, introduce una dirección de correo electrónico válida.');
       return;
     }
 
     try {
       const response = await sendPasswordResetEmail(email);
 
-      if (response.success) {
-        Alert.alert('Success', 'Instructions to reset your password have been sent.');
-      } else {
-        Alert.alert('Error', 'Failed to send password reset instructions. Please try again.');
-      }
+      Alert.alert('Password reset', 'Instructions for your password recovery have been sent',[{text: "OK", onPress: () => navigation.navigate("SignIn")}]);
+      
     } catch (error) {
-      console.error('Error sending password reset email:', error);
-      Alert.alert('Error', 'An error occurred while sending the email. Please try again.');
+      Alert.alert('Error', error.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Forgot Password</Text>
-      <Text style={styles.subtitle}>Don't Worry I'll Help you</Text>
+      <Text style={styles.title}>Forgot your password?</Text>
+      <Text style={styles.subtitle}>Don't worry, we will send you instructions</Text>
       <Text style={styles.instructionText}>
-        Please enter your email address to reset your password
+          Please enter your email address. You will receive a link to create a new password via email.
       </Text>
 
       <TextInput
