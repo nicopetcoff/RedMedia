@@ -18,7 +18,7 @@ import {useUserContext} from '../context/AuthProvider';
 
 const {width: windowWidth} = Dimensions.get('window');
 
-const MyProfileHeader = ({userData}) => {
+const MyProfileHeader = ({userData, userPostsCount}) => {
   const navigation = useNavigation();
   const {token} = useUserContext();
   const [loading, setLoading] = useState(false);
@@ -160,7 +160,7 @@ const MyProfileHeader = ({userData}) => {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>
-              {formatNumber(userData?.postsCount)}
+              {formatNumber(userPostsCount)}
             </Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>

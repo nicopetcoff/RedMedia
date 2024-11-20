@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -6,14 +6,14 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
-} from "react-native";
-import MyProfileHeader from "../components/MyProfileHeader";
-import Post from "../components/Post";
-import { getPosts, getUserData } from "../controller/miApp.controller";
-import { useUserContext } from "../context/AuthProvider";
-import { useFocusEffect } from "@react-navigation/native";
+} from 'react-native';
+import MyProfileHeader from '../components/MyProfileHeader';
+import Post from '../components/Post';
+import {getPosts, getUserData} from '../controller/miApp.controller';
+import {useUserContext} from '../context/AuthProvider';
+import {useFocusEffect} from '@react-navigation/native';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 30) / 2;
 
 const LoggedInUserProfileScreen = () => {
@@ -24,7 +24,7 @@ const LoggedInUserProfileScreen = () => {
   const [userData, setUserData] = useState(null);
 
   // 2. useContext después de useState
-  const { token } = useUserContext();
+  const {token} = useUserContext();
 
   // 3. Definir todas las funciones con useCallback juntas
   const fetchUserData = useCallback(async () => {
@@ -38,11 +38,15 @@ const LoggedInUserProfileScreen = () => {
 
   const fetchUserPosts = useCallback(async () => {
     try {
-      const data = await getPosts();
+      const data = await getPosts(); // Obtén todas las publicaciones
+      console.log('Posts:', data);
+
+      // Filtrar las publicaciones que pertenecen al usuario actual
       const filteredPosts = data.data.filter(
-        (post) => post.user === userData?.usernickname
+        post => post.user === userData?.usernickname, // Compara con el nickname del usuario actual
       );
-      setUserPosts(filteredPosts);
+
+      setUserPosts(filteredPosts); // Guardar solo las publicaciones del usuario
     } catch (error) {
       console.error('Error al obtener posts:', error);
     }
@@ -57,25 +61,30 @@ const LoggedInUserProfileScreen = () => {
     }
   }, [fetchUserData, fetchUserPosts, userData]);
 
-  const renderPost = useCallback(({ item }) => (
-    <View style={styles.postContainer}>
-      <Post item={item} />
-    </View>
-  ), []);
+  const renderPost = useCallback(
+    ({item}) => (
+      <View style={styles.postContainer}>
+        <Post item={item} />
+      </View>
+    ),
+    [],
+  );
 
   const renderHeader = useCallback(() => (
-    <MyProfileHeader userData={userData} />
-  ), [userData]);
+    <MyProfileHeader
+      userData={userData}
+      userPostsCount={userPosts.length} // Pasamos el conteo al encabezado
+    />
+  ), [userData, userPosts]);
 
   // 4. useFocusEffect después de todas las definiciones de useCallback
   useFocusEffect(
     useCallback(() => {
       if (token) {
         setLoading(true);
-        fetchUserData()
-          .finally(() => setLoading(false));
+        fetchUserData().finally(() => setLoading(false));
       }
-    }, [token, fetchUserData])
+    }, [token, fetchUserData]),
   );
 
   // 5. useEffect al final
@@ -98,7 +107,7 @@ const LoggedInUserProfileScreen = () => {
       <FlatList
         data={userPosts}
         renderItem={renderPost}
-        keyExtractor={(item) => item._id.toString()}
+        keyExtractor={item => item._id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
         ListHeaderComponent={renderHeader}
@@ -109,7 +118,7 @@ const LoggedInUserProfileScreen = () => {
             refreshing={refreshing}
             onRefresh={handleRefresh}
             tintColor="#1FA1FF"
-            colors={["#1FA1FF"]}
+            colors={['#1FA1FF']}
           />
         }
       />
@@ -120,7 +129,7 @@ const LoggedInUserProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   contentContainer: {
     flexGrow: 1,
@@ -136,9 +145,9 @@ const styles = StyleSheet.create({
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
 });
 
