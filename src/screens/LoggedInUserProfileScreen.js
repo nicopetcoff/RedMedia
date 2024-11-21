@@ -6,31 +6,68 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
+  Modal,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Platform,
 } from 'react-native';
 import MyProfileHeader from '../components/MyProfileHeader';
 import Post from '../components/Post';
-import {getPosts, getUserData} from '../controller/miApp.controller';
+import {getPosts, getUserData, getUsers} from '../controller/miApp.controller';
 import {useUserContext} from '../context/AuthProvider';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 const {width} = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 30) / 2;
 
 const LoggedInUserProfileScreen = () => {
-  // 1. Todos los useState juntos al principio
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [followersData, setFollowersData] = useState([]);
+  const [followingData, setFollowingData] = useState([]);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
 
-  // 2. useContext después de useState
   const {token} = useUserContext();
+  const navigation = useNavigation();
 
-  // 3. Definir todas las funciones con useCallback juntas
   const fetchUserData = useCallback(async () => {
     try {
-      const data = await getUserData(token);
-      setUserData(data.data);
+      const [userDataResponse, usersResponse] = await Promise.all([
+        getUserData(token),
+        getUsers(token),
+      ]);
+
+      console.log('Full users response:', usersResponse.data);
+      
+      const currentUser = usersResponse.data.find(
+        u => u.usernickname === userDataResponse.data.usernickname
+      );
+      
+      if (currentUser) {
+        console.log('Current user with full data:', currentUser);
+        setUserData(currentUser);
+
+        if (currentUser.followers?.length > 0) {
+          const followers = currentUser.followers
+            .map(followerId => usersResponse.data.find(u => u._id === followerId))
+            .filter(Boolean);
+          setFollowersData(followers);
+        }
+
+        if (currentUser.following?.length > 0) {
+          const following = currentUser.following
+            .map(followingId => usersResponse.data.find(u => u._id === followingId))
+            .filter(Boolean);
+          setFollowingData(following);
+        }
+      } else {
+        setUserData(userDataResponse.data);
+      }
     } catch (error) {
       console.error('Error al obtener datos del usuario:', error);
     }
@@ -38,15 +75,11 @@ const LoggedInUserProfileScreen = () => {
 
   const fetchUserPosts = useCallback(async () => {
     try {
-      const data = await getPosts(); // Obtén todas las publicaciones
-      
-
-      // Filtrar las publicaciones que pertenecen al usuario actual
+      const data = await getPosts();
       const filteredPosts = data.data.filter(
-        post => post.user === userData?.usernickname, // Compara con el nickname del usuario actual
+        post => post.user === userData?.usernickname,
       );
-
-      setUserPosts(filteredPosts); // Guardar solo las publicaciones del usuario
+      setUserPosts(filteredPosts);
     } catch (error) {
       console.error('Error al obtener posts:', error);
     }
@@ -61,23 +94,6 @@ const LoggedInUserProfileScreen = () => {
     }
   }, [fetchUserData, fetchUserPosts, userData]);
 
-  const renderPost = useCallback(
-    ({item}) => (
-      <View style={styles.postContainer}>
-        <Post item={item} />
-      </View>
-    ),
-    [],
-  );
-
-  const renderHeader = useCallback(() => (
-    <MyProfileHeader
-      userData={userData}
-      userPostsCount={userPosts.length} // Pasamos el conteo al encabezado
-    />
-  ), [userData, userPosts]);
-
-  // 4. useFocusEffect después de todas las definiciones de useCallback
   useFocusEffect(
     useCallback(() => {
       if (token) {
@@ -87,12 +103,90 @@ const LoggedInUserProfileScreen = () => {
     }, [token, fetchUserData]),
   );
 
-  // 5. useEffect al final
   useEffect(() => {
     if (userData) {
       fetchUserPosts();
     }
   }, [userData, fetchUserPosts]);
+
+  const renderPost = useCallback(
+    ({item}) => (
+      <View style={styles.postContainer}>
+        <Post item={item} source="Profile" />
+      </View>
+    ),
+    [],
+  );
+
+  const UserListModal = ({visible, onClose, users, title}) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Text style={styles.closeButton}>×</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.usersList}>
+            {users.map(user => (
+              <TouchableOpacity
+                key={user._id}
+                style={styles.userItem}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('Profile', {
+                    username: user.usernickname,
+                    fromScreen: 'Profile',
+                  });
+                }}>
+                <Image
+                  source={{
+                    uri: user.avatar || 'https://via.placeholder.com/40',
+                  }}
+                  style={styles.userAvatar}
+                />
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>
+                    {user.nombre} {user.apellido}
+                  </Text>
+                  <Text style={styles.userUsername}>@{user.usernickname}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const renderHeader = useCallback(() => {
+    console.log('Rendering header with data:', {
+      followers: followersData.length,
+      following: followingData.length
+    });
+    
+    return (
+      <MyProfileHeader
+        userData={userData}
+        userPostsCount={userPosts.length}
+        followersCount={followersData.length}
+        followingCount={followingData.length}
+        onFollowersPress={() => {
+          console.log('Opening followers modal with:', followersData);
+          setShowFollowers(true);
+        }}
+        onFollowingPress={() => {
+          console.log('Opening following modal with:', followingData);
+          setShowFollowing(true);
+        }}
+      />
+    );
+  }, [userData, userPosts.length, followersData, followingData]);
 
   if (loading) {
     return (
@@ -122,6 +216,18 @@ const LoggedInUserProfileScreen = () => {
           />
         }
       />
+      <UserListModal
+        visible={showFollowers}
+        onClose={() => setShowFollowers(false)}
+        users={followersData}
+        title="Seguidores"
+      />
+      <UserListModal
+        visible={showFollowing}
+        onClose={() => setShowFollowing(false)}
+        users={followingData}
+        title="Siguiendo"
+      />
     </View>
   );
 };
@@ -148,6 +254,65 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E8ED',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  closeButton: {
+    fontSize: 24,
+    color: '#657786',
+    padding: 5,
+  },
+  usersList: {
+    padding: 15,
+  },
+  userItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E8ED',
+  },
+  userAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  userInfo: {
+    marginLeft: 15,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  userUsername: {
+    fontSize: 14,
+    color: '#657786',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
 });
 

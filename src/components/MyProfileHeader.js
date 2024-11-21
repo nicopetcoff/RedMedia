@@ -18,7 +18,14 @@ import {useUserContext} from '../context/AuthProvider';
 
 const {width: windowWidth} = Dimensions.get('window');
 
-const MyProfileHeader = ({userData, userPostsCount}) => {
+const MyProfileHeader = ({
+  userData,
+  userPostsCount,
+  followersCount = 0,
+  followingCount = 0,
+  onFollowersPress,
+  onFollowingPress,
+}) => {
   const navigation = useNavigation();
   const {token} = useUserContext();
   const [loading, setLoading] = useState(false);
@@ -33,17 +40,14 @@ const MyProfileHeader = ({userData, userPostsCount}) => {
   };
 
   const requestGalleryPermission = async () => {
-    if (Platform.OS === 'ios') {
-      return true; // iOS maneja los permisos a través del info.plist
-    }
+    if (Platform.OS === 'ios') return true;
 
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         {
           title: 'Gallery Permission',
-          message:
-            'This app needs access to your gallery to update your cover image.',
+          message: 'This app needs access to your gallery to update your cover image.',
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
@@ -59,34 +63,28 @@ const MyProfileHeader = ({userData, userPostsCount}) => {
   const handleUpdateCover = async () => {
     try {
       const hasPermission = await requestGalleryPermission();
-
       if (!hasPermission) {
         Alert.alert('Error', 'Permission to access gallery is required.');
         return;
       }
 
-      const options = {
+      const result = await launchImageLibrary({
         mediaType: 'photo',
         includeBase64: false,
         maxHeight: 2000,
         maxWidth: 2000,
-      };
+      });
 
-      const result = await launchImageLibrary(options);
-
-      if (!result.didCancel && result.assets && result.assets[0]) {
+      if (!result.didCancel && result.assets?.[0]) {
         setLoading(true);
         try {
           const response = await updateUserProfile(
-            {
-              coverImage: result.assets[0].uri,
-            },
+            {coverImage: result.assets[0].uri},
             token,
           );
 
-          if (response.data && response.data.coverImage) {
+          if (response.data?.coverImage) {
             Alert.alert('Success', 'Cover image updated successfully');
-            // Aquí podrías actualizar el estado global del usuario si es necesario
           }
         } catch (error) {
           Alert.alert('Error', 'Failed to update cover image');
@@ -159,23 +157,17 @@ const MyProfileHeader = ({userData, userPostsCount}) => {
 
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
-              {formatNumber(userPostsCount)}
-            </Text>
+            <Text style={styles.statNumber}>{formatNumber(userPostsCount)}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
-              {formatNumber(userData?.followersCount)}
-            </Text>
+          <TouchableOpacity style={styles.statItem} onPress={onFollowersPress}>
+            <Text style={styles.statNumber}>{formatNumber(followersCount)}</Text>
             <Text style={styles.statLabel}>Followers</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
-              {formatNumber(userData?.followingCount)}
-            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem} onPress={onFollowingPress}>
+            <Text style={styles.statNumber}>{formatNumber(followingCount)}</Text>
             <Text style={styles.statLabel}>Following</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -246,6 +238,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 35,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   editButtonText: {
     color: '#fff',
@@ -283,10 +276,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: -45,
+    marginRight: 10,
   },
   statItem: {
     alignItems: 'center',
     marginLeft: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   statNumber: {
     fontSize: 15,
