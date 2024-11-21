@@ -208,6 +208,7 @@ export const getUsers = async token => {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         'x-access-token': token,
+        'Cache-Control': 'no-cache',
       },
     });
 
@@ -270,24 +271,32 @@ export const updateUserProfile = async (userData, token) => {
   }
 };
 
-export const handleFollowUser = async (userId, action, token) => {
+// const url = `http://10.0.2.2:4000/api/users/${targetUserId}/follow`;
+
+export const handleFollowUser = async function(userId, token, isFollowing) {
+  // URL directa en lugar de usar urlWebServices
+  const url = `http://10.0.2.2:4000/api/users/${userId}/follow`;
+  console.log('Making request to URL:', url);
+  console.log('With params - userId:', userId, 'isFollowing:', isFollowing);
+
   try {
-    const url = urlWebServices.followUser.replace(':id', userId);
-    
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'x-access-token': token
       },
-      body: JSON.stringify({ action }) // 'follow' o 'unfollow'
+      body: JSON.stringify({
+        action: isFollowing ? 'unfollow' : 'follow'
+      })
     });
 
-    const data = await response.json();
-    
+    let data = await response.json();
+    console.log('Server response:', data);
+
     if (!response.ok) {
-      throw new Error(data.message || 'Error en la operación de follow/unfollow');
+      throw new Error(data.message || 'Error al seguir/dejar de seguir al usuario');
     }
 
     return data;
