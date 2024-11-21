@@ -39,7 +39,7 @@ const LoggedInUserProfileScreen = () => {
   const fetchUserPosts = useCallback(async () => {
     try {
       const data = await getPosts(); // Obtén todas las publicaciones
-      console.log('Posts:', data);
+      
 
       // Filtrar las publicaciones que pertenecen al usuario actual
       const filteredPosts = data.data.filter(

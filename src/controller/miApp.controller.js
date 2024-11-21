@@ -271,32 +271,30 @@ export const updateUserProfile = async (userData, token) => {
   }
 };
 
-// const url = `http://10.0.2.2:4000/api/users/${targetUserId}/follow`;
-
-export const handleFollowUser = async function(userId, token, isFollowing) {
+export const handleFollowUser = async function (userId, token, isFollowing) {
   // URL directa en lugar de usar urlWebServices
   const url = `http://10.0.2.2:4000/api/users/${userId}/follow`;
-  console.log('Making request to URL:', url);
-  console.log('With params - userId:', userId, 'isFollowing:', isFollowing);
 
   try {
     let response = await fetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'x-access-token': token
+        Accept: 'application/json',
+        'x-access-token': token,
       },
       body: JSON.stringify({
-        action: isFollowing ? 'unfollow' : 'follow'
-      })
+        action: isFollowing ? 'unfollow' : 'follow',
+      }),
     });
 
     let data = await response.json();
-    console.log('Server response:', data);
+    
 
     if (!response.ok) {
-      throw new Error(data.message || 'Error al seguir/dejar de seguir al usuario');
+      throw new Error(
+        data.message || 'Error al seguir/dejar de seguir al usuario',
+      );
     }
 
     return data;

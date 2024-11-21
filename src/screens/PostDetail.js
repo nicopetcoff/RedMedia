@@ -18,14 +18,12 @@ import LocationIcon from '../assets/imgs/location.svg';
 
 const PostDetail = ({route, navigation}) => {
   const {item, previousScreen, username, fromScreen} = route.params || {};
-
   const {token} = useUserContext();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [userData, setUserData] = useState(null);
   const [postUserData, setPostUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState([]); // Añade este estado
 
   const getCurrentUserId = () => {
     try {
@@ -45,36 +43,38 @@ const PostDetail = ({route, navigation}) => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Obtener datos del usuario logueado
-        const [currentUserResponse, usersResponse] = await Promise.all([
-          getUserData(token),
-          getUsers(token),
-        ]);
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const [currentUserResponse, usersResponse] = await Promise.all([
+        getUserData(token),
+        getUsers(token),
+      ]);
 
-        setUserData(currentUserResponse.data);
-
-        // Buscar el usuario del post entre todos los usuarios
-        if (item?.user && usersResponse.data) {
-          const foundUser = usersResponse.data.find(
-            u => u.usernickname === item.user,
-          );
-          if (foundUser) {
-            setPostUserData(foundUser);
-          }
+      setUserData(currentUserResponse.data);
+      
+      if (item?.user && usersResponse.data) {
+        const foundUser = usersResponse.data.find(
+          u => u.usernickname === item.user,
+        );
+        if (foundUser) {
+          const currentUserId = getCurrentUserId();
+          const isCurrentUserFollowing = foundUser.followers?.includes(currentUserId);
+          
+          setPostUserData(foundUser);
+          setIsFollowing(isCurrentUserFollowing);
         }
-      } catch (error) {
-        console.error('Error al obtener datos de usuarios:', error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error('Error al obtener datos de usuarios:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (token && item?.user) {
-      fetchData();
+      fetchUserData();
     }
   }, [token, item]);
 
@@ -125,23 +125,18 @@ const PostDetail = ({route, navigation}) => {
           isOwnPost={isOwnPost}
           userId={postUserData?._id}
           onFollowChange={async newState => {
+            const currentUserId = getCurrentUserId();
             setIsFollowing(newState);
-            // Actualizar el postUserData con el nuevo estado
             setPostUserData(prev => ({
               ...prev,
               followers: newState
-                ? [...(prev.followers || []), getCurrentUserId()]
-                : (prev.followers || []).filter(
-                    id => id !== getCurrentUserId(),
-                  ),
+                ? [...(prev.followers || []), currentUserId]
+                : (prev.followers || []).filter(id => id !== currentUserId)
             }));
-
-            // Opcionalmente recargar los datos
-            await fetchUserData();
           }}
         />
       </TouchableOpacity>
-
+      
       <View style={styles.titleContainer}>
         {item.title && <Text style={styles.title}>{item.title}</Text>}
         {item.description ? (

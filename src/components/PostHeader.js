@@ -14,7 +14,7 @@ import {handleFollowUser} from '../controller/miApp.controller';
 const PostHeader = ({
   userAvatar,
   user,
-  isFollowing: initialIsFollowing,
+  isFollowing,
   setIsFollowing: parentSetIsFollowing,
   isOwnPost,
   userId,
@@ -22,40 +22,33 @@ const PostHeader = ({
 }) => {
   const {token} = useUserContext();
   const [loading, setLoading] = useState(false);
-  const [followState, setFollowState] = useState(initialIsFollowing);
+  const [followState, setFollowState] = useState(isFollowing);
 
   useEffect(() => {
-    setFollowState(initialIsFollowing);
-  }, [initialIsFollowing]);
+    if (isFollowing !== undefined) {
+      setFollowState(isFollowing);
+    }
+  }, [isFollowing]);
 
   const handleFollowPress = async () => {
-    if (loading || !userId) {
-      return;
-    }
+    if (loading || !userId) return;
 
     setLoading(true);
+    const currentState = followState;
 
     try {
-      const data = await handleFollowUser(userId, token, followState);
+      const data = await handleFollowUser(userId, token, currentState);
 
       if (data.status === 200) {
-        const newFollowState = !followState;
-        setFollowState(newFollowState);
-        
-        // Actualizar estado en el componente padre
-        if (parentSetIsFollowing) parentSetIsFollowing(newFollowState);
-        if (onFollowChange) onFollowChange(newFollowState);
-
-        // Opcionalmente recargar los datos del usuario
-        console.log('Follow state updated:', newFollowState);
+        const newState = !currentState;
+        setFollowState(newState);
+        if (parentSetIsFollowing) parentSetIsFollowing(newState);
+        if (onFollowChange) onFollowChange(newState);
       }
     } catch (error) {
-      console.error('Error al seguir/dejar de seguir:', error);
-      Alert.alert(
-        'Error',
-        'No se pudo completar la acción. Por favor, intenta de nuevo.'
-      );
-      setFollowState(followState); // Revertir estado en caso de error
+      console.error('Error:', error);
+      setFollowState(currentState);
+      Alert.alert('Error', 'No se pudo completar la acción');
     } finally {
       setLoading(false);
     }
@@ -96,7 +89,7 @@ const PostHeader = ({
                 styles.followButtonText,
                 followState && styles.followingButtonText,
               ]}>
-              {followState ? 'Siguiendo' : 'Seguir'}
+              {followState ? 'Following' : 'Follow'}
             </Text>
           )}
         </TouchableOpacity>

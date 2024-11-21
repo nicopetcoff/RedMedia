@@ -9,7 +9,8 @@ import {
   Dimensions,
   ActivityIndicator,
   Platform,
-  Alert,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import Post from '../components/Post';
 import {
@@ -30,11 +31,12 @@ const ProfileScreen = ({route, navigation}) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [followersData, setFollowersData] = useState([]);
+  const [showFollowers, setShowFollowers] = useState(false);
 
   const getCurrentUserId = () => {
     try {
       if (!token) return null;
-      // Decodificar el token manualmente
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
@@ -74,6 +76,15 @@ const ProfileScreen = ({route, navigation}) => {
         return;
       }
 
+      if (foundUser.followers && foundUser.followers.length > 0) {
+        const followersInfo = foundUser.followers
+          .map(followerId => {
+            return usersResponse.data.find(u => u._id === followerId);
+          })
+          .filter(Boolean);
+        setFollowersData(followersInfo);
+      }
+
       const currentUserId = getCurrentUserId();
       const isCurrentUserFollowing =
         foundUser.followers?.includes(currentUserId);
@@ -98,69 +109,79 @@ const ProfileScreen = ({route, navigation}) => {
   }, [username, token]);
 
   const handleFollowPress = async () => {
-    if (followLoading || !user?._id) {
-      console.log(
-        'Follow action blocked - loading:',
-        followLoading,
-        'userId:',
-        user?._id,
-      );
-      return;
-    }
+    if (followLoading || !user?._id) return;
 
     setFollowLoading(true);
-    console.log('Attempting follow action for user:', user._id);
-
     try {
       const data = await handleFollowUser(user._id, token, isFollowing);
-
-      console.log('Follow response:', data);
 
       if (data.status === 200) {
         const newFollowState = !isFollowing;
         setIsFollowing(newFollowState);
 
-        // Actualizar el contador de seguidores
-        setUser(prev => {
-          const currentFollowers = Array.isArray(prev.followers)
-            ? prev.followers
-            : [];
-          const currentUserId = getCurrentUserId();
+        setUser(prev => ({
+          ...prev,
+          followers: newFollowState
+            ? [...(prev.followers || []), getCurrentUserId()]
+            : (prev.followers || []).filter(id => id !== getCurrentUserId()),
+        }));
 
-          return {
-            ...prev,
-            followers: newFollowState
-              ? [...currentFollowers, currentUserId]
-              : currentFollowers.filter(id => id !== currentUserId),
-          };
-        });
+        // Actualizar la lista de seguidores
+        await fetchUserData();
       }
     } catch (error) {
-      console.error('Error en follow action:', error);
-      Alert.alert(
-        'Error',
-        'No se pudo completar la acción. Por favor, intenta de nuevo.',
-      );
+      console.error('Error al seguir/dejar de seguir:', error);
     } finally {
       setFollowLoading(false);
     }
   };
 
-  const renderItem = ({item}) => (
-    <View style={styles.postContainer}>
-      <Post
-        item={item}
-        source="Profile"
-        onPress={() =>
-          navigation.navigate('PostDetail', {
-            item,
-            previousScreen: 'Profile',
-            username: user.usernickname,
-            fromScreen: 'Profile',
-          })
-        }
-      />
-    </View>
+  const FollowersModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={showFollowers}
+      onRequestClose={() => setShowFollowers(false)}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Seguidores</Text>
+            <TouchableOpacity onPress={() => setShowFollowers(false)}>
+              <Text style={styles.closeButton}>×</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.followersList}>
+            {followersData.map(follower => (
+              <TouchableOpacity
+                key={follower._id}
+                style={styles.followerItem}
+                onPress={() => {
+                  setShowFollowers(false);
+                  navigation.navigate('Profile', {
+                    username: follower.usernickname,
+                    fromScreen: 'Profile',
+                  });
+                }}>
+                <Image
+                  source={{
+                    uri: follower.avatar || 'https://via.placeholder.com/40',
+                  }}
+                  style={styles.followerAvatar}
+                />
+                <View style={styles.followerInfo}>
+                  <Text style={styles.followerName}>
+                    {follower.nombre} {follower.apellido}
+                  </Text>
+                  <Text style={styles.followerUsername}>
+                    @{follower.usernickname}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
   );
 
   const renderProfileHeader = () => (
@@ -194,12 +215,14 @@ const ProfileScreen = ({route, navigation}) => {
             <Text style={styles.statText}>{userPosts.length}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
-          <View style={styles.statItem}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() => setShowFollowers(true)}>
             <Text style={styles.statText}>
               {user.followers ? user.followers.length : 0}
             </Text>
             <Text style={styles.statLabel}>Followers</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.statItem}>
             <Text style={styles.statText}>
               {user.following ? user.following.length : 0}
@@ -231,7 +254,7 @@ const ProfileScreen = ({route, navigation}) => {
                 styles.followButtonText,
                 isFollowing && styles.followingButtonText,
               ]}>
-              {isFollowing ? 'Siguiendo' : 'Seguir'}
+              {isFollowing ? 'Following' : 'Follow'}
             </Text>
           )}
         </TouchableOpacity>
@@ -267,7 +290,22 @@ const ProfileScreen = ({route, navigation}) => {
     <View style={styles.container}>
       <FlatList
         data={userPosts}
-        renderItem={renderItem}
+        renderItem={({item}) => (
+          <View style={styles.postContainer}>
+            <Post
+              item={item}
+              source="Profile"
+              onPress={() =>
+                navigation.navigate('PostDetail', {
+                  item,
+                  previousScreen: 'Profile',
+                  username: user.usernickname,
+                  fromScreen: 'Profile',
+                })
+              }
+            />
+          </View>
+        )}
         keyExtractor={item => item._id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
@@ -277,6 +315,7 @@ const ProfileScreen = ({route, navigation}) => {
         onRefresh={fetchUserData}
         refreshing={loading}
       />
+      <FollowersModal />
     </View>
   );
 };
@@ -411,6 +450,81 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.7,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E8ED',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  closeButton: {
+    fontSize: 24,
+    color: '#657786',
+    padding: 5,
+  },
+  followersList: {
+    padding: 15,
+  },
+  followerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E1E8ED',
+  },
+  followerAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  followerInfo: {
+    marginLeft: 15,
+  },
+  followerName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  followerUsername: {
+    fontSize: 14,
+    color: '#657786',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  shadowEffect: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });
 
