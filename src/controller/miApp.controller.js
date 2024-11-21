@@ -272,8 +272,11 @@ export const updateUserProfile = async (userData, token) => {
 };
 
 export const handleFollowUser = async function (userId, token, isFollowing) {
-  // URL directa en lugar de usar urlWebServices
-  const url = `http://10.0.2.2:4000/api/users/${userId}/follow`;
+  // Construir la URL reemplazando el parámetro dinámico
+  const baseUrl = urlWebServices.followUser;
+  const url = baseUrl.replace(':id', userId);
+  
+  console.log('URL final:', url); // Para debug
 
   try {
     let response = await fetch(url, {
@@ -289,7 +292,7 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
     });
 
     let data = await response.json();
-    
+    console.log('Follow response:', data); // Para debug
 
     if (!response.ok) {
       throw new Error(

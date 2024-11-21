@@ -42,26 +42,27 @@ const LoggedInUserProfileScreen = () => {
         getUsers(token),
       ]);
 
-      console.log('Full users response:', usersResponse.data);
-      
       const currentUser = usersResponse.data.find(
-        u => u.usernickname === userDataResponse.data.usernickname
+        u => u.usernickname === userDataResponse.data.usernickname,
       );
-      
+
       if (currentUser) {
-        console.log('Current user with full data:', currentUser);
         setUserData(currentUser);
 
         if (currentUser.followers?.length > 0) {
           const followers = currentUser.followers
-            .map(followerId => usersResponse.data.find(u => u._id === followerId))
+            .map(followerId =>
+              usersResponse.data.find(u => u._id === followerId),
+            )
             .filter(Boolean);
           setFollowersData(followers);
         }
 
         if (currentUser.following?.length > 0) {
           const following = currentUser.following
-            .map(followingId => usersResponse.data.find(u => u._id === followingId))
+            .map(followingId =>
+              usersResponse.data.find(u => u._id === followingId),
+            )
             .filter(Boolean);
           setFollowingData(following);
         }
@@ -165,11 +166,6 @@ const LoggedInUserProfileScreen = () => {
   );
 
   const renderHeader = useCallback(() => {
-    console.log('Rendering header with data:', {
-      followers: followersData.length,
-      following: followingData.length
-    });
-    
     return (
       <MyProfileHeader
         userData={userData}
@@ -177,11 +173,9 @@ const LoggedInUserProfileScreen = () => {
         followersCount={followersData.length}
         followingCount={followingData.length}
         onFollowersPress={() => {
-          console.log('Opening followers modal with:', followersData);
           setShowFollowers(true);
         }}
         onFollowingPress={() => {
-          console.log('Opening following modal with:', followingData);
           setShowFollowing(true);
         }}
       />
