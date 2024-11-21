@@ -251,41 +251,23 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flex: 1,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    fontFamily: 'Roboto',
-  },
-  username: {
-    fontSize: 14,
-    color: '#657786',
-    marginTop: 1,
-    marginBottom: 4,
-    fontFamily: 'Roboto',
-  },
-  bio: {
-    fontSize: 14,
-    color: '#000',
-    fontFamily: 'Roboto',
-    marginBottom: 4,
+    marginBottom: 0, // Reducido a 0
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginTop: -45,
+    marginTop: -70, // Ajustado para subir más
     marginRight: 10,
+    paddingBottom: 10,
   },
   statItem: {
     alignItems: 'center',
-    marginLeft: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    marginLeft: 15, // Reducido el espacio entre items
+    paddingHorizontal: 5,
   },
   statNumber: {
-    fontSize: 15,
+    fontSize: 14, // Reducido
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 1,
@@ -293,7 +275,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     color: '#657786',
-    fontSize: 12,
+    fontSize: 11, // Reducido
     fontFamily: 'Roboto',
   },
   levelContainer: {
