@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,11 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {useUserContext} from '../context/AuthProvider';
+import { useNavigation } from '@react-navigation/native';
+import { useUserContext } from '../context/AuthProvider';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
-import {getTimelinePosts, getAds} from '../controller/miApp.controller';
+import { getTimelinePosts, getAds } from '../controller/miApp.controller';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -24,13 +24,22 @@ const HomeScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
-  const {token} = useUserContext();
+  const { token } = useUserContext();
   const navigation = useNavigation();
 
+  const updatePost = (updatedPost) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === updatedPost._id ? updatedPost : post
+      )
+    );
+  };
+
   const fetchData = async (isLoadMore = false) => {
+    if (isLoadMore && loadingMore) return; // Evitar múltiples cargas simultáneas
     if (isLoadMore) {
       setLoadingMore(true);
-    } else {
+    } else if (!refreshing) {
       setLoading(true);
     }
 
@@ -40,16 +49,16 @@ const HomeScreen = () => {
         getAds(),
       ]);
 
-      setAds(adsResponse.data);
-      setPosts(prevPosts =>
-        isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data,
+      setAds(adsResponse.data || []);
+      setPosts((prevPosts) =>
+        isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data
       );
 
       if (isLoadMore) {
-        setPage(prevPage => prevPage + 1);
+        setPage((prevPage) => prevPage + 1);
       }
     } catch (error) {
-      console.error('Error al cargar los datos', error);
+      console.error('Error al cargar los datos:', error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -65,17 +74,21 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchData();
-    const unsubscribe = navigation.addListener('focus', fetchData);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!refreshing && !loading) {
+        refreshData();
+      }
+    });
     return unsubscribe;
   }, [navigation]);
 
   const adIndices = useMemo(() => {
     return posts.map((_, index) =>
-      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
+      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null
     );
   }, [posts, ads]);
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({ item, index }) => {
     const adIndex = adIndices[index];
 
     if (adIndex !== null && ads[adIndex]) {
@@ -83,9 +96,10 @@ const HomeScreen = () => {
       return (
         <TouchableOpacity
           style={styles.adContainer}
-          onPress={() => Linking.openURL(randomAd.Url)}>
+          onPress={() => Linking.openURL(randomAd.Url)}
+        >
           <Image
-            source={{uri: randomAd.imagePath[0].landscape}}
+            source={{ uri: randomAd.imagePath[0].landscape }}
             style={styles.adImage}
             resizeMode="cover"
           />
@@ -95,7 +109,17 @@ const HomeScreen = () => {
 
     return (
       <View style={styles.postContainer}>
-        <Post item={item} source="Home" />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('PostDetail', {
+              postId: item._id,
+              previousScreen: 'Home',
+              updatePost,
+            })
+          }
+        >
+          <Post item={item} source="Home" />
+        </TouchableOpacity>
       </View>
     );
   };
@@ -152,7 +176,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 0,
   },
   container: {
     flex: 1,

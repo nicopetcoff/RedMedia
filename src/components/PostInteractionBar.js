@@ -8,17 +8,23 @@ const PostInteractionBar = ({ isLiked, onLikePress, onCommentPress }) => {
   return (
     <View style={styles.interactionBar}>
       <View style={styles.leftIcons}>
-        {/* Botón de like */}
-        <TouchableOpacity onPress={onLikePress} style={styles.iconButton}>
+        <TouchableOpacity 
+          onPress={onLikePress} 
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
           {isLiked ? (
-            <FilledLikeIcon width={24} height={24} />
+            <FilledLikeIcon width={24} height={24} fill="#E31B23" />
           ) : (
             <LikeIcon width={24} height={24} />
           )}
         </TouchableOpacity>
 
-        {/* Botón de comentar */}
-        <TouchableOpacity onPress={onCommentPress} style={styles.iconButton}>
+        <TouchableOpacity 
+          onPress={onCommentPress} 
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
           <CommentIcon width={24} height={24} />
         </TouchableOpacity>
       </View>

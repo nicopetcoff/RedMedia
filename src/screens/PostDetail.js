@@ -18,11 +18,12 @@ import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
 
 const PostDetail = ({ route, navigation }) => {
-  const { item, previousScreen, username, fromScreen } = route.params || {};
+  const { item, previousScreen, username, fromScreen, updatePost } = route.params || {};
   const { token } = useUserContext();
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [currentPost, setCurrentPost] = useState(item);
   const [userData, setUserData] = useState(null);
   const [postUserData, setPostUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -56,16 +57,21 @@ const PostDetail = ({ route, navigation }) => {
         getUsers(token),
       ]);
 
-      setUserData(currentUserResponse.data);
+      const currentUser = currentUserResponse.data;
+      setUserData(currentUser);
 
-      if (item?.user && usersResponse.data) {
+      // Verificar likes inicial
+      if (currentPost?.likes && Array.isArray(currentPost.likes)) {
+        setIsLiked(currentPost.likes.includes(currentUser.usernickname));
+      }
+
+      if (currentPost?.user && usersResponse.data) {
         const foundUser = usersResponse.data.find(
-          u => u.usernickname === item.user
+          u => u.usernickname === currentPost.user
         );
         if (foundUser) {
           const currentUserId = getCurrentUserId();
           const isCurrentUserFollowing = foundUser.followers?.includes(currentUserId);
-
           setPostUserData(foundUser);
           setIsFollowing(isCurrentUserFollowing);
         }
@@ -83,7 +89,6 @@ const PostDetail = ({ route, navigation }) => {
       await handleFollowUser(postUserData._id, token, isFollowing);
       setIsFollowing(newFollowState);
 
-      // Actualizar seguidores en el estado local
       setPostUserData(prev => ({
         ...prev,
         followers: newFollowState
@@ -97,10 +102,18 @@ const PostDetail = ({ route, navigation }) => {
 
   const handleLike = async () => {
     try {
-      const action = isLiked ? 'unlike' : 'like';
-      const response = await interactWithPost(item._id, token, action);
-      setIsLiked(!isLiked);
-      console.log('Post actualizado:', response.data);
+      const response = await interactWithPost(currentPost._id, token, 'like');
+      
+      if (response.data) {
+        // Actualizar el estado local
+        setCurrentPost(response.data);
+        setIsLiked(response.data.likes.includes(userData?.usernickname));
+        
+        // Actualizar la lista principal
+        if (updatePost) {
+          updatePost(response.data);
+        }
+      }
     } catch (error) {
       console.error('Error al dar/quitar like:', error);
     }
@@ -110,23 +123,33 @@ const PostDetail = ({ route, navigation }) => {
     try {
       if (!newComment.trim()) return;
 
-      const response = await interactWithPost(item._id, token, 'comment', newComment);
-      setComments(response.data.comments); // Actualiza los comentarios desde el backend
-      setNewComment('');
-      setShowCommentInput(false);
+      const response = await interactWithPost(currentPost._id, token, 'comment', newComment);
+      
+      if (response.data) {
+        // Actualizar estado local
+        setCurrentPost(response.data);
+        setComments(response.data.comments);
+        setNewComment('');
+        setShowCommentInput(false);
+        
+        // Actualizar la lista principal
+        if (updatePost) {
+          updatePost(response.data);
+        }
+      }
     } catch (error) {
       console.error('Error al agregar comentario:', error);
     }
   };
 
   useEffect(() => {
-    if (token && item?.user) {
+    if (token && currentPost?.user) {
       fetchUserData();
     }
-  }, [token, item]);
+  }, [token, currentPost]);
 
   useEffect(() => {
-    if (item?.sold) {
+    if (currentPost?.sold) {
       if (previousScreen === 'Profile') {
         navigation.navigate('Profile', {
           username,
@@ -136,9 +159,9 @@ const PostDetail = ({ route, navigation }) => {
         navigation.goBack();
       }
     }
-  }, [item, navigation, previousScreen, username, fromScreen]);
+  }, [currentPost, navigation, previousScreen, username, fromScreen]);
 
-  if (!item || item.sold) {
+  if (!currentPost || currentPost.sold) {
     return null;
   }
 
@@ -150,12 +173,12 @@ const PostDetail = ({ route, navigation }) => {
     );
   }
 
-  const isOwnPost = userData?.usernickname === item?.user;
+  const isOwnPost = userData?.usernickname === currentPost.user;
 
   const handleUserPress = () => {
     if (!isOwnPost) {
       navigation.navigate('Profile', {
-        username: item.user,
+        username: currentPost.user,
         fromScreen: previousScreen || 'Home',
       });
     }
@@ -166,7 +189,7 @@ const PostDetail = ({ route, navigation }) => {
       <TouchableOpacity onPress={handleUserPress} disabled={isOwnPost}>
         <PostHeader
           userAvatar={isOwnPost ? userData?.avatar : postUserData?.avatar}
-          user={item.user}
+          user={currentPost.user}
           isFollowing={isFollowing}
           setIsFollowing={setIsFollowing}
           isOwnPost={isOwnPost}
@@ -176,31 +199,39 @@ const PostDetail = ({ route, navigation }) => {
       </TouchableOpacity>
 
       <View style={styles.titleContainer}>
-        {item.title && <Text style={styles.title}>{item.title}</Text>}
-        {item.description ? (
-          <Text style={styles.description}>{item.description}</Text>
+        {currentPost.title && <Text style={styles.title}>{currentPost.title}</Text>}
+        {currentPost.description ? (
+          <Text style={styles.description}>{currentPost.description}</Text>
         ) : (
           <Text style={styles.description}>Sin descripción</Text>
         )}
       </View>
-      <PostImage images={item.image} />
-      {item.location && (
+
+      <PostImage images={currentPost.image} />
+
+      {currentPost.location && (
         <View style={styles.locationContainer}>
           <LocationIcon width={16} height={16} />
-          <Text style={styles.location}>{item.location}</Text>
+          <Text style={styles.location}>{currentPost.location}</Text>
         </View>
       )}
+
       <PostInteractionBar
         isLiked={isLiked}
         onLikePress={handleLike}
         onCommentPress={() => setShowCommentInput(!showCommentInput)}
       />
+
       <View style={styles.line} />
+      
       <View style={styles.likeSection}>
         <Text style={styles.likeText}>
-          Le gusta a <Text style={styles.boldText}>{item.likes || 0}</Text> personas
+          Le gusta a <Text style={styles.boldText}>
+            {currentPost.likes?.length || 0}
+          </Text> personas
         </Text>
       </View>
+
       <PostComments comments={comments} />
 
       {showCommentInput && (
@@ -210,8 +241,13 @@ const PostDetail = ({ route, navigation }) => {
             value={newComment}
             onChangeText={setNewComment}
             placeholder="Escribe un comentario..."
+            autoFocus
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleAddComment}>
+          <TouchableOpacity 
+            style={[styles.sendButton, !newComment.trim() && styles.sendButtonDisabled]}
+            onPress={handleAddComment}
+            disabled={!newComment.trim()}
+          >
             <Text style={styles.sendButtonText}>Enviar</Text>
           </TouchableOpacity>
         </View>
