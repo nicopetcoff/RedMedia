@@ -34,9 +34,9 @@ export const getTimelinePosts = async token => {
     });
 
     const followingData = await followingResponse.json();
-    
+
     return {
-      data: followingData.data || []
+      data: followingData.data || [],
     };
   } catch (error) {
     console.error('Error en getTimelinePosts:', error);
@@ -280,8 +280,6 @@ export const updateUserProfile = async (userData, token) => {
     if (userData.nombre) formData.append('nombre', userData.nombre);
     if (userData.bio) formData.append('bio', userData.bio);
 
-    console.log('FormData being sent:', formData);
-
     const response = await fetch(url, {
       method: 'PATCH',
       headers: {
@@ -292,8 +290,6 @@ export const updateUserProfile = async (userData, token) => {
       body: formData,
     });
 
-    console.log('Response status:', response.status);
-
     if (!response.ok) {
       const errorData = await response.json();
       console.error('❌ Error response:', errorData);
@@ -301,7 +297,6 @@ export const updateUserProfile = async (userData, token) => {
     }
 
     const data = await response.json();
-    console.log('Success response:', data);
 
     return data;
   } catch (error) {
@@ -314,8 +309,6 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
   // Construir la URL reemplazando el parámetro dinámico
   const baseUrl = urlWebServices.followUser;
   const url = baseUrl.replace(':id', userId);
-
-  console.log('URL final:', url); // Para debug
 
   try {
     let response = await fetch(url, {
@@ -331,7 +324,6 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
     });
 
     let data = await response.json();
-    console.log('Follow response:', data); // Para debug
 
     if (!response.ok) {
       throw new Error(
@@ -360,8 +352,6 @@ export const interactWithPost = async (
       body.comment = comment;
     }
 
-    console.log('Interact body:', body); // Para debug
-
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -373,8 +363,6 @@ export const interactWithPost = async (
 
     const data = await response.json();
 
-    console.log('Interact response:', data); //
-
     if (!response.ok) {
       throw new Error(data.message || 'Error interacting with the post');
     }
@@ -382,6 +370,30 @@ export const interactWithPost = async (
     return data; // Datos actualizados del post
   } catch (error) {
     console.error('Error en interactWithPost:', error);
+    throw error;
+  }
+};
+
+export const searchUsers = async (query, token) => {
+  const url = urlWebServices.searchUsers + `?query=${query}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al buscar usuarios: ' + response.status);
+    }
+
+    const data = await response.json();
+    return data.data; // Retorna los usuarios encontrados
+  } catch (error) {
+    console.error('Error en searchUsers:', error);
     throw error;
   }
 };

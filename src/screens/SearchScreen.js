@@ -1,3 +1,5 @@
+// SearchScreen.js
+
 import React, { useState } from 'react';
 import {
   View,
@@ -9,43 +11,63 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import usersData from '../data/users.json';
 import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de retroceso
 import SearchIcon from '../assets/imgs/search.svg'; // Icono de búsqueda personalizado
+import { searchUsers } from '../controller/miApp.controller'; // Importa el método searchUsers
+import { useUserContext } from '../context/AuthProvider'; // Asumiendo que usas un contexto para la autenticación
+
+const DEFAULT_AVATAR = 'https://res.cloudinary.com/docrp6wwd/image/upload/v1731610184/default-avatar.jpg'; // URL de imagen predeterminada
 
 const SearchScreen = () => {
   const navigation = useNavigation();
+  const { token } = useUserContext(); // Obtén el token desde el contexto de autenticación
   const [searchText, setSearchText] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Función para filtrar usuarios basándose en el texto de búsqueda
-  const handleSearch = (text) => {
+  // Función para buscar usuarios desde el backend
+  const handleSearch = async (text) => {
     setSearchText(text);
-    if (text) {
-      const filtered = usersData.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase()) ||
-        user.username.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    } else {
-      setFilteredUsers([]); 
+    if (text.trim().length === 0) {
+      setFilteredUsers([]);
+      setError(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const users = await searchUsers(text, token); // Llama al método searchUsers con el query y el token
+      setFilteredUsers(users);
+      setError(null);
+    } catch (err) {
+      console.error('Error al buscar usuarios:', err);
+      setError(err.message || 'Error al buscar usuarios');
+      setFilteredUsers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  
+  // Renderiza cada usuario encontrado
   const renderUserItem = ({ item }) => (
     <TouchableOpacity
       style={styles.userItem}
       onPress={() =>
-        navigation.navigate('UserProfile', { username: item.username })
+        navigation.navigate('UserProfile', { username: item.usernickname })
       }
     >
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Image
+        source={{ uri: item.avatar || DEFAULT_AVATAR }}
+        style={styles.avatar}
+        defaultSource={{ uri: DEFAULT_AVATAR }} // Para manejar carga inicial en iOS
+      />
       <View style={styles.userInfo}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.username}>@{item.username}</Text>
+        <Text style={styles.name}>{item.nombre}</Text>
+        <Text style={styles.username}>@{item.usernickname}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -54,14 +76,14 @@ const SearchScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      
+      {/* Header con botón de retroceso */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <BackIcon width={24} height={24}  />
+          <BackIcon width={24} height={24} />
         </TouchableOpacity>
       </View>
 
-      
+      {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <SearchIcon width={20} height={20} style={styles.searchIcon} />
@@ -71,16 +93,31 @@ const SearchScreen = () => {
             value={searchText}
             onChangeText={handleSearch}
             placeholderTextColor="#999"
+            autoCapitalize="none"
           />
         </View>
       </View>
 
-      
-      {searchText.length > 0 && (
+      {/* Indicador de carga */}
+      {loading && (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#1DA1F2" />
+        </View>
+      )}
+
+      {/* Mensaje de error */}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {/* Lista de usuarios filtrados */}
+      {searchText.length > 0 && !loading && (
         <FlatList
           data={filteredUsers}
           renderItem={renderUserItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item._id.toString()}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
             <Text style={styles.noResultsText}>No users found</Text>
@@ -145,6 +182,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 10,
+    backgroundColor: '#ccc', // Color de fondo mientras se carga la imagen
   },
   userInfo: {
     flexDirection: 'column',
@@ -152,6 +190,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#000',
   },
   username: {
     fontSize: 14,
@@ -162,6 +201,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'gray',
     marginTop: 20,
+  },
+  loaderContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  errorContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
   },
 });
 
