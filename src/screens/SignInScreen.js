@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useContext, useState } from 'react';
-=======
 import React from "react";
->>>>>>> main
 import {
   View,
   Text,
@@ -10,21 +6,6 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-<<<<<<< HEAD
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useUserContext } from '../context/AuthProvider';
-import { useToggleContext } from '../context/AuthProvider';
-import { signIn as signInAPI } from '../controller/miApp.controller';
-
-const SignInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const authState=useUserContext();
-  const {login}=useToggleContext();
-
-  const handleSignIn = async () => {
-=======
 } from "react-native";
 import { useToggleContext } from "../context/AuthProvider";
 import { Formik } from "formik";
@@ -35,7 +16,6 @@ const SignInScreen = ({ navigation }) => {
   const { login } = useToggleContext();
 
   const handleSignIn = async ({email,password}) => {
->>>>>>> main
     await login({ email, password });
   };
   const handleForgotPassword = () => {

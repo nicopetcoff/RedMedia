@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-import React, {useContext} from 'react';
-import { View, StyleSheet, FlatList, Button } from 'react-native';
-import MyProfileHeader from '../components/MyProfileHeader';
-import Post from '../components/Post';
-import posts from '../data/MyPosts';
-import { useToggleContext } from '../context/AuthProvider';
-
-const LoggedInUserProfileScreen = () => {
-  const {signOut} = useToggleContext()
-
-  const handleLogout = async () => {
-    signOut();
-  };
-=======
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -107,7 +92,6 @@ const LoggedInUserProfileScreen = () => {
       </View>
     );
   }
->>>>>>> main
 
   return (
     <View style={styles.container}>
