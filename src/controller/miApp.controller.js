@@ -23,6 +23,27 @@ export const getPosts = async function () {
   }
 };
 
+export const getTimelinePosts = async token => {
+  try {
+    const followingResponse = await fetch(urlWebServices.getFollowingPosts, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    const followingData = await followingResponse.json();
+    
+    return {
+      data: followingData.data || []
+    };
+  } catch (error) {
+    console.error('Error en getTimelinePosts:', error);
+    throw error;
+  }
+};
+
 export const signUp = async userData => {
   let url = urlWebServices.signUp;
 
@@ -293,7 +314,7 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
   // Construir la URL reemplazando el parámetro dinámico
   const baseUrl = urlWebServices.followUser;
   const url = baseUrl.replace(':id', userId);
-  
+
   console.log('URL final:', url); // Para debug
 
   try {
@@ -325,11 +346,16 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
   }
 };
 
-export const interactWithPost = async (postId, token, action, comment = null) => {
+export const interactWithPost = async (
+  postId,
+  token,
+  action,
+  comment = null,
+) => {
   const url = urlWebServices.interactWithPost.replace(':id', postId);
 
   try {
-    const body = { action };
+    const body = {action};
     if (comment) {
       body.comment = comment;
     }

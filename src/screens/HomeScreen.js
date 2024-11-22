@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, {useEffect, useState, useMemo} from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,13 @@ import {
   Linking,
   TouchableOpacity,
   StatusBar,
-  SafeAreaView
-} from "react-native";
-import Post from "../components/Post";
-import { getPosts, getAds } from "../controller/miApp.controller";
-import { useNavigation } from "@react-navigation/native";
-import Skeleton from "../components/Skeleton";
+  SafeAreaView,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useUserContext} from '../context/AuthProvider';
+import Post from '../components/Post';
+import Skeleton from '../components/Skeleton';
+import {getTimelinePosts, getAds} from '../controller/miApp.controller';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -23,6 +24,7 @@ const HomeScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
+  const {token} = useUserContext();
   const navigation = useNavigation();
 
   const fetchData = async (isLoadMore = false) => {
@@ -34,20 +36,20 @@ const HomeScreen = () => {
 
     try {
       const [postsResponse, adsResponse] = await Promise.all([
-        getPosts(page),
+        getTimelinePosts(token),
         getAds(),
       ]);
 
       setAds(adsResponse.data);
-      setPosts((prevPosts) =>
-        isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data
+      setPosts(prevPosts =>
+        isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data,
       );
 
       if (isLoadMore) {
-        setPage((prevPage) => prevPage + 1);
+        setPage(prevPage => prevPage + 1);
       }
     } catch (error) {
-      console.error("Error al cargar los datos", error);
+      console.error('Error al cargar los datos', error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -63,17 +65,17 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchData();
-    const unsubscribe = navigation.addListener("focus", fetchData);
+    const unsubscribe = navigation.addListener('focus', fetchData);
     return unsubscribe;
   }, [navigation]);
 
   const adIndices = useMemo(() => {
     return posts.map((_, index) =>
-      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null
+      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
     );
   }, [posts, ads]);
 
-  const renderItem = ({ item, index }) => {
+  const renderItem = ({item, index}) => {
     const adIndex = adIndices[index];
 
     if (adIndex !== null && ads[adIndex]) {
@@ -81,10 +83,9 @@ const HomeScreen = () => {
       return (
         <TouchableOpacity
           style={styles.adContainer}
-          onPress={() => Linking.openURL(randomAd.Url)}
-        >
+          onPress={() => Linking.openURL(randomAd.Url)}>
           <Image
-            source={{ uri: randomAd.imagePath[0].landscape }}
+            source={{uri: randomAd.imagePath[0].landscape}}
             style={styles.adImage}
             resizeMode="cover"
           />
@@ -97,11 +98,6 @@ const HomeScreen = () => {
         <Post item={item} source="Home" />
       </View>
     );
-  };
-
-  const renderFooter = () => {
-    if (!loadingMore) return null;
-    return <ActivityIndicator size="small" color="#1DA1F2" />;
   };
 
   if (loading && !refreshing) {
@@ -122,7 +118,7 @@ const HomeScreen = () => {
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Image
-            source={require("../assets/imgs/logo.png")}
+            source={require('../assets/imgs/logo.png')}
             style={styles.logo}
           />
           <Text style={styles.header}>REDMEDIA</Text>
@@ -131,7 +127,7 @@ const HomeScreen = () => {
         <FlatList
           data={posts}
           renderItem={renderItem}
-          keyExtractor={(item, index) => `${item._id || `ad`}-${index}`}
+          keyExtractor={(item, index) => `${item._id || 'ad'}-${index}`}
           numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}
@@ -140,7 +136,9 @@ const HomeScreen = () => {
           onRefresh={refreshData}
           onEndReached={() => fetchData(true)}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={renderFooter}
+          ListFooterComponent={
+            loadingMore && <ActivityIndicator size="small" color="#1DA1F2" />
+          }
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           windowSize={5}
@@ -153,21 +151,21 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 0, // Eliminamos cualquier padding adicional
+    backgroundColor: '#fff',
+    paddingTop: 0,
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#efefef",
-    backgroundColor: "#fff",
+    borderBottomColor: '#efefef',
+    backgroundColor: '#fff',
   },
   logo: {
     width: 50,
@@ -176,15 +174,15 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "black",
+    fontWeight: 'bold',
+    color: 'black',
   },
   listContent: {
     paddingHorizontal: 10,
     paddingTop: 10,
   },
   row: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     marginHorizontal: 5,
   },
   postContainer: {
@@ -199,17 +197,24 @@ const styles = StyleSheet.create({
     height: 200,
   },
   adImage: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   skeletonContainer: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     paddingHorizontal: 15,
     paddingTop: 10,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
+  },
+  skeleton: {
+    width: '48%',
+    height: 200,
+    marginBottom: 15,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
   },
 });
 
