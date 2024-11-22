@@ -1,30 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 const PostComments = ({ comments }) => {
-  const [showAllComments, setShowAllComments] = useState(false);
-
   if (!comments || comments.length === 0) {
-    return <Text>No comments yet</Text>;
+    return <Text style={styles.noCommentsText}>No hay comentarios aún</Text>;
   }
-
-  const commentsToDisplay = showAllComments ? comments : comments.slice(0, 2);
 
   return (
     <View style={styles.commentSection}>
-      {commentsToDisplay.map((comment, index) => (
+      {comments.map((comment, index) => (
         <View key={index} style={styles.commentContainer}>
           <Text style={styles.commentUsername}>{comment.username}</Text>
           <Text style={styles.commentText}>{comment.comment}</Text>
         </View>
       ))}
-      {comments.length > 2 && (
-        <TouchableOpacity onPress={() => setShowAllComments(!showAllComments)}>
-          <Text style={styles.viewAllComments}>
-            {showAllComments ? 'Hide comments' : 'View all comments'}
-          </Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -47,10 +36,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  viewAllComments: {
-    color: '#888',
-    marginTop: 5,
+  noCommentsText: {
     paddingHorizontal: 15,
+    color: '#aaa',
+    fontStyle: 'italic',
   },
 });
 

@@ -172,15 +172,18 @@ const LoggedInUserProfileScreen = () => {
         userPostsCount={userPosts.length}
         followersCount={followersData.length}
         followingCount={followingData.length}
-        onFollowersPress={() => {
-          setShowFollowers(true);
-        }}
-        onFollowingPress={() => {
-          setShowFollowing(true);
-        }}
+        onFollowersPress={() => setShowFollowers(true)}
+        onFollowingPress={() => setShowFollowing(true)}
+        onRefresh={handleRefresh} // Añade esta prop
       />
     );
-  }, [userData, userPosts.length, followersData, followingData]);
+  }, [
+    userData,
+    userPosts.length,
+    followersData.length,
+    followingData.length,
+    handleRefresh,
+  ]);
 
   if (loading) {
     return (

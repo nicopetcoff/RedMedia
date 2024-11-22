@@ -243,9 +243,23 @@ export const updateUserProfile = async (userData, token) => {
       });
     }
 
+    if (userData.coverImage) {
+      const imageUri = userData.coverImage;
+      const uriParts = imageUri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('coverImage', {
+        uri: imageUri,
+        name: `cover.${fileType}`,
+        type: `image/${fileType}`,
+      });
+    }
+
     // Agregar otros campos si existen
     if (userData.nombre) formData.append('nombre', userData.nombre);
     if (userData.bio) formData.append('bio', userData.bio);
+
+    console.log('FormData being sent:', formData);
 
     const response = await fetch(url, {
       method: 'PATCH',
@@ -257,6 +271,8 @@ export const updateUserProfile = async (userData, token) => {
       body: formData,
     });
 
+    console.log('Response status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error('❌ Error response:', errorData);
@@ -264,9 +280,11 @@ export const updateUserProfile = async (userData, token) => {
     }
 
     const data = await response.json();
+    console.log('Success response:', data);
 
     return data;
   } catch (error) {
+    console.error('❌ Full error:', error);
     throw error;
   }
 };
@@ -303,6 +321,41 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
     return data;
   } catch (error) {
     console.error('Error en handleFollowUser:', error);
+    throw error;
+  }
+};
+
+export const interactWithPost = async (postId, token, action, comment = null) => {
+  const url = urlWebServices.interactWithPost.replace(':id', postId);
+
+  try {
+    const body = { action };
+    if (comment) {
+      body.comment = comment;
+    }
+
+    console.log('Interact body:', body); // Para debug
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    console.log('Interact response:', data); //
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Error interacting with the post');
+    }
+
+    return data; // Datos actualizados del post
+  } catch (error) {
+    console.error('Error en interactWithPost:', error);
     throw error;
   }
 };
