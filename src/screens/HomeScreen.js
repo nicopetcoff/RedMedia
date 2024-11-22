@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,13 @@ import {
   Linking,
   TouchableOpacity,
   StatusBar,
-  SafeAreaView
-} from "react-native";
-import Post from "../components/Post";
-import { getPosts, getAds } from "../controller/miApp.controller";
-import { useNavigation } from "@react-navigation/native";
-import Skeleton from "../components/Skeleton";
+  SafeAreaView,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useUserContext } from '../context/AuthProvider';
+import Post from '../components/Post';
+import Skeleton from '../components/Skeleton';
+import { getTimelinePosts, getAds } from '../controller/miApp.controller';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -23,22 +24,32 @@ const HomeScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
+  const { token } = useUserContext();
   const navigation = useNavigation();
 
+  const updatePost = (updatedPost) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === updatedPost._id ? updatedPost : post
+      )
+    );
+  };
+
   const fetchData = async (isLoadMore = false) => {
+    if (isLoadMore && loadingMore) return; // Evitar múltiples cargas simultáneas
     if (isLoadMore) {
       setLoadingMore(true);
-    } else {
+    } else if (!refreshing) {
       setLoading(true);
     }
 
     try {
       const [postsResponse, adsResponse] = await Promise.all([
-        getPosts(page),
+        getTimelinePosts(token),
         getAds(),
       ]);
 
-      setAds(adsResponse.data);
+      setAds(adsResponse.data || []);
       setPosts((prevPosts) =>
         isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data
       );
@@ -47,7 +58,7 @@ const HomeScreen = () => {
         setPage((prevPage) => prevPage + 1);
       }
     } catch (error) {
-      console.error("Error al cargar los datos", error);
+      console.error('Error al cargar los datos:', error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -63,7 +74,11 @@ const HomeScreen = () => {
 
   useEffect(() => {
     fetchData();
-    const unsubscribe = navigation.addListener("focus", fetchData);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!refreshing && !loading) {
+        refreshData();
+      }
+    });
     return unsubscribe;
   }, [navigation]);
 
@@ -94,14 +109,19 @@ const HomeScreen = () => {
 
     return (
       <View style={styles.postContainer}>
-        <Post item={item} source="Home" />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('PostDetail', {
+              postId: item._id,
+              previousScreen: 'Home',
+              updatePost,
+            })
+          }
+        >
+          <Post item={item} source="Home" />
+        </TouchableOpacity>
       </View>
     );
-  };
-
-  const renderFooter = () => {
-    if (!loadingMore) return null;
-    return <ActivityIndicator size="small" color="#1DA1F2" />;
   };
 
   if (loading && !refreshing) {
@@ -122,7 +142,7 @@ const HomeScreen = () => {
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Image
-            source={require("../assets/imgs/logo.png")}
+            source={require('../assets/imgs/logo.png')}
             style={styles.logo}
           />
           <Text style={styles.header}>REDMEDIA</Text>
@@ -131,7 +151,7 @@ const HomeScreen = () => {
         <FlatList
           data={posts}
           renderItem={renderItem}
-          keyExtractor={(item, index) => `${item._id || `ad`}-${index}`}
+          keyExtractor={(item, index) => `${item._id || 'ad'}-${index}`}
           numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}
@@ -140,7 +160,9 @@ const HomeScreen = () => {
           onRefresh={refreshData}
           onEndReached={() => fetchData(true)}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={renderFooter}
+          ListFooterComponent={
+            loadingMore && <ActivityIndicator size="small" color="#1DA1F2" />
+          }
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           windowSize={5}
@@ -153,21 +175,20 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 0, // Eliminamos cualquier padding adicional
+    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#efefef",
-    backgroundColor: "#fff",
+    borderBottomColor: '#efefef',
+    backgroundColor: '#fff',
   },
   logo: {
     width: 50,
@@ -176,15 +197,15 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "black",
+    fontWeight: 'bold',
+    color: 'black',
   },
   listContent: {
     paddingHorizontal: 10,
     paddingTop: 10,
   },
   row: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     marginHorizontal: 5,
   },
   postContainer: {
@@ -199,17 +220,24 @@ const styles = StyleSheet.create({
     height: 200,
   },
   adImage: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   skeletonContainer: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     paddingHorizontal: 15,
     paddingTop: 10,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
+  },
+  skeleton: {
+    width: '48%',
+    height: 200,
+    marginBottom: 15,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
   },
 });
 

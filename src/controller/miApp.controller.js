@@ -23,6 +23,27 @@ export const getPosts = async function () {
   }
 };
 
+export const getTimelinePosts = async token => {
+  try {
+    const followingResponse = await fetch(urlWebServices.getFollowingPosts, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    const followingData = await followingResponse.json();
+
+    return {
+      data: followingData.data || [],
+    };
+  } catch (error) {
+    console.error('Error en getTimelinePosts:', error);
+    throw error;
+  }
+};
+
 export const signUp = async userData => {
   let url = urlWebServices.signUp;
 
@@ -243,6 +264,18 @@ export const updateUserProfile = async (userData, token) => {
       });
     }
 
+    if (userData.coverImage) {
+      const imageUri = userData.coverImage;
+      const uriParts = imageUri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('coverImage', {
+        uri: imageUri,
+        name: `cover.${fileType}`,
+        type: `image/${fileType}`,
+      });
+    }
+
     // Agregar otros campos si existen
     if (userData.nombre) formData.append('nombre', userData.nombre);
     if (userData.bio) formData.append('bio', userData.bio);
@@ -267,6 +300,7 @@ export const updateUserProfile = async (userData, token) => {
 
     return data;
   } catch (error) {
+    console.error('❌ Full error:', error);
     throw error;
   }
 };
@@ -275,8 +309,6 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
   // Construir la URL reemplazando el parámetro dinámico
   const baseUrl = urlWebServices.followUser;
   const url = baseUrl.replace(':id', userId);
-  
-  console.log('URL final:', url); // Para debug
 
   try {
     let response = await fetch(url, {
@@ -292,7 +324,6 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
     });
 
     let data = await response.json();
-    console.log('Follow response:', data); // Para debug
 
     if (!response.ok) {
       throw new Error(
@@ -303,6 +334,66 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
     return data;
   } catch (error) {
     console.error('Error en handleFollowUser:', error);
+    throw error;
+  }
+};
+
+export const interactWithPost = async (
+  postId,
+  token,
+  action,
+  comment = null,
+) => {
+  const url = urlWebServices.interactWithPost.replace(':id', postId);
+
+  try {
+    const body = {action};
+    if (comment) {
+      body.comment = comment;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Error interacting with the post');
+    }
+
+    return data; // Datos actualizados del post
+  } catch (error) {
+    console.error('Error en interactWithPost:', error);
+    throw error;
+  }
+};
+
+export const searchUsers = async (query, token) => {
+  const url = urlWebServices.searchUsers + `?query=${query}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al buscar usuarios: ' + response.status);
+    }
+
+    const data = await response.json();
+    return data.data; // Retorna los usuarios encontrados
+  } catch (error) {
+    console.error('Error en searchUsers:', error);
     throw error;
   }
 };

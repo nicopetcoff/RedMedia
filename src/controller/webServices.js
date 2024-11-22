@@ -11,12 +11,16 @@ const urlWebServices = {
   getNotifications: urlApi + 'api/users/notificaciones',
   getUsers: urlApi + 'api/users',
   updateUserProfile: urlApi + 'api/users/me',
-  followUser: urlApi + "api/users/:id/follow", // Añade esta línea
-
-
+  followUser: urlApi + "api/users/:id/follow",
+  searchUsers: urlApi + 'api/users/search',
+  
   // Posts
   getPosts: urlApi + 'api/posts',
+  getFollowingPosts: urlApi + 'api/posts/following',
   postPost: urlApi + 'api/posts/crear',
+  interactWithPost: urlApi + 'api/posts/:id/interactions',
+  
+
 
   // Mail
   passwordReset: urlApi + 'api/mail',

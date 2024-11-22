@@ -3,31 +3,31 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import LikeIcon from '../assets/imgs/like.svg';
 import FilledLikeIcon from '../assets/imgs/filled_like.svg';
 import CommentIcon from '../assets/imgs/comentar.svg';
-import InterestIcon from '../assets/imgs/intereses.svg';
 
-const PostInteractionBar = ({ isLiked, setIsLiked }) => {
+const PostInteractionBar = ({ isLiked, onLikePress, onCommentPress }) => {
   return (
     <View style={styles.interactionBar}>
       <View style={styles.leftIcons}>
-        {/* Botón de like */}
-        <TouchableOpacity onPress={() => setIsLiked(!isLiked)} style={styles.iconButton}>
+        <TouchableOpacity 
+          onPress={onLikePress} 
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
           {isLiked ? (
-            <FilledLikeIcon width={24} height={24} />
+            <FilledLikeIcon width={24} height={24} fill="#E31B23" />
           ) : (
             <LikeIcon width={24} height={24} />
           )}
         </TouchableOpacity>
 
-        {/* Botón de comentar */}
-        <TouchableOpacity onPress={() => console.log('Comentar presionado')} style={styles.iconButton}>
+        <TouchableOpacity 
+          onPress={onCommentPress} 
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
           <CommentIcon width={24} height={24} />
         </TouchableOpacity>
       </View>
-
-      {/* Botón de intereses */}
-      <TouchableOpacity onPress={() => console.log('Intereses presionado')}>
-        <InterestIcon width={24} height={24} />
-      </TouchableOpacity>
     </View>
   );
 };
@@ -35,16 +35,16 @@ const PostInteractionBar = ({ isLiked, setIsLiked }) => {
 const styles = StyleSheet.create({
   interactionBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
     marginVertical: 10,
   },
   leftIcons: {
     flexDirection: 'row',
-    alignItems: 'center', // Asegura que los íconos estén alineados verticalmente
+    alignItems: 'center',
   },
   iconButton: {
-    marginHorizontal: 10, // Agrega un espacio horizontal entre los íconos
+    marginHorizontal: 10,
   },
 });
 

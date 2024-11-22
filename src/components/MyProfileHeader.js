@@ -25,6 +25,7 @@ const MyProfileHeader = ({
   followingCount = 0,
   onFollowersPress,
   onFollowingPress,
+  onRefresh,
 }) => {
   const navigation = useNavigation();
   const {token} = useUserContext();
@@ -47,7 +48,8 @@ const MyProfileHeader = ({
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         {
           title: 'Gallery Permission',
-          message: 'This app needs access to your gallery to update your cover image.',
+          message:
+            'This app needs access to your gallery to update your cover image.',
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
@@ -67,28 +69,33 @@ const MyProfileHeader = ({
         Alert.alert('Error', 'Permission to access gallery is required.');
         return;
       }
-
+  
       const result = await launchImageLibrary({
         mediaType: 'photo',
         includeBase64: false,
         maxHeight: 2000,
         maxWidth: 2000,
       });
-
+  
       if (!result.didCancel && result.assets?.[0]) {
         setLoading(true);
         try {
-          const response = await updateUserProfile(
-            {coverImage: result.assets[0].uri},
-            token,
-          );
-
+          // Crear el objeto que se enviará
+          const coverImageData = {
+            coverImage: result.assets[0].uri
+          };
+  
+          const response = await updateUserProfile(coverImageData, token);
+  
           if (response.data?.coverImage) {
             Alert.alert('Success', 'Cover image updated successfully');
+            if (onRefresh) {
+              await onRefresh();
+            }
           }
         } catch (error) {
+          console.error('Error details:', error);
           Alert.alert('Error', 'Failed to update cover image');
-          console.error(error);
         } finally {
           setLoading(false);
         }
@@ -157,15 +164,21 @@ const MyProfileHeader = ({
 
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{formatNumber(userPostsCount)}</Text>
+            <Text style={styles.statNumber}>
+              {formatNumber(userPostsCount)}
+            </Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <TouchableOpacity style={styles.statItem} onPress={onFollowersPress}>
-            <Text style={styles.statNumber}>{formatNumber(followersCount)}</Text>
+            <Text style={styles.statNumber}>
+              {formatNumber(followersCount)}
+            </Text>
             <Text style={styles.statLabel}>Followers</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statItem} onPress={onFollowingPress}>
-            <Text style={styles.statNumber}>{formatNumber(followingCount)}</Text>
+            <Text style={styles.statNumber}>
+              {formatNumber(followingCount)}
+            </Text>
             <Text style={styles.statLabel}>Following</Text>
           </TouchableOpacity>
         </View>
@@ -251,23 +264,42 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flex: 1,
-    marginBottom: 0, // Reducido a 0
+    marginBottom: 0,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'Roboto',
+  },
+  username: {
+    fontSize: 14,
+    color: '#657786',
+    marginTop: 1,
+    marginBottom: 4,
+    fontFamily: 'Roboto',
+  },
+  bio: {
+    fontSize: 14,
+    color: '#000',
+    fontFamily: 'Roboto',
+    marginBottom: 4,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginTop: -70, // Ajustado para subir más
+    marginTop: -70,
     marginRight: 10,
     paddingBottom: 10,
   },
   statItem: {
     alignItems: 'center',
-    marginLeft: 15, // Reducido el espacio entre items
+    marginLeft: 15,
     paddingHorizontal: 5,
   },
   statNumber: {
-    fontSize: 14, // Reducido
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 1,
@@ -275,7 +307,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     color: '#657786',
-    fontSize: 11, // Reducido
+    fontSize: 11,
     fontFamily: 'Roboto',
   },
   levelContainer: {
