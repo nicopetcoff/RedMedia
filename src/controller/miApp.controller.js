@@ -1,19 +1,19 @@
-import urlWebServices from "./webServices";
-import { useSelector } from 'react-redux';
+import urlWebServices from './webServices';
+import {useSelector} from 'react-redux';
 
 export const getPosts = async function () {
   let url = urlWebServices.getPosts;
 
   try {
     let response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        Accept: "application/json",
+        Accept: 'application/json',
       },
     });
 
     if (!response.ok) {
-      throw new Error("Error al obtener los posts: " + response.status);
+      throw new Error('Error al obtener los posts: ' + response.status);
     }
 
     let data = await response.json();
@@ -23,7 +23,28 @@ export const getPosts = async function () {
   }
 };
 
-export const signUp = async (userData) => {
+export const getTimelinePosts = async token => {
+  try {
+    const followingResponse = await fetch(urlWebServices.getFollowingPosts, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    const followingData = await followingResponse.json();
+
+    return {
+      data: followingData.data || [],
+    };
+  } catch (error) {
+    console.error('Error en getTimelinePosts:', error);
+    throw error;
+  }
+};
+
+export const signUp = async userData => {
   let url = urlWebServices.signUp;
 
   try {
@@ -52,17 +73,16 @@ export const googleAutenticacion = async (userData) => {
 
   try {
     let response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
       body: JSON.stringify(userData),
-    });;
-    
+    });
 
     let data = await response.json();
-    if (data.status===400) {
+    if (data.status === 400) {
       throw new Error(data.message);
     }
     return data;
@@ -72,15 +92,15 @@ export const googleAutenticacion = async (userData) => {
   }
 };
 
-export const signIn = async (userData) => {
+export const signIn = async userData => {
   let url = urlWebServices.signIn;
 
   try {
     let response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
       body: JSON.stringify({
         email: userData.email,
@@ -90,7 +110,7 @@ export const signIn = async (userData) => {
 
     let data = await response.json();
     if (data.status === 400) {
-      throw(data);
+      throw data;
     }
     return data;
   } catch (error) {
@@ -98,39 +118,39 @@ export const signIn = async (userData) => {
   }
 };
 
-export const sendPasswordResetEmail = async (email) => {
+export const sendPasswordResetEmail = async email => {
   let url = urlWebServices.passwordReset;
 
   try {
     let response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({email}),
     });
 
     let data = await response.json();
     if (data.status === 404) {
-      throw (data);
+      throw data;
     }
-    
+
     return data;
   } catch (error) {
     throw error;
   }
 };
 
-export const getUserData = async (token) => {
+export const getUserData = async token => {
   let url = urlWebServices.getProfile;
 
   try {
     const response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-        "x-access-token": token,
+        'Content-Type': 'application/json',
+        'x-access-token': token,
       },
     });
 
@@ -145,19 +165,17 @@ export const getUserData = async (token) => {
   }
 };
 
-
 export const publishPost = async (postData, token) => {
   try {
     let url = urlWebServices.postPost;
-    
+
     const formData = new FormData();
-    
+
     // Agregar datos del post
     formData.append('title', postData.title);
     formData.append('description', postData.description);
     formData.append('location', postData.location);
     formData.append('user', postData.user);
-    formData.append('userAvatar', postData.userAvatar);
 
     // Agregar imágenes
     postData.images.forEach((imageUri, index) => {
@@ -171,36 +189,35 @@ export const publishPost = async (postData, token) => {
       formData.append('images', {
         uri: localUri,
         name: filename,
-        type
+        type,
       });
     });
-
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'x-access-token': token
+        Accept: 'application/json',
+        'x-access-token': token,
       },
-      body: formData
+      body: formData,
     });
 
     const responseData = await response.json();
 
     if (response.ok) {
-      return { 
-        success: true, 
-        message: 'Post published successfully', 
-        data: responseData.data 
+      return {
+        success: true,
+        message: 'Post published successfully',
+        data: responseData.data,
       };
     } else {
       throw new Error(responseData.message || 'Failed to publish post');
     }
   } catch (error) {
     console.error('Error en publishPost:', error);
-    return { 
-      success: false, 
-      message: error.message || 'Error connecting to server'
+    return {
+      success: false,
+      message: error.message || 'Error connecting to server',
     };
   }
 };
@@ -209,46 +226,44 @@ export const getAds = async () => {
   let url = urlWebServices.getAds;
 
   try {
-      const response = await fetch(url, {
-          method: "GET",
-          headers: {
-              Accept: "application/json",
-          },
-      });
-
-      if (!response.ok) {
-          throw new Error("Error al obtener los anuncios: " + response.status);
-      }
-
-      const data = await response.json();
-      return data;
-  } catch (error) {
-      throw error;
-  }
-};
-
-export const getUsers = async (token) => {
-  let url = urlWebServices.getUsers;
-  
-
-  try {
     const response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "x-access-token": token
+        Accept: 'application/json',
       },
     });
 
-    
-    
     if (!response.ok) {
-      throw new Error("Error al obtener los usuarios: " + response.status);
+      throw new Error('Error al obtener los anuncios: ' + response.status);
     }
 
     const data = await response.json();
-    
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getUsers = async token => {
+  let url = urlWebServices.getUsers;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'x-access-token': token,
+        'Cache-Control': 'no-cache',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener los usuarios: ' + response.status);
+    }
+
+    const data = await response.json();
+
     return data;
   } catch (error) {
     console.error('Error en getUsers:', error);
@@ -258,13 +273,11 @@ export const getUsers = async (token) => {
 
 export const updateUserProfile = async (userData, token) => {
   let url = urlWebServices.updateUserProfile;
-  
 
   try {
     const formData = new FormData();
 
     if (userData.avatar) {
-      
       const imageUri = userData.avatar;
       const uriParts = imageUri.split('.');
       const fileType = uriParts[uriParts.length - 1];
@@ -272,29 +285,36 @@ export const updateUserProfile = async (userData, token) => {
       formData.append('avatar', {
         uri: imageUri,
         name: `photo.${fileType}`,
-        type: `image/${fileType}`
+        type: `image/${fileType}`,
       });
-      
+    }
+
+    if (userData.coverImage) {
+      const imageUri = userData.coverImage;
+      const uriParts = imageUri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('coverImage', {
+        uri: imageUri,
+        name: `cover.${fileType}`,
+        type: `image/${fileType}`,
+      });
     }
 
     // Agregar otros campos si existen
     if (userData.nombre) formData.append('nombre', userData.nombre);
     if (userData.bio) formData.append('bio', userData.bio);
 
-    
-
     const response = await fetch(url, {
       method: 'PATCH',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'multipart/form-data',
-        'x-access-token': token
+        'x-access-token': token,
       },
-      body: formData
+      body: formData,
     });
 
-    
-    
     if (!response.ok) {
       const errorData = await response.json();
       console.error('❌ Error response:', errorData);
@@ -302,10 +322,103 @@ export const updateUserProfile = async (userData, token) => {
     }
 
     const data = await response.json();
-    
+
     return data;
   } catch (error) {
-    
+    console.error('❌ Full error:', error);
+    throw error;
+  }
+};
+
+export const handleFollowUser = async function (userId, token, isFollowing) {
+  // Construir la URL reemplazando el parámetro dinámico
+  const baseUrl = urlWebServices.followUser;
+  const url = baseUrl.replace(':id', userId);
+
+  try {
+    let response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'x-access-token': token,
+      },
+      body: JSON.stringify({
+        action: isFollowing ? 'unfollow' : 'follow',
+      }),
+    });
+
+    let data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || 'Error al seguir/dejar de seguir al usuario',
+      );
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error en handleFollowUser:', error);
+    throw error;
+  }
+};
+
+export const interactWithPost = async (
+  postId,
+  token,
+  action,
+  comment = null,
+) => {
+  const url = urlWebServices.interactWithPost.replace(':id', postId);
+
+  try {
+    const body = {action};
+    if (comment) {
+      body.comment = comment;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Error interacting with the post');
+    }
+
+    return data; // Datos actualizados del post
+  } catch (error) {
+    console.error('Error en interactWithPost:', error);
+    throw error;
+  }
+};
+
+export const searchUsers = async (query, token) => {
+  const url = urlWebServices.searchUsers + `?query=${query}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al buscar usuarios: ' + response.status);
+    }
+
+    const data = await response.json();
+    return data.data; // Retorna los usuarios encontrados
+  } catch (error) {
+    console.error('Error en searchUsers:', error);
     throw error;
   }
 };

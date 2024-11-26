@@ -1,3 +1,5 @@
+// SignUpScreen.js
+
 import React, { useState } from "react";
 import {
   View,
@@ -7,18 +9,22 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { signUp } from "../controller/miApp.controller";
+import { useToggleContext } from "../context/AuthProvider";
 import { Formik } from "formik";
 import { signUpValidationSchema } from "../context/validationSchemas";
 import { FormikInputValue } from "../components/FormikInputValue";
+import EyeIcon from '../assets/imgs/eyeIcon.svg'; // Icono para mostrar/ocultar contraseña
 import { useNavigation } from '@react-navigation/native';
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
+  const { signUpUser } = useToggleContext(); // Asegúrate de que tu contexto tiene una función 'signUpUser'
+
+  const [showPassword, setShowPassword] = useState(false); // Estado para la visibilidad de la contraseña
 
   const handleSignUp = async (userData) => {
     try {
-      const response = await signUp(userData);
+      const response = await signUpUser(userData); // Cambiado a signUpUser para evitar conflictos con la función importada 'signUp'
       Alert.alert("Success", response.message, [
         { text: "OK", onPress: () => navigation.navigate("SignIn") },
       ]);
@@ -41,7 +47,7 @@ const SignUpScreen = () => {
       initialValues={initialValues}
       onSubmit={(values) => handleSignUp(values)}
     >
-      {({ handleSubmit }) => {
+      {({ handleSubmit, errors, touched }) => {
         return (
           <View style={styles.container}>
             <Image
@@ -49,33 +55,78 @@ const SignUpScreen = () => {
               style={styles.logo}
             />
             <Text style={styles.title}>Create your account</Text>
+
+            {/* Campo de Nombre */}
+            <FormikInputValue
+              name="name"
+              placeholder="Enter your name"
+              placeholderTextColor="#aaa"
+            />
+            {errors.name && touched.name && (
+              <Text style={styles.error}>{errors.name}</Text>
+            )}
+
+            {/* Campo de Apellido */}
+            <FormikInputValue
+              name="lastName"
+              placeholder="Enter your last name"
+              placeholderTextColor="#aaa"
+            />
+            {errors.lastName && touched.lastName && (
+              <Text style={styles.error}>{errors.lastName}</Text>
+            )}
+
+            {/* Campo de Nickname */}
+            <FormikInputValue
+              name="nick"
+              placeholder="Enter your nickname"
+              placeholderTextColor="#aaa"
+            />
+            {errors.nick && touched.nick && (
+              <Text style={styles.error}>{errors.nick}</Text>
+            )}
+
+            {/* Campo de Email */}
             <FormikInputValue
               name="email"
               placeholder="Enter your email"
               placeholderTextColor="#aaa"
               keyboardType="email-address"
             />
-            <FormikInputValue
-              name="password"
-              placeholder="Enter your password"
-              placeholderTextColor="#aaa"
-              secureTextEntry={true}
-            />
-            <FormikInputValue
-              name="name"
-              placeholder="Enter your name"
-              placeholderTextColor="#aaa"
-            />
-            <FormikInputValue
-              name="lastName"
-              placeholder="Enter your LastName"
-              placeholderTextColor="#aaa"
-            />
-            <FormikInputValue
-              name="nick"
-              placeholder="Enter your nick"
-              placeholderTextColor="#aaa"
-            />
+            {errors.email && touched.email && (
+              <Text style={styles.error}>{errors.email}</Text>
+            )}
+
+            {/* Campo de Contraseña con Toggle */}
+            <View style={styles.passwordContainer}>
+              <FormikInputValue
+                name="password"
+                placeholder="Enter your password"
+                placeholderTextColor="#aaa"
+                secureTextEntry={!showPassword}
+                style={styles.passwordInput}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeButton}
+                accessibilityLabel={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                accessibilityRole="button"
+              >
+                <EyeIcon
+                  width={24}
+                  height={24}
+                  style={[
+                    styles.eyeIcon,
+                    showPassword && styles.eyeIconActive
+                  ]}
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password && touched.password && (
+              <Text style={styles.error}>{errors.password}</Text>
+            )}
+
+            {/* Botón de Registro */}
             <TouchableOpacity
               style={styles.signUpButton}
               onPress={handleSubmit}
@@ -101,6 +152,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginBottom: 20,
+    resizeMode: 'contain',
   },
   title: {
     fontSize: 24,
@@ -108,15 +160,29 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#000",
   },
-  input: {
-    width: "100%",
-    height: 40,
-    borderColor: "#ccc",
+  passwordContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
-    color: "#000",
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
+    color: "black",
+  },
+  eyeButton: {
+    padding: 5,
+  },
+  eyeIcon: {
+    transition: 'transform 0.3s', // Animación suave al rotar
+  },
+  eyeIconActive: {
+    transform: [{ rotate: '180deg' }], // Rota el icono cuando la contraseña es visible
   },
   signUpButton: {
     backgroundColor: "#4285F4",
@@ -124,6 +190,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 60,
     borderRadius: 5,
     marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
   },
   signUpButtonText: {
     color: "#fff",
@@ -132,9 +200,10 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "red",
-    marginBottom: 20,
-    marginTop: -10,
+    marginBottom: 10,
     fontSize: 12,
+    alignSelf: 'flex-start',
+    marginLeft: '5%',
   },
 });
 
