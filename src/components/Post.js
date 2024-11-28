@@ -1,8 +1,8 @@
 import React, {memo, useCallback} from 'react';
-import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
-const Post = ({item}) => {
+const Post = ({item, source}) => {
   const navigation = useNavigation();
   const route = useRoute();
   const imageUri = Array.isArray(item.image) ? item.image[0] : item.image;
@@ -10,12 +10,12 @@ const Post = ({item}) => {
   const navigateToDetail = useCallback(() => {
     const params = {
       item,
-      previousScreen: route.name,
-      fromScreen: route.name,
+      previousScreen: source || route.name,
+      fromScreen: source || route.name,
       username: item.user,
     };
     navigation.navigate('PostDetail', params);
-  }, [navigation, route.name, item]);
+  }, [navigation, route.name, item, source]);
 
   return (
     <TouchableOpacity onPress={navigateToDetail} style={styles.container}>
@@ -52,12 +52,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 2,
-    fontFamily: 'Roboto',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   username: {
     fontSize: 12,
     color: '#657786',
-    fontFamily: 'Roboto',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
 });
 

@@ -23,23 +23,21 @@ import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
 
 const PostDetail = ({route, navigation}) => {
-  const {item, previousScreen, username, fromScreen} = route.params || {};
+  const {item, previousScreen, username, fromScreen, updatePost} =
+    route.params || {};
   const {token} = useUserContext();
 
-  // Estados
   const [currentPost, setCurrentPost] = useState(() =>
     item ? JSON.parse(JSON.stringify(item)) : null,
   );
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(item?.likes?.length || 0);
   const [userData, setUserData] = useState(null);
   const [postUserData, setPostUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState(item?.comments || []);
-
   const getCurrentUserId = useCallback(() => {
     try {
       if (!token) return null;
@@ -57,6 +55,7 @@ const PostDetail = ({route, navigation}) => {
       return null;
     }
   }, [token]);
+
   const fetchUserData = useCallback(async () => {
     if (!token || !currentPost?.user) return;
 
@@ -72,7 +71,6 @@ const PostDetail = ({route, navigation}) => {
 
       if (currentPost?.likes && Array.isArray(currentPost.likes)) {
         setIsLiked(currentPost.likes.includes(currentUser.usernickname));
-        setLikeCount(currentPost.likes.length);
       }
 
       const foundUser = usersResponse.data.find(
@@ -101,10 +99,8 @@ const PostDetail = ({route, navigation}) => {
 
   useEffect(() => {
     if (item && item._id !== currentPost?._id) {
-      const newPost = JSON.parse(JSON.stringify(item));
-      setCurrentPost(newPost);
-      setComments(newPost.comments || []);
-      setLikeCount(newPost.likes?.length || 0);
+      setCurrentPost(JSON.parse(JSON.stringify(item)));
+      setComments(item.comments || []);
     }
   }, [item?._id]);
 
@@ -116,7 +112,6 @@ const PostDetail = ({route, navigation}) => {
       setComments([]);
     };
   }, []);
-
   const toggleFollow = async () => {
     if (!postUserData?._id) return;
 
@@ -139,35 +134,55 @@ const PostDetail = ({route, navigation}) => {
   const handleLike = async () => {
     if (!currentPost?._id || !userData?.usernickname) return;
 
-    // Actualización optimista inmediata
+    // Optimistic update
     const newLikeState = !isLiked;
     setIsLiked(newLikeState);
-    setLikeCount(prev => (newLikeState ? prev + 1 : prev - 1));
+
+    // Actualizar el post actual de manera optimista
+    setCurrentPost(prev => ({
+      ...prev,
+      likes: newLikeState
+        ? [...(prev.likes || []), userData.usernickname]
+        : (prev.likes || []).filter(like => like !== userData.usernickname),
+    }));
 
     try {
       const response = await interactWithPost(currentPost._id, token, 'like');
 
-      if (response.data && route.params?.updatePost) {
-        // Actualizamos en segundo plano
-        route.params.updatePost(response.data);
+      if (response.data) {
+        // Actualizar con los datos del servidor
+        setCurrentPost(response.data);
+
+        // Actualizar el timeline
+        if (updatePost) {
+          updatePost(response.data);
+        }
       }
     } catch (error) {
-      // Revertir cambios si hay error
+      // Revertir cambios en caso de error
       setIsLiked(!newLikeState);
-      setLikeCount(prev => (newLikeState ? prev - 1 : prev + 1));
+      setCurrentPost(prev => ({
+        ...prev,
+        likes: !newLikeState
+          ? [...(prev.likes || []), userData.usernickname]
+          : (prev.likes || []).filter(like => like !== userData.usernickname),
+      }));
       console.error('Error al dar/quitar like:', error);
     }
   };
-  const handleAddComment = async () => {
-    if (!currentPost?._id || !newComment.trim()) return;
 
-    // Optimistic update for comments
+  const handleAddComment = async () => {
+    if (!currentPost?._id || !newComment.trim() || !userData?.usernickname)
+      return;
+
     const optimisticComment = {
-      user: userData?.usernickname,
+      user: userData.usernickname,
       comment: newComment.trim(),
       createdAt: new Date().toISOString(),
+      _id: Date.now().toString(), // ID temporal para optimistic update
     };
 
+    // Optimistic update
     setComments(prev => [...prev, optimisticComment]);
     setNewComment('');
     setShowCommentInput(false);
@@ -177,27 +192,28 @@ const PostDetail = ({route, navigation}) => {
         currentPost._id,
         token,
         'comment',
-        newComment,
+        newComment.trim(),
       );
 
       if (response.data) {
         setCurrentPost(response.data);
         setComments(response.data.comments);
 
-        if (route.params?.updatePost) {
-          route.params.updatePost(response.data);
+        // Actualizar el timeline
+        if (updatePost) {
+          updatePost(response.data);
         }
       }
     } catch (error) {
-      // Revert optimistic update on error
+      // Revertir optimistic update en caso de error
       setComments(prev =>
-        prev.filter(comment => comment !== optimisticComment),
+        prev.filter(comment => comment._id !== optimisticComment._id),
       );
       console.error('Error al agregar comentario:', error);
     }
   };
 
-  const handleUserPress = () => {
+  const handleUserPress = useCallback(() => {
     if (!isOwnPost && currentPost?.user) {
       navigation.push('Profile', {
         username: currentPost.user,
@@ -205,8 +221,7 @@ const PostDetail = ({route, navigation}) => {
         timestamp: Date.now(),
       });
     }
-  };
-
+  }, [isOwnPost, currentPost?.user, navigation, previousScreen]);
   if (!currentPost) {
     return null;
   }
@@ -245,6 +260,7 @@ const PostDetail = ({route, navigation}) => {
           <Text style={styles.description}>Sin descripción</Text>
         )}
       </View>
+
       <PostImage images={currentPost.image} />
 
       {currentPost.location && (
@@ -264,7 +280,9 @@ const PostDetail = ({route, navigation}) => {
 
       <View style={styles.likeSection}>
         <Text style={styles.likeText}>
-          Le gusta a <Text style={styles.boldText}>{likeCount}</Text> personas
+          Le gusta a{' '}
+          <Text style={styles.boldText}>{currentPost.likes?.length || 0}</Text>{' '}
+          personas
         </Text>
       </View>
 
