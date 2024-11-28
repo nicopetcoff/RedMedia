@@ -29,22 +29,19 @@ const HomeStackScreen = () => {
           headerTitle: '',
           headerLeft: () => {
             const {previousScreen, username, fromScreen} = route.params || {};
-            console.log('PostDetail Header - Navigation params:', {
-              previousScreen,
-              username,
-              fromScreen,
-            });
 
             return (
               <TouchableOpacity
                 onPress={() => {
-                  if (previousScreen === 'Profile' && fromScreen === 'Profile') {
-                    console.log('PostDetail Header - Navigating back to Profile');
+                  if (
+                    previousScreen === 'Profile' &&
+                    fromScreen === 'Profile'
+                  ) {
                     // Limpiar la pila de navegación antes de navegar al perfil
                     navigation.reset({
                       index: 1,
                       routes: [
-                        { name: 'Home' },
+                        {name: 'Home'},
                         {
                           name: 'Profile',
                           params: {
@@ -56,7 +53,6 @@ const HomeStackScreen = () => {
                       ],
                     });
                   } else {
-                    console.log('PostDetail Header - Going back');
                     navigation.goBack();
                   }
                 }}
@@ -80,10 +76,9 @@ const HomeStackScreen = () => {
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {
-                console.log('Profile Header - Navigating to Home');
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'Home' }],
+                  routes: [{name: 'Home'}],
                 });
               }}
               style={{

@@ -24,11 +24,6 @@ const {width: windowWidth} = Dimensions.get('window');
 
 const ProfileScreen = ({route, navigation}) => {
   const {username, fromScreen, postId} = route.params;
-  console.log('ProfileScreen - Mounting with params:', {
-    username,
-    fromScreen,
-    postId,
-  });
 
   const {token} = useUserContext();
   const [user, setUser] = useState(null);
@@ -70,7 +65,6 @@ const ProfileScreen = ({route, navigation}) => {
 
   const fetchUserData = useCallback(async () => {
     try {
-      console.log('ProfileScreen - Fetching data for user:', username);
       setLoading(true);
       setError(null);
 
@@ -89,7 +83,6 @@ const ProfileScreen = ({route, navigation}) => {
       );
 
       if (!foundUser) {
-        console.log('ProfileScreen - User not found:', username);
         setError('Usuario no encontrado');
         return;
       }
@@ -114,7 +107,6 @@ const ProfileScreen = ({route, navigation}) => {
         .filter(post => post.user === username)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      console.log('ProfileScreen - Posts found:', userPosts.length);
       setUserPosts(userPosts);
     } catch (error) {
       console.error('ProfileScreen - Error loading data:', error);
@@ -128,7 +120,6 @@ const ProfileScreen = ({route, navigation}) => {
     let mounted = true;
 
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log('ProfileScreen - Screen focused');
       if (mounted) {
         fetchUserData();
       }
@@ -139,7 +130,6 @@ const ProfileScreen = ({route, navigation}) => {
     }
 
     return () => {
-      console.log('ProfileScreen - Cleanup on unmount');
       mounted = false;
       unsubscribe();
       setUser(null);
@@ -177,8 +167,6 @@ const ProfileScreen = ({route, navigation}) => {
   const handlePostPress = useCallback(
     post => {
       if (!post?._id || !user) return;
-
-      console.log('ProfileScreen - Opening post:', post._id);
 
       // Limpiamos la navegación anterior
       navigation.setParams({timestamp: Date.now()});
