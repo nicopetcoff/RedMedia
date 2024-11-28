@@ -1,4 +1,3 @@
-// HomeStackScreen.js
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {TouchableOpacity} from 'react-native';
@@ -14,6 +13,9 @@ const HomeStackScreen = () => {
     <Stack.Navigator
       screenOptions={{
         headerBackTitleVisible: false,
+        unmountOnBlur: true,
+        detachInactiveScreens: true,
+        ...defaultScreenOptions,
       }}>
       <Stack.Screen
         name="Home"
@@ -35,46 +37,81 @@ const HomeStackScreen = () => {
                     previousScreen === 'Profile' &&
                     fromScreen === 'Profile'
                   ) {
-                    // Si venimos originalmente del perfil, volvemos al perfil
-                    navigation.navigate('Profile', {
-                      username,
-                      fromScreen: 'Home', // Esto asegura que el siguiente back vaya a Home
+                    // Limpiar la pila de navegación antes de navegar al perfil
+                    navigation.reset({
+                      index: 1,
+                      routes: [
+                        {name: 'Home'},
+                        {
+                          name: 'Profile',
+                          params: {
+                            username,
+                            fromScreen: 'Home',
+                            timestamp: Date.now(),
+                          },
+                        },
+                      ],
                     });
                   } else {
-                    // En cualquier otro caso, volvemos a Home
-                    navigation.navigate('Home');
+                    navigation.goBack();
                   }
                 }}
-                style={{marginLeft: 10}}>
+                style={{
+                  marginLeft: 10,
+                  padding: 10,
+                }}>
                 <BackIcon width={24} height={24} />
               </TouchableOpacity>
             );
           },
+          headerStyle: defaultScreenOptions.headerStyle,
+          cardStyle: defaultScreenOptions.cardStyle,
         })}
       />
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={({route, navigation}) => ({
+        options={({navigation}) => ({
           headerTitle: '',
-          headerLeft: () => {
-            const {fromScreen} = route.params || {};
-
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  // Siempre volvemos a Home desde Profile
-                  navigation.navigate('Home');
-                }}
-                style={{marginLeft: 10}}>
-                <BackIcon width={24} height={24} />
-              </TouchableOpacity>
-            );
-          },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'Home'}],
+                });
+              }}
+              style={{
+                marginLeft: 10,
+                padding: 10,
+              }}>
+              <BackIcon width={24} height={24} />
+            </TouchableOpacity>
+          ),
+          headerStyle: defaultScreenOptions.headerStyle,
+          cardStyle: defaultScreenOptions.cardStyle,
         })}
       />
     </Stack.Navigator>
   );
+};
+
+const defaultScreenOptions = {
+  headerBackTitleVisible: false,
+  headerStyle: {
+    elevation: 0,
+    shadowOpacity: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  headerTitleStyle: {
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+  headerTintColor: '#000',
+  cardStyle: {
+    backgroundColor: '#ffffff',
+  },
 };
 
 export default HomeStackScreen;

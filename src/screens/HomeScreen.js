@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -10,132 +10,162 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useUserContext } from '../context/AuthProvider';
+import {useNavigation} from '@react-navigation/native';
+import {useUserContext} from '../context/AuthProvider';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
-import { getTimelinePosts, getAds } from '../controller/miApp.controller';
+import {getTimelinePosts, getAds} from '../controller/miApp.controller';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [ads, setAds] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Cambiado a false inicialmente
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
-  const { token } = useUserContext();
+  const {token} = useUserContext();
   const navigation = useNavigation();
 
-  const updatePost = (updatedPost) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === updatedPost._id ? updatedPost : post
-      )
+  const updatePost = useCallback(updatedPost => {
+    if (!updatedPost?._id) return;
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === updatedPost._id ? updatedPost : post,
+      ),
     );
-  };
+  }, []);
+  const fetchData = useCallback(
+    async (isLoadMore = false) => {
+      if (isLoadMore && loadingMore) return;
 
-  const fetchData = async (isLoadMore = false) => {
-    if (isLoadMore && loadingMore) return; // Evitar múltiples cargas simultáneas
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else if (!refreshing) {
-      setLoading(true);
-    }
+      try {
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
 
-    try {
-      const [postsResponse, adsResponse] = await Promise.all([
-        getTimelinePosts(token),
-        getAds(),
-      ]);
+        const [postsResponse, adsResponse] = await Promise.all([
+          getTimelinePosts(token),
+          getAds(),
+        ]);
 
-      setAds(adsResponse.data || []);
-      setPosts((prevPosts) =>
-        isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data
-      );
+        // Validar las respuestas antes de actualizar el estado
+        if (postsResponse?.data && Array.isArray(postsResponse.data)) {
+          const sortedPosts = postsResponse.data.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          );
 
-      if (isLoadMore) {
-        setPage((prevPage) => prevPage + 1);
+          setPosts(prevPosts =>
+            isLoadMore ? [...prevPosts, ...sortedPosts] : sortedPosts,
+          );
+        }
+
+        if (adsResponse?.data && Array.isArray(adsResponse.data)) {
+          setAds(adsResponse.data);
+        }
+
+        if (isLoadMore) {
+          setPage(prevPage => prevPage + 1);
+        }
+      } catch (error) {
+        console.error('Error al cargar los datos:', error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
       }
-    } catch (error) {
-      console.error('Error al cargar los datos:', error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-      setRefreshing(false);
-    }
-  };
+    },
+    [token],
+  );
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
+    if (refreshing) return;
     setPage(1);
     setRefreshing(true);
     await fetchData(false);
-  };
+  }, [fetchData, refreshing]);
 
+  // Efecto inicial para cargar datos
   useEffect(() => {
     fetchData();
+  }, []);
+
+  // Efecto para manejar el focus de la pantalla
+  useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       if (!refreshing && !loading) {
         refreshData();
       }
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, refreshing, loading, refreshData]);
 
   const adIndices = useMemo(() => {
+    if (!ads.length) return [];
     return posts.map((_, index) =>
-      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null
+      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
     );
   }, [posts, ads]);
+  const renderPost = useCallback(
+    ({item, index}) => {
+      const adIndex = adIndices[index];
 
-  const renderItem = ({ item, index }) => {
-    const adIndex = adIndices[index];
+      if (adIndex !== null && ads[adIndex]) {
+        const randomAd = ads[adIndex];
+        return (
+          <TouchableOpacity
+            style={styles.adContainer}
+            onPress={() => Linking.openURL(randomAd.Url)}>
+            <Image
+              source={{uri: randomAd.imagePath[0].landscape}}
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+        );
+      }
 
-    if (adIndex !== null && ads[adIndex]) {
-      const randomAd = ads[adIndex];
+      if (!item?._id) return null;
+
       return (
-        <TouchableOpacity
-          style={styles.adContainer}
-          onPress={() => Linking.openURL(randomAd.Url)}
-        >
-          <Image
-            source={{ uri: randomAd.imagePath[0].landscape }}
-            style={styles.adImage}
-            resizeMode="cover"
-          />
-        </TouchableOpacity>
+        <View style={styles.postContainer}>
+          <Post item={item} source="Home" updatePost={updatePost} />
+        </View>
       );
-    }
+    },
+    [ads, adIndices, updatePost],
+  );
 
-    return (
-      <View style={styles.postContainer}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('PostDetail', {
-              postId: item._id,
-              previousScreen: 'Home',
-              updatePost,
-            })
-          }
-        >
-          <Post item={item} source="Home" />
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  if (loading && !refreshing) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
+  const renderEmptyComponent = useCallback(() => {
+    if (loading) {
+      return (
         <View style={styles.skeletonContainer}>
           {[...Array(6)].map((_, index) => (
             <Skeleton key={index} style={styles.skeleton} />
           ))}
         </View>
-      </SafeAreaView>
+      );
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No hay publicaciones para mostrar</Text>
+      </View>
     );
-  }
+  }, [loading]);
 
+  const renderFooter = useCallback(() => {
+    if (loadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color="#1DA1F2" />
+        </View>
+      );
+    }
+    return null;
+  }, [loadingMore]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -150,22 +180,25 @@ const HomeScreen = () => {
 
         <FlatList
           data={posts}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => `${item._id || 'ad'}-${index}`}
+          renderItem={renderPost}
+          keyExtractor={item => item._id}
           numColumns={2}
           columnWrapperStyle={styles.row}
+          contentContainerStyle={[
+            styles.listContent,
+            posts.length === 0 && styles.emptyList,
+          ]}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
           refreshing={refreshing}
           onRefresh={refreshData}
-          onEndReached={() => fetchData(true)}
+          onEndReached={() => !loadingMore && fetchData(true)}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loadingMore && <ActivityIndicator size="small" color="#1DA1F2" />
-          }
-          initialNumToRender={10}
-          maxToRenderPerBatch={5}
+          ListEmptyComponent={renderEmptyComponent}
+          ListFooterComponent={renderFooter}
+          initialNumToRender={6}
+          maxToRenderPerBatch={3}
           windowSize={5}
+          removeClippedSubviews={Platform.OS === 'android'}
         />
       </View>
     </SafeAreaView>
@@ -204,6 +237,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
   },
+  emptyList: {
+    flexGrow: 1,
+  },
   row: {
     justifyContent: 'space-between',
     marginHorizontal: 5,
@@ -218,10 +254,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     marginBottom: 15,
     height: 200,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   adImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 8,
   },
   skeletonContainer: {
     flex: 1,
@@ -230,7 +269,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 15,
     paddingTop: 10,
-    backgroundColor: '#fff',
   },
   skeleton: {
     width: '48%',
@@ -238,6 +276,21 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#f0f0f0',
     borderRadius: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#657786',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: 'center',
   },
 });
 

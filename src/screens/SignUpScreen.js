@@ -1,6 +1,4 @@
-// SignUpScreen.js
-
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -8,50 +6,53 @@ import {
   StyleSheet,
   Image,
   Alert,
-} from "react-native";
-import { useToggleContext } from "../context/AuthProvider";
-import { Formik } from "formik";
-import { signUpValidationSchema } from "../context/validationSchemas";
-import { FormikInputValue } from "../components/FormikInputValue";
+} from 'react-native';
+import {Formik} from 'formik';
+import {signUpValidationSchema} from '../context/validationSchemas';
+import {FormikInputValue} from '../components/FormikInputValue';
 import EyeIcon from '../assets/imgs/eyeIcon.svg'; // Icono para mostrar/ocultar contraseña
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {signUp} from '../controller/miApp.controller'; // Importa la función signUp directamente
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
-  const { signUpUser } = useToggleContext(); // Asegúrate de que tu contexto tiene una función 'signUpUser'
 
   const [showPassword, setShowPassword] = useState(false); // Estado para la visibilidad de la contraseña
 
-  const handleSignUp = async (userData) => {
+  const handleSignUp = async userData => {
     try {
-      const response = await signUpUser(userData); // Cambiado a signUpUser para evitar conflictos con la función importada 'signUp'
-      Alert.alert("Success", response.message, [
-        { text: "OK", onPress: () => navigation.navigate("SignIn") },
-      ]);
+      const response = await signUp(userData); // Llama a la función signUp desde el controlador
+
+      if (response.token) {
+        Alert.alert('Success', response.message || 'Registro exitoso', [
+          {text: 'OK', onPress: () => navigation.goBack()}, // Regresa a la pantalla anterior
+        ]);
+      } else {
+        Alert.alert('Error', response.message || 'Registro fallido');
+      }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert('Error', error.message || 'Error al registrarse');
     }
   };
 
   const initialValues = {
-    email: "",
-    password: "",
-    name: "",
-    lastName: "",
-    nick: "",
+    email: '',
+    password: '',
+    name: '',
+    lastName: '',
+    nick: '',
   };
 
   return (
     <Formik
       validationSchema={signUpValidationSchema}
       initialValues={initialValues}
-      onSubmit={(values) => handleSignUp(values)}
-    >
-      {({ handleSubmit, errors, touched }) => {
+      onSubmit={values => handleSignUp(values)}>
+      {({handleSubmit, errors, touched}) => {
         return (
           <View style={styles.container}>
             <Image
-              source={require("../assets/imgs/logo.png")}
+              source={require('../assets/imgs/logo.png')}
               style={styles.logo}
             />
             <Text style={styles.title}>Create your account</Text>
@@ -109,16 +110,14 @@ const SignUpScreen = () => {
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeButton}
-                accessibilityLabel={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                accessibilityRole="button"
-              >
+                accessibilityLabel={
+                  showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                }
+                accessibilityRole="button">
                 <EyeIcon
                   width={24}
                   height={24}
-                  style={[
-                    styles.eyeIcon,
-                    showPassword && styles.eyeIconActive
-                  ]}
+                  style={[styles.eyeIcon, showPassword && styles.eyeIconActive]}
                 />
               </TouchableOpacity>
             </View>
@@ -129,8 +128,7 @@ const SignUpScreen = () => {
             {/* Botón de Registro */}
             <TouchableOpacity
               style={styles.signUpButton}
-              onPress={handleSubmit}
-            >
+              onPress={handleSubmit}>
               <Text style={styles.signUpButtonText}>Sign up</Text>
             </TouchableOpacity>
           </View>
@@ -143,9 +141,9 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
   logo: {
@@ -156,9 +154,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
-    color: "#000",
+    color: '#000',
   },
   passwordContainer: {
     width: '100%',
@@ -173,7 +171,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     height: 40,
-    color: "black",
+    color: 'black',
   },
   eyeButton: {
     padding: 5,
@@ -182,10 +180,10 @@ const styles = StyleSheet.create({
     transition: 'transform 0.3s', // Animación suave al rotar
   },
   eyeIconActive: {
-    transform: [{ rotate: '180deg' }], // Rota el icono cuando la contraseña es visible
+    transform: [{rotate: '180deg'}], // Rota el icono cuando la contraseña es visible
   },
   signUpButton: {
-    backgroundColor: "#4285F4",
+    backgroundColor: '#4285F4',
     paddingVertical: 12,
     paddingHorizontal: 60,
     borderRadius: 5,
@@ -194,12 +192,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   signUpButtonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   error: {
-    color: "red",
+    color: 'red',
     marginBottom: 10,
     fontSize: 12,
     alignSelf: 'flex-start',

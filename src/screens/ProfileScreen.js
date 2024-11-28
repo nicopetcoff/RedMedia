@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,8 @@ import {useUserContext} from '../context/AuthProvider';
 const {width: windowWidth} = Dimensions.get('window');
 
 const ProfileScreen = ({route, navigation}) => {
-  const {username, fromScreen} = route.params;
+  const {username, fromScreen, postId} = route.params;
+
   const {token} = useUserContext();
   const [user, setUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
@@ -34,7 +35,7 @@ const ProfileScreen = ({route, navigation}) => {
   const [followersData, setFollowersData] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
 
-  const getCurrentUserId = () => {
+  const getCurrentUserId = useCallback(() => {
     try {
       if (!token) return null;
       const base64Url = token.split('.')[1];
@@ -50,9 +51,19 @@ const ProfileScreen = ({route, navigation}) => {
       console.error('Error getting user ID:', error);
       return null;
     }
-  };
+  }, [token]);
 
-  const fetchUserData = async () => {
+  const updatePost = useCallback(updatedPost => {
+    if (!updatedPost?._id) return;
+
+    setUserPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === updatedPost._id ? updatedPost : post,
+      ),
+    );
+  }, []);
+
+  const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -92,22 +103,40 @@ const ProfileScreen = ({route, navigation}) => {
       setUser(foundUser);
       setIsFollowing(isCurrentUserFollowing);
 
-      const userPosts = postsResponse.data.filter(
-        post => post.user === username,
-      );
+      const userPosts = postsResponse.data
+        .filter(post => post.user === username)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
       setUserPosts(userPosts);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('ProfileScreen - Error loading data:', error);
       setError('Error al cargar los datos del usuario');
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, username, getCurrentUserId]);
 
   useEffect(() => {
-    fetchUserData();
-  }, [username, token]);
+    let mounted = true;
 
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (mounted) {
+        fetchUserData();
+      }
+    });
+
+    if (mounted) {
+      fetchUserData();
+    }
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+      setUser(null);
+      setUserPosts([]);
+      setFollowersData([]);
+    };
+  }, [navigation, username, token, fetchUserData]);
   const handleFollowPress = async () => {
     if (followLoading || !user?._id) return;
 
@@ -126,7 +155,6 @@ const ProfileScreen = ({route, navigation}) => {
             : (prev.followers || []).filter(id => id !== getCurrentUserId()),
         }));
 
-        // Actualizar la lista de seguidores
         await fetchUserData();
       }
     } catch (error) {
@@ -136,7 +164,41 @@ const ProfileScreen = ({route, navigation}) => {
     }
   };
 
-  const FollowersModal = () => (
+  const handlePostPress = useCallback(
+    post => {
+      if (!post?._id || !user) return;
+
+      // Limpiamos la navegación anterior
+      navigation.setParams({timestamp: Date.now()});
+
+      const postCopy = JSON.parse(JSON.stringify(post));
+
+      // Usar navigate en lugar de push cuando es el mismo post
+      if (route.params?.currentPostId === post._id) {
+        navigation.navigate('PostDetail', {
+          item: postCopy,
+          previousScreen: 'Profile',
+          username: user.usernickname,
+          fromScreen: 'Profile',
+          timestamp: Date.now(),
+          updatePost,
+        });
+      } else {
+        navigation.push('PostDetail', {
+          item: postCopy,
+          previousScreen: 'Profile',
+          username: user.usernickname,
+          fromScreen: 'Profile',
+          timestamp: Date.now(),
+          updatePost,
+          currentPostId: post._id,
+        });
+      }
+    },
+    [navigation, user, updatePost, route.params?.currentPostId],
+  );
+
+  const renderFollowersModal = () => (
     <Modal
       animationType="slide"
       transparent={true}
@@ -157,9 +219,10 @@ const ProfileScreen = ({route, navigation}) => {
                 style={styles.followerItem}
                 onPress={() => {
                   setShowFollowers(false);
-                  navigation.navigate('Profile', {
+                  navigation.push('Profile', {
                     username: follower.usernickname,
                     fromScreen: 'Profile',
+                    timestamp: Date.now(),
                   });
                 }}>
                 <Image
@@ -261,6 +324,22 @@ const ProfileScreen = ({route, navigation}) => {
       )}
     </View>
   );
+  const renderPost = useCallback(
+    ({item}) => {
+      if (!item?._id) return null;
+
+      return (
+        <View style={styles.postContainer}>
+          <TouchableOpacity
+            onPress={() => handlePostPress(item)}
+            key={`${item._id}-${route.params?.timestamp || Date.now()}`}>
+            <Post item={item} source="Profile" />
+          </TouchableOpacity>
+        </View>
+      );
+    },
+    [handlePostPress, route.params?.timestamp],
+  );
 
   if (loading) {
     return (
@@ -290,23 +369,10 @@ const ProfileScreen = ({route, navigation}) => {
     <View style={styles.container}>
       <FlatList
         data={userPosts}
-        renderItem={({item}) => (
-          <View style={styles.postContainer}>
-            <Post
-              item={item}
-              source="Profile"
-              onPress={() =>
-                navigation.navigate('PostDetail', {
-                  item,
-                  previousScreen: 'Profile',
-                  username: user.usernickname,
-                  fromScreen: 'Profile',
-                })
-              }
-            />
-          </View>
-        )}
-        keyExtractor={item => item._id.toString()}
+        renderItem={renderPost}
+        keyExtractor={item =>
+          `${item._id}-${route.params?.timestamp || Date.now()}`
+        }
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={renderProfileHeader}
@@ -314,8 +380,17 @@ const ProfileScreen = ({route, navigation}) => {
         showsVerticalScrollIndicator={false}
         onRefresh={fetchUserData}
         refreshing={loading}
+        removeClippedSubviews={true}
+        initialNumToRender={6}
+        maxToRenderPerBatch={4}
+        windowSize={5}
+        getItemLayout={(data, index) => ({
+          length: 200,
+          offset: 200 * index,
+          index,
+        })}
       />
-      <FollowersModal />
+      {renderFollowersModal()}
     </View>
   );
 };
