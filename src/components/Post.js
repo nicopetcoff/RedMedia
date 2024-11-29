@@ -1,15 +1,17 @@
 import React, {memo, useCallback} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {usePost} from '../context/PostContext';
 
 const Post = ({item, source}) => {
   const navigation = useNavigation();
   const route = useRoute();
+  const {updatePost} = usePost();
   const imageUri = Array.isArray(item.image) ? item.image[0] : item.image;
 
   const navigateToDetail = useCallback(() => {
     const params = {
-      item,
+      item: {...item},
       previousScreen: source || route.name,
       fromScreen: source || route.name,
       username: item.user,
@@ -18,7 +20,11 @@ const Post = ({item, source}) => {
   }, [navigation, route.name, item, source]);
 
   return (
-    <TouchableOpacity onPress={navigateToDetail} style={styles.container}>
+    <TouchableOpacity 
+      onPress={navigateToDetail} 
+      style={styles.container}
+      key={`post-${item._id}-${item.user}`}
+    >
       <Image source={{uri: imageUri}} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={styles.title} numberOfLines={2}>

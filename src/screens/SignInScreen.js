@@ -23,7 +23,32 @@ const SignInScreen = ({ navigation }) => {
     try {
       await login({ email, password });
     } catch (error) {
-      Alert.alert("Error", error.message || "Error al iniciar sesión");
+      // Verifica si el error tiene un mensaje definido
+      if (error.message) {
+        // Identifica mensajes específicos del backend para mostrar alertas personalizadas
+        if (error.message.includes("Debes confirmar tu cuenta")) {
+          Alert.alert(
+            "Cuenta no confirmada",
+            "Por favor, revisa tu correo electrónico para confirmar tu cuenta."
+          );
+        } else if (error.message.includes("Contraseña incorrecta")) {
+          Alert.alert(
+            "Credenciales incorrectas",
+            "La contraseña ingresada no es correcta. Inténtalo nuevamente."
+          );
+        } else if (error.message.includes("El usuario no existe")) {
+          Alert.alert(
+            "Usuario no encontrado",
+            "No se encontró una cuenta asociada con este correo electrónico. Por favor, regístrate primero."
+          );
+        } else {
+          // Mensaje genérico para errores no manejados
+          Alert.alert("Error", error.message || "Error al iniciar sesión");
+        }
+      } else {
+        // Mensaje genérico si no hay detalles del error
+        Alert.alert("Error", "Ocurrió un error inesperado. Inténtalo nuevamente.");
+      }
     }
   };
 

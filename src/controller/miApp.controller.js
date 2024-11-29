@@ -397,3 +397,27 @@ export const searchUsers = async (query, token) => {
     throw error;
   }
 };
+
+export const deleteUserAccount = async token => {
+  let url = urlWebServices.deleteAccount;
+
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error deleting account');
+    }
+
+    return true; // Si se elimina correctamente
+  } catch (error) {
+    console.error('Error en deleteUserAccount:', error);
+    throw error;
+  }
+};
