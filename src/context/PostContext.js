@@ -1,15 +1,24 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useCallback, useState } from 'react';
 
 const PostContext = createContext(null);
 
 export const PostProvider = ({ children }) => {
-  const updatePost = (updatedPost) => {
+  const [updatedPosts, setUpdatedPosts] = useState({});
+
+  const updatePost = useCallback((updatedPost) => {
     if (!updatedPost?._id) return;
-    // Esta función será sobrescrita por el HomeScreen
-  };
+    setUpdatedPosts(prev => ({
+      ...prev,
+      [updatedPost._id]: updatedPost
+    }));
+  }, []);
+
+  const getUpdatedPost = useCallback((postId) => {
+    return updatedPosts[postId];
+  }, [updatedPosts]);
 
   return (
-    <PostContext.Provider value={{ updatePost }}>
+    <PostContext.Provider value={{ updatePost, getUpdatedPost, updatedPosts }}>
       {children}
     </PostContext.Provider>
   );

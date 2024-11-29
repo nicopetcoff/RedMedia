@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useUserContext} from '../context/AuthProvider';
+import {usePost} from '../context/PostContext';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
 import {getTimelinePosts, getAds} from '../controller/miApp.controller';
@@ -21,12 +22,13 @@ import {getTimelinePosts, getAds} from '../controller/miApp.controller';
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [ads, setAds] = useState([]);
-  const [loading, setLoading] = useState(false); // Cambiado a false inicialmente
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const {token} = useUserContext();
   const navigation = useNavigation();
+  const postContext = usePost();
 
   const updatePost = useCallback(updatedPost => {
     if (!updatedPost?._id) return;
@@ -36,6 +38,10 @@ const HomeScreen = () => {
       ),
     );
   }, []);
+
+  useEffect(() => {
+    postContext.updatePost = updatePost;
+  }, [updatePost, postContext]);
   const fetchData = useCallback(
     async (isLoadMore = false) => {
       if (isLoadMore && loadingMore) return;
@@ -43,7 +49,7 @@ const HomeScreen = () => {
       try {
         if (isLoadMore) {
           setLoadingMore(true);
-        } else {
+        } else if (!refreshing) {
           setLoading(true);
         }
 
@@ -52,7 +58,6 @@ const HomeScreen = () => {
           getAds(),
         ]);
 
-        // Validar las respuestas antes de actualizar el estado
         if (postsResponse?.data && Array.isArray(postsResponse.data)) {
           const sortedPosts = postsResponse.data.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
@@ -78,7 +83,7 @@ const HomeScreen = () => {
         setRefreshing(false);
       }
     },
-    [token],
+    [token, loadingMore, refreshing],
   );
 
   const refreshData = useCallback(async () => {
@@ -88,12 +93,10 @@ const HomeScreen = () => {
     await fetchData(false);
   }, [fetchData, refreshing]);
 
-  // Efecto inicial para cargar datos
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Efecto para manejar el focus de la pantalla
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       if (!refreshing && !loading) {
@@ -117,6 +120,7 @@ const HomeScreen = () => {
         const randomAd = ads[adIndex];
         return (
           <TouchableOpacity
+            key={`ad-${index}-${Date.now()}`}
             style={styles.adContainer}
             onPress={() => Linking.openURL(randomAd.Url)}>
             <Image
@@ -131,12 +135,12 @@ const HomeScreen = () => {
       if (!item?._id) return null;
 
       return (
-        <View style={styles.postContainer}>
-          <Post item={item} source="Home" updatePost={updatePost} />
+        <View style={styles.postContainer} key={`post-container-${item._id}`}>
+          <Post item={item} source="Home" />
         </View>
       );
     },
-    [ads, adIndices, updatePost],
+    [ads, adIndices],
   );
 
   const renderEmptyComponent = useCallback(() => {
@@ -144,14 +148,17 @@ const HomeScreen = () => {
       return (
         <View style={styles.skeletonContainer}>
           {[...Array(6)].map((_, index) => (
-            <Skeleton key={index} style={styles.skeleton} />
+            <Skeleton key={`skeleton-${index}`} style={styles.skeleton} />
           ))}
         </View>
       );
     }
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No hay publicaciones para mostrar</Text>
+        <Text style={styles.emptyText}>
+          You are not following anyone yet. Find your friends using the search
+          icon or create a new post
+        </Text>
       </View>
     );
   }, [loading]);
@@ -181,7 +188,7 @@ const HomeScreen = () => {
         <FlatList
           data={posts}
           renderItem={renderPost}
-          keyExtractor={item => item._id}
+          keyExtractor={item => `post-${item._id}-${item.user}`}
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={[
@@ -199,6 +206,7 @@ const HomeScreen = () => {
           maxToRenderPerBatch={3}
           windowSize={5}
           removeClippedSubviews={Platform.OS === 'android'}
+          updateCellsBatchingPeriod={50}
         />
       </View>
     </SafeAreaView>
@@ -285,7 +293,10 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#657786',
+    color: '#555', // Color gris para un tono suave
+    textAlign: 'center',
+    marginTop: 50,
+    paddingHorizontal: 10, // Asegura que el texto no toque los bordes
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   footerLoader: {
