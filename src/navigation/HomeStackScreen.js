@@ -1,4 +1,3 @@
-// HomeStackScreen.js
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {TouchableOpacity} from 'react-native';
@@ -16,6 +15,9 @@ const HomeStackScreen = () => {
     <Stack.Navigator
       screenOptions={{
         headerBackTitleVisible: false,
+        unmountOnBlur: true,
+        detachInactiveScreens: true,
+        ...defaultScreenOptions,
       }}>
       <Stack.Screen
         name="Home"
@@ -37,7 +39,7 @@ const HomeStackScreen = () => {
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={({route, navigation}) => ({
+        options={({navigation}) => ({
           headerTitle: '',
           headerStyle: {
             backgroundColor: colors.background, 
@@ -47,6 +49,24 @@ const HomeStackScreen = () => {
       />
     </Stack.Navigator>
   );
+};
+
+const defaultScreenOptions = {
+  headerBackTitleVisible: false,
+  headerStyle: {
+    elevation: 0,
+    shadowOpacity: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  headerTitleStyle: {
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+  headerTintColor: '#000',
+  cardStyle: {
+    backgroundColor: '#ffffff',
+  },
 };
 
 export default HomeStackScreen;

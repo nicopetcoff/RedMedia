@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   Image,
   TouchableOpacity,
@@ -10,14 +9,15 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Platform,
-  PermissionsAndroid,
+  TextInput,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserContext, useToggleContext } from '../context/AuthProvider';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { updateUserProfile, getUserData } from '../controller/miApp.controller';
 import { useToggleMode } from '../context/ThemeContext';
+import { updateUserProfile, getUserData, deleteUserAccount } from '../controller/miApp.controller';
 
 const EditProfileScreen = ({ navigation, route }) => {
   const { avatar } = route.params;
@@ -27,7 +27,7 @@ const EditProfileScreen = ({ navigation, route }) => {
   const [nickname, setNickname] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [gender, setGender] = useState('');
+  const [gender, setGender] = useState('Not specified');
   const [profileImage, setProfileImage] = useState(avatar);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,6 +47,7 @@ const EditProfileScreen = ({ navigation, route }) => {
       setName(userData.data.nombre || '');
       setDescription(userData.data.bio || '');
       setProfileImage(userData.data.avatar || avatar);
+      setGender(userData.data.genero || 'Not specified');
     } catch (error) {
       showMessage('Error loading user data: ' + error.message);
     } finally {
@@ -66,6 +67,31 @@ const EditProfileScreen = ({ navigation, route }) => {
     ]);
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This action cannot be undone. Are you sure you want to delete your account?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Yes, delete',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await deleteUserAccount(token);
+              Alert.alert('Account Deleted', 'Your account has been deleted.');
+              signOut();
+            } catch (error) {
+              showMessage('Error deleting account: ' + error.message);
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleUpdateProfile = async () => {
     if (loading) return;
 
@@ -74,6 +100,7 @@ const EditProfileScreen = ({ navigation, route }) => {
       const updateData = {
         nombre: name,
         bio: description,
+        genero: gender,
       };
 
       await updateUserProfile(updateData, token);
@@ -113,53 +140,8 @@ const EditProfileScreen = ({ navigation, route }) => {
     }
   };
 
-  const requestGalleryPermission = async () => {
-    if (Platform.OS === 'ios') return true;
-
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        {
-          title: 'Gallery Permission',
-          message: 'This app needs access to your gallery to update your profile picture.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        }
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn(err);
-      return false;
-    }
-  };
-
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'ios') return true;
-
-    try {
-      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
-        title: 'Camera Permission',
-        message: 'This app needs access to your camera to take a profile picture.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      });
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn(err);
-      return false;
-    }
-  };
-
   const pickImage = async () => {
     try {
-      const hasPermission = await requestGalleryPermission();
-      if (!hasPermission) {
-        Alert.alert('Error', 'Permission to access gallery is required.');
-        return;
-      }
-
       const options = {
         mediaType: 'photo',
         includeBase64: false,
@@ -179,12 +161,6 @@ const EditProfileScreen = ({ navigation, route }) => {
 
   const takePhoto = async () => {
     try {
-      const hasPermission = await requestCameraPermission();
-      if (!hasPermission) {
-        Alert.alert('Error', 'Permission to access camera is required.');
-        return;
-      }
-
       const options = {
         mediaType: 'photo',
         includeBase64: false,
@@ -255,7 +231,6 @@ const EditProfileScreen = ({ navigation, route }) => {
             placeholder="Nickname"
              placeholderTextColor="#999"
             value={nickname}
-            onChangeText={setNickname}
             style={[styles.input, { color: '#999' }]}
             editable={false}
           />
@@ -276,14 +251,19 @@ const EditProfileScreen = ({ navigation, route }) => {
             multiline
             editable={!loading}
           />
-          <TextInput
-            placeholder="Gender"
-             placeholderTextColor="#999"
-            value={gender}
-            onChangeText={setGender}
-            style={[styles.input,{color:colors.text}]}
-            editable={!loading}
-          />
+          <View style={styles.pickerContainer}>
+            <Text style={[styles.label,{color:colors.text}]}>Gender:</Text>
+            <Picker
+              selectedValue={gender}
+              style={styles.picker}
+              onValueChange={(itemValue) => setGender(itemValue)}
+              enabled={!loading}
+            >
+              <Picker.Item label="Male" value="Masculino" />
+              <Picker.Item label="Female" value="Femenino" />
+              <Picker.Item label="Prefer not to say" value="Not specified" />
+            </Picker>
+          </View>
         </View>
 
         <View style={styles.settingsSection}>
@@ -301,15 +281,11 @@ const EditProfileScreen = ({ navigation, route }) => {
           </View>
 
           <TouchableOpacity
-            style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-            onPress={handleUpdateProfile}
+            style={styles.deleteButton}
+            onPress={handleDeleteAccount}
             disabled={loading}
           >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.saveButtonText}>Save changes</Text>
-            )}
+            <Text style={[styles.deleteText, loading && styles.disabledText]}>Delete Account</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -318,19 +294,6 @@ const EditProfileScreen = ({ navigation, route }) => {
             disabled={loading}
           >
             <Text style={[styles.logoutText, loading && styles.disabledText]}>Logout</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.deleteButton}
-            disabled={loading}
-            onPress={() =>
-              Alert.alert('Delete Account', 'This action cannot be undone. Are you sure?', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive' },
-              ])
-            }
-          >
-            <Text style={[styles.deleteText, loading && styles.disabledText]}>Delete Account</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -422,43 +385,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 15,
   },
+  pickerContainer: {
+    marginBottom: 20,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   settingsSection: {
     marginHorizontal: 20,
     marginTop: 30,
     marginBottom: 50,
-  },
-  appearanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  lightText: {
-    marginRight: 10,
-    fontSize: 16,
-  },
-  darkText: {
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  saveButtonDisabled: {
-    opacity: 0.7,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   logoutButton: {
     padding: 15,
@@ -471,14 +413,15 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 15,
+    marginVertical: 10,
+    backgroundColor: '#FF3B30',
+    borderRadius: 10,
+    alignItems: 'center',
   },
   deleteText: {
-    color: '#FF3B30',
+    color: '#fff',
     fontSize: 16,
-    textAlign: 'center',
-  },
-  appearanceLabel: {
-    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

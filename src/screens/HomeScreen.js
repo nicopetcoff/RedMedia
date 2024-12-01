@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,11 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useUserContext } from '../context/AuthProvider';
+import {useNavigation} from '@react-navigation/native';
+import {useUserContext} from '../context/AuthProvider';
+import {usePost} from '../context/PostContext';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
 import { getTimelinePosts, getAds } from '../controller/miApp.controller';
@@ -21,124 +23,159 @@ import { useToggleMode } from '../context/ThemeContext';
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [ads, setAds] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
-  const { token } = useUserContext();
+  const {token} = useUserContext();
   const navigation = useNavigation();
-
+  const postContext = usePost();
   const { colors } = useToggleMode();
-  const updatePost = (updatedPost) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === updatedPost._id ? updatedPost : post
-      )
+
+  const updatePost = useCallback(updatedPost => {
+    if (!updatedPost?._id) return;
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === updatedPost._id ? updatedPost : post,
+      ),
     );
-  };
+  }, []);
 
-  const fetchData = async (isLoadMore = false) => {
-    if (isLoadMore && loadingMore) return; // Evitar múltiples cargas simultáneas
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else if (!refreshing) {
-      setLoading(true);
-    }
+  useEffect(() => {
+    postContext.updatePost = updatePost;
+  }, [updatePost, postContext]);
+  const fetchData = useCallback(
+    async (isLoadMore = false) => {
+      if (isLoadMore && loadingMore) return;
 
-    try {
-      const [postsResponse, adsResponse] = await Promise.all([
-        getTimelinePosts(token),
-        getAds(),
-      ]);
+      try {
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else if (!refreshing) {
+          setLoading(true);
+        }
 
-      setAds(adsResponse.data || []);
-      setPosts((prevPosts) =>
-        isLoadMore ? [...prevPosts, ...postsResponse.data] : postsResponse.data
-      );
+        const [postsResponse, adsResponse] = await Promise.all([
+          getTimelinePosts(token),
+          getAds(),
+        ]);
 
-      if (isLoadMore) {
-        setPage((prevPage) => prevPage + 1);
+        if (postsResponse?.data && Array.isArray(postsResponse.data)) {
+          const sortedPosts = postsResponse.data.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          );
+
+          setPosts(prevPosts =>
+            isLoadMore ? [...prevPosts, ...sortedPosts] : sortedPosts,
+          );
+        }
+
+        if (adsResponse?.data && Array.isArray(adsResponse.data)) {
+          setAds(adsResponse.data);
+        }
+
+        if (isLoadMore) {
+          setPage(prevPage => prevPage + 1);
+        }
+      } catch (error) {
+        console.error('Error al cargar los datos:', error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
       }
-    } catch (error) {
-      console.error('Error al cargar los datos:', error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-      setRefreshing(false);
-    }
-  };
+    },
+    [token, loadingMore, refreshing],
+  );
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
+    if (refreshing) return;
     setPage(1);
     setRefreshing(true);
     await fetchData(false);
-  };
+  }, [fetchData, refreshing]);
 
   useEffect(() => {
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       if (!refreshing && !loading) {
         refreshData();
       }
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, refreshing, loading, refreshData]);
 
   const adIndices = useMemo(() => {
+    if (!ads.length) return [];
     return posts.map((_, index) =>
-      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null
+      (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
     );
   }, [posts, ads]);
+  const renderPost = useCallback(
+    ({item, index}) => {
+      const adIndex = adIndices[index];
 
-  const renderItem = ({ item, index }) => {
-    const adIndex = adIndices[index];
+      if (adIndex !== null && ads[adIndex]) {
+        const randomAd = ads[adIndex];
+        return (
+          <TouchableOpacity
+            key={`ad-${index}-${Date.now()}`}
+            style={styles.adContainer}
+            onPress={() => Linking.openURL(randomAd.Url)}>
+            <Image
+              source={{uri: randomAd.imagePath[0].landscape}}
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+        );
+      }
 
-    if (adIndex !== null && ads[adIndex]) {
-      const randomAd = ads[adIndex];
+      if (!item?._id) return null;
+
       return (
-        <TouchableOpacity
-          style={styles.adContainer}
-          onPress={() => Linking.openURL(randomAd.Url)}
-        >
-          <Image
-            source={{ uri: randomAd.imagePath[0].landscape }}
-            style={styles.adImage}
-            resizeMode="cover"
-          />
-        </TouchableOpacity>
-      );
-    }
-
-    return (
-      <View style={styles.postContainer}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('PostDetail', {
-              postId: item._id,
-              previousScreen: 'Home',
-              updatePost,
-            })
-          }
-        >
+        <View style={styles.postContainer} key={`post-container-${item._id}`}>
           <Post item={item} source="Home" />
-        </TouchableOpacity>
-      </View>
-    );
-  };
+        </View>
+      );
+    },
+    [ads, adIndices],
+  );
 
-  if (loading && !refreshing) {
-    return (
-      <SafeAreaView style={[styles.safeArea,{backgroundColor:colors.background}]}>
+  const renderEmptyComponent = useCallback(() => {
+    if (loading) {
+      return (
         <View style={styles.skeletonContainer}>
           {[...Array(6)].map((_, index) => (
-            <Skeleton key={index} style={styles.skeleton} />
+            <Skeleton key={`skeleton-${index}`} style={styles.skeleton} />
           ))}
         </View>
-      </SafeAreaView>
+      );
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>
+          You are not following anyone yet. Find your friends using the search
+          icon or create a new post
+        </Text>
+      </View>
     );
-  }
+  }, [loading]);
 
+  const renderFooter = useCallback(() => {
+    if (loadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color="#1DA1F2" />
+        </View>
+      );
+    }
+    return null;
+  }, [loadingMore]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -153,22 +190,26 @@ const HomeScreen = () => {
 
         <FlatList
           data={posts}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => `${item._id || 'ad'}-${index}`}
+          renderItem={renderPost}
+          keyExtractor={item => `post-${item._id}-${item.user}`}
           numColumns={2}
           columnWrapperStyle={styles.row}
+          contentContainerStyle={[
+            styles.listContent,
+            posts.length === 0 && styles.emptyList,
+          ]}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
           refreshing={refreshing}
           onRefresh={refreshData}
-          onEndReached={() => fetchData(true)}
+          onEndReached={() => !loadingMore && fetchData(true)}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loadingMore && <ActivityIndicator size="small" color="#1DA1F2" />
-          }
-          initialNumToRender={10}
-          maxToRenderPerBatch={5}
+          ListEmptyComponent={renderEmptyComponent}
+          ListFooterComponent={renderFooter}
+          initialNumToRender={6}
+          maxToRenderPerBatch={3}
           windowSize={5}
+          removeClippedSubviews={Platform.OS === 'android'}
+          updateCellsBatchingPeriod={50}
         />
       </View>
     </SafeAreaView>
@@ -203,6 +244,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
   },
+  emptyList: {
+    flexGrow: 1,
+  },
   row: {
     justifyContent: 'space-between',
     marginHorizontal: 5,
@@ -217,10 +261,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     marginBottom: 15,
     height: 200,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   adImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 8,
   },
   skeletonContainer: {
     flex: 1,
@@ -235,6 +282,24 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 15,
     borderRadius: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#555', // Color gris para un tono suave
+    textAlign: 'center',
+    marginTop: 50,
+    paddingHorizontal: 10, // Asegura que el texto no toque los bordes
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: 'center',
   },
 });
 

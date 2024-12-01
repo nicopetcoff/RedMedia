@@ -14,6 +14,12 @@ const urlWebServices = {
   googleLogin: urlApi + "api/users/google",
   followUser: urlApi + "api/users/:id/follow",
   searchUsers: urlApi + 'api/users/search',
+<<<<<<< HEAD
+=======
+  deleteAccount: urlApi + 'api/users/me',
+
+  
+>>>>>>> 7eceb8e39a6f71ee9f9cfe600df2d739d9ff3f15
   // Posts
   getPosts: urlApi + 'api/posts',
   getFollowingPosts: urlApi + 'api/posts/following',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -9,8 +9,13 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { useUserContext } from '../context/AuthProvider';
-import { getUserData, getUsers, interactWithPost, handleFollowUser } from '../controller/miApp.controller';
+import {useUserContext} from '../context/AuthProvider';
+import {
+  getUserData,
+  getUsers,
+  interactWithPost,
+  handleFollowUser,
+} from '../controller/miApp.controller';
 import PostHeader from '../components/PostHeader';
 import PostImage from '../components/PostImage';
 import PostInteractionBar from '../components/PostInteractionBar';
@@ -18,23 +23,24 @@ import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
 import { useToggleMode } from '../context/ThemeContext';
 
-const PostDetail = ({ route, navigation }) => {
-  const { item, previousScreen, username, fromScreen, updatePost } = route.params || {};
-  const { token } = useUserContext();
+const PostDetail = ({route, navigation}) => {
+  const {item, previousScreen, username, fromScreen, updatePost} =
+    route.params || {};
+  const {token} = useUserContext();
 
+  const [currentPost, setCurrentPost] = useState(() =>
+    item ? JSON.parse(JSON.stringify(item)) : null,
+  );
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [currentPost, setCurrentPost] = useState(item);
   const [userData, setUserData] = useState(null);
   const [postUserData, setPostUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState(item?.comments || []);
-
   const { colors } = useToggleMode();
-
-  const getCurrentUserId = () => {
+  const getCurrentUserId = useCallback(() => {
     try {
       if (!token) return null;
       const base64Url = token.split('.')[1];
@@ -43,16 +49,18 @@ const PostDetail = ({ route, navigation }) => {
         atob(base64)
           .split('')
           .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .join(''),
       );
       return JSON.parse(jsonPayload).id;
     } catch (error) {
       console.error('Error getting user ID:', error);
       return null;
     }
-  };
+  }, [token]);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
+    if (!token || !currentPost?.user) return;
+
     try {
       setLoading(true);
       const [currentUserResponse, usersResponse] = await Promise.all([
@@ -63,30 +71,52 @@ const PostDetail = ({ route, navigation }) => {
       const currentUser = currentUserResponse.data;
       setUserData(currentUser);
 
-      // Verificar likes inicial
       if (currentPost?.likes && Array.isArray(currentPost.likes)) {
         setIsLiked(currentPost.likes.includes(currentUser.usernickname));
       }
 
-      if (currentPost?.user && usersResponse.data) {
-        const foundUser = usersResponse.data.find(
-          u => u.usernickname === currentPost.user
-        );
-        if (foundUser) {
-          const currentUserId = getCurrentUserId();
-          const isCurrentUserFollowing = foundUser.followers?.includes(currentUserId);
-          setPostUserData(foundUser);
-          setIsFollowing(isCurrentUserFollowing);
-        }
+      const foundUser = usersResponse.data.find(
+        u => u.usernickname === currentPost.user,
+      );
+
+      if (foundUser) {
+        const currentUserId = getCurrentUserId();
+        const isCurrentUserFollowing =
+          foundUser.followers?.includes(currentUserId);
+        setPostUserData(foundUser);
+        setIsFollowing(isCurrentUserFollowing);
       }
     } catch (error) {
-      console.error('Error al obtener datos de usuarios:', error);
+      console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, currentPost, getCurrentUserId]);
 
+  useEffect(() => {
+    if (token && currentPost?.user) {
+      fetchUserData();
+    }
+  }, [token, currentPost?.user, fetchUserData]);
+
+  useEffect(() => {
+    if (item && item._id !== currentPost?._id) {
+      setCurrentPost(JSON.parse(JSON.stringify(item)));
+      setComments(item.comments || []);
+    }
+  }, [item?._id]);
+
+  useEffect(() => {
+    return () => {
+      setCurrentPost(null);
+      setUserData(null);
+      setPostUserData(null);
+      setComments([]);
+    };
+  }, []);
   const toggleFollow = async () => {
+    if (!postUserData?._id) return;
+
     try {
       const newFollowState = !isFollowing;
       await handleFollowUser(postUserData._id, token, isFollowing);
@@ -104,71 +134,101 @@ const PostDetail = ({ route, navigation }) => {
   };
 
   const handleLike = async () => {
+    if (!currentPost?._id || !userData?.usernickname) return;
+
+    // Optimistic update
+    const newLikeState = !isLiked;
+    setIsLiked(newLikeState);
+
+    // Actualizar el post actual de manera optimista
+    setCurrentPost(prev => ({
+      ...prev,
+      likes: newLikeState
+        ? [...(prev.likes || []), userData.usernickname]
+        : (prev.likes || []).filter(like => like !== userData.usernickname),
+    }));
+
     try {
       const response = await interactWithPost(currentPost._id, token, 'like');
-      
+
       if (response.data) {
-        // Actualizar el estado local
+        // Actualizar con los datos del servidor
         setCurrentPost(response.data);
-        setIsLiked(response.data.likes.includes(userData?.usernickname));
-        
-        // Actualizar la lista principal
+
+        // Actualizar el timeline
         if (updatePost) {
           updatePost(response.data);
         }
       }
     } catch (error) {
+      // Revertir cambios en caso de error
+      setIsLiked(!newLikeState);
+      setCurrentPost(prev => ({
+        ...prev,
+        likes: !newLikeState
+          ? [...(prev.likes || []), userData.usernickname]
+          : (prev.likes || []).filter(like => like !== userData.usernickname),
+      }));
       console.error('Error al dar/quitar like:', error);
     }
   };
 
   const handleAddComment = async () => {
-    try {
-      if (!newComment.trim()) return;
+    if (!currentPost?._id || !newComment.trim() || !userData?.usernickname)
+      return;
 
-      const response = await interactWithPost(currentPost._id, token, 'comment', newComment);
-      
+    const optimisticComment = {
+      user: userData.usernickname,
+      comment: newComment.trim(),
+      createdAt: new Date().toISOString(),
+      _id: Date.now().toString(), // ID temporal para optimistic update
+    };
+
+    // Optimistic update
+    setComments(prev => [...prev, optimisticComment]);
+    setNewComment('');
+    setShowCommentInput(false);
+
+    try {
+      const response = await interactWithPost(
+        currentPost._id,
+        token,
+        'comment',
+        newComment.trim(),
+      );
+
       if (response.data) {
-        // Actualizar estado local
         setCurrentPost(response.data);
         setComments(response.data.comments);
-        setNewComment('');
-        setShowCommentInput(false);
-        
-        // Actualizar la lista principal
+
+        // Actualizar el timeline
         if (updatePost) {
           updatePost(response.data);
         }
       }
     } catch (error) {
+      // Revertir optimistic update en caso de error
+      setComments(prev =>
+        prev.filter(comment => comment._id !== optimisticComment._id),
+      );
       console.error('Error al agregar comentario:', error);
     }
   };
 
-  useEffect(() => {
-    if (token && currentPost?.user) {
-      fetchUserData();
+  const handleUserPress = useCallback(() => {
+    if (!isOwnPost && currentPost?.user) {
+      navigation.push('Profile', {
+        username: currentPost.user,
+        fromScreen: previousScreen || 'Home',
+        timestamp: Date.now(),
+      });
     }
-  }, [token, currentPost]);
-
-  useEffect(() => {
-    if (currentPost?.sold) {
-      if (previousScreen === 'Profile') {
-        navigation.navigate('Profile', {
-          username,
-          fromScreen: fromScreen || 'Home',
-        });
-      } else {
-        navigation.goBack();
-      }
-    }
-  }, [currentPost, navigation, previousScreen, username, fromScreen]);
-
-  if (!currentPost || currentPost.sold) {
+  }, [isOwnPost, currentPost?.user, navigation, previousScreen]);
+  if (!currentPost) {
     return null;
   }
 
-  if (loading) {
+  if (loading && !userData && !postUserData) {
     return (
       <View style={[styles.loaderContainer,{backgroundColor:colors.post}]}>
         <ActivityIndicator size="large" color="#1DA1F2" />
@@ -177,15 +237,6 @@ const PostDetail = ({ route, navigation }) => {
   }
 
   const isOwnPost = userData?.usernickname === currentPost.user;
-
-  const handleUserPress = () => {
-    if (!isOwnPost) {
-      navigation.navigate('Profile', {
-        username: currentPost.user,
-        fromScreen: previousScreen || 'Home',
-      });
-    }
-  };
 
   return (
     <ScrollView contentContainerStyle={[styles.container,{backgroundColor: colors.background}]}>
@@ -202,7 +253,9 @@ const PostDetail = ({ route, navigation }) => {
       </TouchableOpacity>
 
       <View style={styles.titleContainer}>
-        {currentPost.title && <Text style={[styles.title,{color:colors.text}]}>{currentPost.title}</Text>}
+        {currentPost.title && (
+          <Text style={[styles.title,{color:colors.text}]}>{currentPost.title}</Text>
+        )}
         {currentPost.description ? (
           <Text style={styles.description}>{currentPost.description}</Text>
         ) : (
@@ -226,12 +279,12 @@ const PostDetail = ({ route, navigation }) => {
       />
 
       <View style={styles.line} />
-      
+
       <View style={styles.likeSection}>
         <Text style={[styles.likeText,{color:colors.text}]}>
-          Le gusta a <Text style={styles.boldText}>
-            {currentPost.likes?.length || 0}
-          </Text> personas
+          Le gusta a{' '}
+          <Text style={styles.boldText}>{currentPost.likes?.length || 0}</Text>{' '}
+          personas
         </Text>
       </View>
 
@@ -246,11 +299,13 @@ const PostDetail = ({ route, navigation }) => {
             placeholder="Escribe un comentario..."
             autoFocus
           />
-          <TouchableOpacity 
-            style={[styles.sendButton, !newComment.trim() && styles.sendButtonDisabled]}
+          <TouchableOpacity
+            style={[
+              styles.sendButton,
+              !newComment.trim() && styles.sendButtonDisabled,
+            ]}
             onPress={handleAddComment}
-            disabled={!newComment.trim()}
-          >
+            disabled={!newComment.trim()}>
             <Text style={styles.sendButtonText}>Enviar</Text>
           </TouchableOpacity>
         </View>
@@ -339,6 +394,9 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
 });
 

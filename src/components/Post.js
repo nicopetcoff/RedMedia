@@ -1,27 +1,33 @@
 import React, {memo, useCallback} from 'react';
-import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import { useToggleMode } from '../context/ThemeContext';
+import {usePost} from '../context/PostContext';
 
-const Post = ({item}) => {
+const Post = ({item, source}) => {
   const navigation = useNavigation();
   const route = useRoute();
+  const {updatePost} = usePost();
   const imageUri = Array.isArray(item.image) ? item.image[0] : item.image;
 
   const { colors } = useToggleMode();
 
   const navigateToDetail = useCallback(() => {
     const params = {
-      item,
-      previousScreen: route.name,
-      fromScreen: route.name,
+      item: {...item},
+      previousScreen: source || route.name,
+      fromScreen: source || route.name,
       username: item.user,
     };
     navigation.navigate('PostDetail', params);
-  }, [navigation, route.name, item]);
+  }, [navigation, route.name, item, source]);
 
   return (
-    <TouchableOpacity onPress={navigateToDetail} style={[styles.container,{backgroundColor: colors.background}]}>
+    <TouchableOpacity 
+      onPress={navigateToDetail} 
+      style={[styles.container,{backgroundColor: colors.background}]}
+      key={`post-${item._id}-${item.user}`}
+    >
       <Image source={{uri: imageUri}} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={[styles.title,{color:colors.text}]} numberOfLines={2}>
@@ -54,12 +60,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 2,
-    fontFamily: 'Roboto',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   username: {
     fontSize: 12,
     color: '#657786',
-    fontFamily: 'Roboto',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
 });
 
