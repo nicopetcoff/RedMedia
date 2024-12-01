@@ -16,6 +16,7 @@ import { useUserContext } from '../context/AuthProvider';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
 import { getTimelinePosts, getAds } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -27,6 +28,7 @@ const HomeScreen = () => {
   const { token } = useUserContext();
   const navigation = useNavigation();
 
+  const { colors } = useToggleMode();
   const updatePost = (updatedPost) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
@@ -73,6 +75,7 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
+
     fetchData();
     const unsubscribe = navigation.addListener('focus', () => {
       if (!refreshing && !loading) {
@@ -126,7 +129,7 @@ const HomeScreen = () => {
 
   if (loading && !refreshing) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={[styles.safeArea,{backgroundColor:colors.background}]}>
         <View style={styles.skeletonContainer}>
           {[...Array(6)].map((_, index) => (
             <Skeleton key={index} style={styles.skeleton} />
@@ -139,13 +142,13 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.headerContainer}>
           <Image
             source={require('../assets/imgs/logo.png')}
             style={styles.logo}
           />
-          <Text style={styles.header}>REDMEDIA</Text>
+          <Text style={[styles.header,{color:colors.text}]}>REDMEDIA</Text>
         </View>
 
         <FlatList
@@ -175,11 +178,9 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -188,7 +189,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#efefef',
-    backgroundColor: '#fff',
   },
   logo: {
     width: 50,
@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'black',
   },
   listContent: {
     paddingHorizontal: 10,
@@ -230,13 +229,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 15,
     paddingTop: 10,
-    backgroundColor: '#fff',
   },
   skeleton: {
     width: '48%',
     height: 200,
     marginBottom: 15,
-    backgroundColor: '#f0f0f0',
     borderRadius: 8,
   },
 });

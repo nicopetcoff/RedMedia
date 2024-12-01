@@ -1,11 +1,14 @@
 import React, {memo, useCallback} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import { useToggleMode } from '../context/ThemeContext';
 
 const Post = ({item}) => {
   const navigation = useNavigation();
   const route = useRoute();
   const imageUri = Array.isArray(item.image) ? item.image[0] : item.image;
+
+  const { colors } = useToggleMode();
 
   const navigateToDetail = useCallback(() => {
     const params = {
@@ -18,10 +21,10 @@ const Post = ({item}) => {
   }, [navigation, route.name, item]);
 
   return (
-    <TouchableOpacity onPress={navigateToDetail} style={styles.container}>
+    <TouchableOpacity onPress={navigateToDetail} style={[styles.container,{backgroundColor: colors.background}]}>
       <Image source={{uri: imageUri}} style={styles.image} />
       <View style={styles.textContainer}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={[styles.title,{color:colors.text}]} numberOfLines={2}>
           {item.title}
         </Text>
         <Text style={styles.username}>@{item.user}</Text>
@@ -33,7 +36,6 @@ const Post = ({item}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
     marginBottom: 2,
     borderRadius: 12,
     overflow: 'hidden',

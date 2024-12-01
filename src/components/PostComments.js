@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useToggleMode } from '../context/ThemeContext';
 
 const PostComments = ({ comments }) => {
+  const { colors } = useToggleMode();
   if (!comments || comments.length === 0) {
     return <Text style={styles.noCommentsText}>No hay comentarios aún</Text>;
   }
@@ -9,9 +11,9 @@ const PostComments = ({ comments }) => {
   return (
     <View style={styles.commentSection}>
       {comments.map((comment, index) => (
-        <View key={index} style={styles.commentContainer}>
-          <Text style={styles.commentUsername}>{comment.username}</Text>
-          <Text style={styles.commentText}>{comment.comment}</Text>
+        <View key={index} style={[styles.commentContainer,{color:colors.text}]}>
+          <Text style={[styles.commentUsername,{color:colors.details}]}>{comment.username}</Text>
+          <Text style={[styles.commentText,{color:colors.details}]}>{comment.comment}</Text>
         </View>
       ))}
     </View>
@@ -30,7 +32,6 @@ const styles = StyleSheet.create({
   commentUsername: {
     fontWeight: 'bold',
     marginRight: 5,
-    color: '#333',
   },
   commentText: {
     fontSize: 14,

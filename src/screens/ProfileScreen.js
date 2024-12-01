@@ -19,6 +19,7 @@ import {
   handleFollowUser,
 } from '../controller/miApp.controller';
 import {useUserContext} from '../context/AuthProvider';
+import { useToggleMode } from '../context/ThemeContext';
 
 const {width: windowWidth} = Dimensions.get('window');
 
@@ -33,6 +34,8 @@ const ProfileScreen = ({route, navigation}) => {
   const [error, setError] = useState(null);
   const [followersData, setFollowersData] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
+
+  const { colors } = useToggleMode();
 
   const getCurrentUserId = () => {
     try {
@@ -203,7 +206,7 @@ const ProfileScreen = ({route, navigation}) => {
             style={styles.avatar}
           />
           <View style={styles.userDetails}>
-            <Text style={styles.name}>
+            <Text style={[styles.name,{color:colors.text}]}>
               {user.nombre} {user.apellido}
             </Text>
             <Text style={styles.username}>@{user.usernickname}</Text>
@@ -212,19 +215,19 @@ const ProfileScreen = ({route, navigation}) => {
 
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statText}>{userPosts.length}</Text>
+            <Text style={[styles.statText,{color:colors.text}]}>{userPosts.length}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <TouchableOpacity
             style={styles.statItem}
             onPress={() => setShowFollowers(true)}>
-            <Text style={styles.statText}>
+            <Text style={[styles.statText,{color:colors.text}]}>
               {user.followers ? user.followers.length : 0}
             </Text>
             <Text style={styles.statLabel}>Followers</Text>
           </TouchableOpacity>
           <View style={styles.statItem}>
-            <Text style={styles.statText}>
+            <Text style={[styles.statText,{color:colors.text}]}>
               {user.following ? user.following.length : 0}
             </Text>
             <Text style={styles.statLabel}>Following</Text>
@@ -239,7 +242,7 @@ const ProfileScreen = ({route, navigation}) => {
           style={[
             styles.followButton,
             isFollowing && styles.followingButton,
-            followLoading && styles.disabledButton,
+            followLoading && styles.disabledButton,{backgroundColor:colors.background}
           ]}
           onPress={handleFollowPress}
           disabled={followLoading}>
@@ -264,7 +267,7 @@ const ProfileScreen = ({route, navigation}) => {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={[styles.loaderContainer,{backgroundColor:colors.post}]}>
         <ActivityIndicator size="large" color="#1DA1F2" />
       </View>
     );
@@ -287,7 +290,7 @@ const ProfileScreen = ({route, navigation}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor:colors.background}]}>
       <FlatList
         data={userPosts}
         renderItem={({item}) => (
@@ -323,7 +326,6 @@ const ProfileScreen = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   errorContainer: {
     flex: 1,
@@ -411,7 +413,6 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   followButton: {
-    backgroundColor: '#1DA1F2',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 24,
@@ -422,7 +423,6 @@ const styles = StyleSheet.create({
     height: 36,
   },
   followingButton: {
-    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#1DA1F2',
   },

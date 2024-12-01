@@ -18,6 +18,7 @@ import Post from '../components/Post';
 import {getPosts, getUserData, getUsers} from '../controller/miApp.controller';
 import {useUserContext} from '../context/AuthProvider';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import { useToggleMode } from '../context/ThemeContext';
 
 const {width} = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 30) / 2;
@@ -34,6 +35,7 @@ const LoggedInUserProfileScreen = () => {
 
   const {token} = useUserContext();
   const navigation = useNavigation();
+  const { colors } = useToggleMode();
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -187,14 +189,14 @@ const LoggedInUserProfileScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={[styles.loaderContainer,{backgroundColor:colors.post}]}>
         <ActivityIndicator size="large" color="#1FA1FF" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor: colors.background}]}>
       <FlatList
         data={userPosts}
         renderItem={renderPost}
@@ -232,7 +234,6 @@ const LoggedInUserProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   contentContainer: {
     flexGrow: 1,

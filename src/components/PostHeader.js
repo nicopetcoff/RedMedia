@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {useUserContext} from '../context/AuthProvider';
 import {handleFollowUser} from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const PostHeader = ({
   userAvatar,
@@ -23,6 +24,7 @@ const PostHeader = ({
   const {token} = useUserContext();
   const [loading, setLoading] = useState(false);
   const [followState, setFollowState] = useState(isFollowing);
+  const { colors } = useToggleMode();
 
   useEffect(() => {
     if (isFollowing !== undefined) {
@@ -65,8 +67,8 @@ const PostHeader = ({
           }
           style={styles.avatar}
         />
-        <View style={styles.userInfo}>
-          <Text style={styles.username}>{user}</Text>
+        <View style={[styles.userInfo]}>
+          <Text style={[styles.username,{color:colors.text}]}>{user}</Text>
         </View>
       </View>
       {!isOwnPost && (
@@ -87,7 +89,7 @@ const PostHeader = ({
             <Text
               style={[
                 styles.followButtonText,
-                followState && styles.followingButtonText,
+                followState && styles.followingButtonText,{color:colors.post},
               ]}>
               {followState ? 'Following' : 'Follow'}
             </Text>

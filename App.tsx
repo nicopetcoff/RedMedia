@@ -6,6 +6,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { Alert, StatusBar } from "react-native";
 import RNRestart from 'react-native-restart';
 import SplashScreen from 'react-native-splash-screen';
+import {ThemeProvider} from "./src/context/ThemeContext";
 
 
 const App = () => {
@@ -40,9 +41,11 @@ const App = () => {
         barStyle="dark-content" 
         backgroundColor="#ffffff" 
       />
-      <AuthProvider>
-        <AppNavigator />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppNavigator />
+        </AuthProvider>
+      </ThemeProvider>
     </>
   );
 };

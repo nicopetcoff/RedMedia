@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserContext, useToggleContext } from '../context/AuthProvider';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { updateUserProfile, getUserData } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const EditProfileScreen = ({ navigation, route }) => {
   const { avatar } = route.params;
@@ -27,10 +28,11 @@ const EditProfileScreen = ({ navigation, route }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [gender, setGender] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileImage, setProfileImage] = useState(avatar);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const { toggleTheme, isDark,colors } = useToggleMode();
 
   useEffect(() => {
     loadUserData();
@@ -200,9 +202,12 @@ const EditProfileScreen = ({ navigation, route }) => {
     }
   };
 
+  const handleChangeTheme = () =>  toggleTheme
+  
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+    <SafeAreaView style={[styles.safeArea,{backgroundColor:colors.background}]}>
+      <ScrollView style={[styles.container,{backgroundColor:colors.background}]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Text style={styles.closeButtonText}>×</Text>
         </TouchableOpacity>
@@ -248,6 +253,7 @@ const EditProfileScreen = ({ navigation, route }) => {
           <Text style={styles.sectionTitle}>PROFILE</Text>
           <TextInput
             placeholder="Nickname"
+             placeholderTextColor="#999"
             value={nickname}
             onChangeText={setNickname}
             style={[styles.input, { color: '#999' }]}
@@ -255,24 +261,27 @@ const EditProfileScreen = ({ navigation, route }) => {
           />
           <TextInput
             placeholder="Name"
+             placeholderTextColor="#999"
             value={name}
             onChangeText={setName}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             editable={!loading}
           />
           <TextInput
             placeholder="Description"
+             placeholderTextColor="#999"
             value={description}
             onChangeText={setDescription}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             multiline
             editable={!loading}
           />
           <TextInput
             placeholder="Gender"
+             placeholderTextColor="#999"
             value={gender}
             onChangeText={setGender}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             editable={!loading}
           />
         </View>
@@ -280,15 +289,14 @@ const EditProfileScreen = ({ navigation, route }) => {
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>SETTINGS</Text>
           <View style={styles.appearanceRow}>
-            <Text style={styles.appearanceLabel}>Appearance:</Text>
+            <Text style={[styles.appearanceLabel,{color:colors.text}]}>Appearance:</Text>
             <View style={styles.switchContainer}>
-              <Text style={styles.lightText}>Light</Text>
+              <Text style={[styles.lightText,{color:colors.text}]}>Light</Text>
               <Switch
-                value={isDarkMode}
-                onValueChange={setIsDarkMode}
-                disabled={loading}
+                value={isDark}
+                onValueChange={handleChangeTheme()}
               />
-              <Text style={styles.darkText}>Dark</Text>
+              <Text style={[styles.darkText,{color:colors.text}]}>Dark</Text>
             </View>
           </View>
 
@@ -337,7 +345,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   closeButton: {
     alignSelf: 'flex-start',

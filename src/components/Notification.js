@@ -2,9 +2,11 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image,TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import { useToggleMode } from '../context/ThemeContext';
 
 const Notification = ({item}) => {
   const navigation = useNavigation();
+  const {colors} = useToggleMode();
 
   const getImage = () => {
     switch (item.type) {
@@ -23,24 +25,24 @@ const Notification = ({item}) => {
     <View style={styles.Notification}>
       <Image source={getImage()} style={styles.imagen} />
       <View style={styles.activityItem}>
-        <Text style={styles.activityType}>{item.type}</Text>
+        <Text style={[styles.activityType,{color:colors.text}]}>{item.type}</Text>
         <View style={styles.action}>
           {item.icon}
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('profile', {username: item.user})
             } style={styles.action}>
-            <Text style={styles.activityUser}>{item.user}</Text>
+            <Text style={[styles.activityUser,{color:colors.text}]}>{item.user}</Text>
             </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={() => 
               navigation.navigate('PostDetail', {item: item.post})}>
-            <Text style={styles.activityText}>{item.text}</Text>
+            <Text style={[styles.activityText,{color:colors.text}]}>{item.text}</Text>
           </TouchableOpacity>     
 
         </View>
-        <Text style={styles.activityTime}>{item.time}</Text>
+        <Text style={[styles.activityTime,{color:colors.details}]}>{item.time}</Text>
       </View>
     </View>
   );
@@ -55,7 +57,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     padding: 1,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(242, 244, 245, 0.5)',
     flex: 1,
   },
   activityType: {
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     lineHeight: 22,
     fontSize: 17,
-    color: 'black',
     marginRight: 5,
   },
   action: {
@@ -74,18 +74,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
     fontFamily: 'Roboto',
-    color: 'black',
   },
   activityText: {
     marginLeft: 8,
     fontSize: 16,
-    color: 'black',
     fontFamily: 'Roboto',
   },
   activityTime: {
     marginTop: 5,
     alignSelf: 'flex-end',
-    color: '#999',
     fontSize: 12,
   },
 });

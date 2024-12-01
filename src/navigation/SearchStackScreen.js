@@ -3,11 +3,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { TouchableOpacity } from 'react-native';
 import SearchScreen from '../screens/SearchScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import BackIcon from '../assets/imgs/back.svg'; // Importa tu icono de retroceso
+import { useToggleMode } from '../context/ThemeContext';
 
 const Stack = createStackNavigator();
 
 const SearchStackScreen = () => {
+  const {colors} = useToggleMode();
   return (
     <Stack.Navigator>
       {/* Cambiamos el nombre a "SearchHome" para evitar conflictos */}
@@ -19,13 +20,12 @@ const SearchStackScreen = () => {
       <Stack.Screen
         name="UserProfile"
         component={ProfileScreen}
-        options={({ navigation }) => ({
+        options={() => ({
           headerTitle: '',
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 10 }}>
-              <BackIcon width={24} height={24} />
-            </TouchableOpacity>
-          ),
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: colors.text,
         })}
       />
     </Stack.Navigator>

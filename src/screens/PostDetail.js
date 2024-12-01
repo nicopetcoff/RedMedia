@@ -16,6 +16,7 @@ import PostImage from '../components/PostImage';
 import PostInteractionBar from '../components/PostInteractionBar';
 import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
+import { useToggleMode } from '../context/ThemeContext';
 
 const PostDetail = ({ route, navigation }) => {
   const { item, previousScreen, username, fromScreen, updatePost } = route.params || {};
@@ -30,6 +31,8 @@ const PostDetail = ({ route, navigation }) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState(item?.comments || []);
+
+  const { colors } = useToggleMode();
 
   const getCurrentUserId = () => {
     try {
@@ -167,7 +170,7 @@ const PostDetail = ({ route, navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={[styles.loaderContainer,{backgroundColor:colors.post}]}>
         <ActivityIndicator size="large" color="#1DA1F2" />
       </View>
     );
@@ -185,7 +188,7 @@ const PostDetail = ({ route, navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container,{backgroundColor: colors.background}]}>
       <TouchableOpacity onPress={handleUserPress} disabled={isOwnPost}>
         <PostHeader
           userAvatar={isOwnPost ? userData?.avatar : postUserData?.avatar}
@@ -199,7 +202,7 @@ const PostDetail = ({ route, navigation }) => {
       </TouchableOpacity>
 
       <View style={styles.titleContainer}>
-        {currentPost.title && <Text style={styles.title}>{currentPost.title}</Text>}
+        {currentPost.title && <Text style={[styles.title,{color:colors.text}]}>{currentPost.title}</Text>}
         {currentPost.description ? (
           <Text style={styles.description}>{currentPost.description}</Text>
         ) : (
@@ -225,7 +228,7 @@ const PostDetail = ({ route, navigation }) => {
       <View style={styles.line} />
       
       <View style={styles.likeSection}>
-        <Text style={styles.likeText}>
+        <Text style={[styles.likeText,{color:colors.text}]}>
           Le gusta a <Text style={styles.boldText}>
             {currentPost.likes?.length || 0}
           </Text> personas
@@ -266,7 +269,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   titleContainer: {
     paddingHorizontal: 15,
@@ -275,7 +277,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#000',
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   description: {
@@ -292,13 +293,13 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 12,
-    color: '#555',
+    color: '#848383',
     marginLeft: 4,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   line: {
     height: 1,
-    backgroundColor: '#E1E8ED',
+    backgroundColor: '#848383',
     marginHorizontal: 15,
     marginVertical: 10,
   },

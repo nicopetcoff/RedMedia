@@ -15,6 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {updateUserProfile} from '../controller/miApp.controller';
 import {useUserContext} from '../context/AuthProvider';
+import { useToggleMode } from '../context/ThemeContext';
 
 const {width: windowWidth} = Dimensions.get('window');
 
@@ -30,6 +31,7 @@ const MyProfileHeader = ({
   const navigation = useNavigation();
   const {token} = useUserContext();
   const [loading, setLoading] = useState(false);
+  const { colors } = useToggleMode();
 
   const handleEditPress = () => {
     navigation.navigate('EditProfile', {avatar: userData?.avatar});
@@ -107,7 +109,7 @@ const MyProfileHeader = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor: colors.background}]}>
       <TouchableOpacity
         onPress={handleUpdateCover}
         style={styles.coverContainer}
@@ -153,30 +155,30 @@ const MyProfileHeader = ({
 
       <View style={styles.mainContent}>
         <View style={styles.userInfo}>
-          <Text style={styles.name}>
+          <Text style={[styles.name,{color:colors.text}]}>
             {userData?.nombre} {userData?.apellido}
           </Text>
           <Text style={styles.username}>@{userData?.usernickname}</Text>
-          <Text style={styles.bio}>
+          <Text style={[styles.bio,{color:colors.text}]}>
             {userData?.bio ? userData.bio : 'No bio yet'}
           </Text>
         </View>
 
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
+            <Text style={[styles.statNumber,{color:colors.text}]}>
               {formatNumber(userPostsCount)}
             </Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
           <TouchableOpacity style={styles.statItem} onPress={onFollowersPress}>
-            <Text style={styles.statNumber}>
+            <Text style={[styles.statNumber,{color:colors.text}]}>
               {formatNumber(followersCount)}
             </Text>
             <Text style={styles.statLabel}>Followers</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.statItem} onPress={onFollowingPress}>
-            <Text style={styles.statNumber}>
+            <Text style={[styles.statNumber,{color:colors.text}]}>
               {formatNumber(followingCount)}
             </Text>
             <Text style={styles.statLabel}>Following</Text>
@@ -185,7 +187,7 @@ const MyProfileHeader = ({
       </View>
 
       <View style={styles.levelContainer}>
-        <Text style={styles.level}>Level: {userData?.level || 0}</Text>
+        <Text style={[styles.level,{color:colors.text}]}>Level: {userData?.level || 0}</Text>
       </View>
     </View>
   );
@@ -289,7 +291,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginTop: -70,
+    marginTop: -60,
     marginRight: 10,
     paddingBottom: 10,
   },

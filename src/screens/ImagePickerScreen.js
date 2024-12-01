@@ -19,6 +19,7 @@ import Geocoder from 'react-native-geocoding';
 import { publishPost, getUserData } from '../controller/miApp.controller';
 import { useUserContext } from '../context/AuthProvider';
 import { useFocusEffect } from '@react-navigation/native';
+import { useToggleMode } from '../context/ThemeContext';
 
 Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc'); // Reemplaza con tu API Key.
 
@@ -31,6 +32,8 @@ const ImagePickerScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true);
+
+  const { colors } = useToggleMode();
 
   const toggleSwitch = () => setIsEnabled((prev) => !prev);
   const deleteLocation = () => setSelectedLocation('');
@@ -219,7 +222,7 @@ const ImagePickerScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container,{backgroundColor:colors.background}]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.goBackText}>Back</Text>
@@ -239,7 +242,7 @@ const ImagePickerScreen = ({ navigation }) => {
           }}
           style={styles.profileImage}
         />
-        <Text style={styles.username}>
+        <Text style={[styles.username,{color:colors.text}]}>
           @{userData?.usernickname || 'Loading...'}
         </Text>
       </View>
