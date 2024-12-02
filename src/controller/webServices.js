@@ -19,7 +19,7 @@ const urlWebServices = {
   getPosts: urlApi + 'api/posts',
   getUserPosts: urlApi + 'api/posts/me',
   getFollowingPosts: urlApi + 'api/posts/following',
-  postPost: urlApi + 'api/posts/crear',
+  postPost: urlApi + 'api/posts/create',
   interactWithPost: urlApi + 'api/posts/:id/interactions',
 
   // Mail
