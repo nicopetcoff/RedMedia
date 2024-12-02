@@ -8,6 +8,7 @@ import {
   TextInput,
   ActivityIndicator,
   Platform,
+  Image,
 } from 'react-native';
 import {useUserContext} from '../context/AuthProvider';
 import {
@@ -17,7 +18,8 @@ import {
   handleFollowUser,
 } from '../controller/miApp.controller';
 import PostHeader from '../components/PostHeader';
-import PostImage from '../components/PostImage';
+import PostMedia from '../components/PostMedia';
+import Video from 'react-native-video';
 import PostInteractionBar from '../components/PostInteractionBar';
 import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
@@ -27,11 +29,12 @@ const PostDetail = ({route, navigation}) => {
     route.params || {};
   const {token} = useUserContext();
 
-  const [currentPost, setCurrentPost] = useState(() =>
-    item ? JSON.parse(JSON.stringify(item)) : null,
-  );
+  //const [currentPost, setCurrentPost] = useState(() =>
+  //  item ? JSON.parse(JSON.stringify(item)) : null,
+  //);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [currentPost, setCurrentPost] = useState({ ...item, videos: item?.videos || [] });
   const [userData, setUserData] = useState(null);
   const [postUserData, setPostUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -260,8 +263,17 @@ const PostDetail = ({route, navigation}) => {
           <Text style={styles.description}>Sin descripción</Text>
         )}
       </View>
+      {console.log("currentPost",currentPost)}
+      {console.log("IMAGENES",currentPost.image)}
+      {console.log("VIDEOS",currentPost.videos)}
+      
+      <PostMedia
+  media={[
+    ...(currentPost.image || []).map(img => ({ type: 'image', url: img })),
+    ...(currentPost.videos || []).map(vid => ({ type: 'video', url: vid }))
+  ]}
+/>
 
-      <PostImage images={currentPost.image} />
 
       {currentPost.location && (
         <View style={styles.locationContainer}>
