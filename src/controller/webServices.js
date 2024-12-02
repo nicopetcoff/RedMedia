@@ -17,7 +17,7 @@ const urlWebServices = {
   // Posts
   getPosts: urlApi + 'api/posts',
   getFollowingPosts: urlApi + 'api/posts/following',
-  postPost: urlApi + 'api/posts/crear',
+  postPost: urlApi + 'api/posts/create',
   interactWithPost: urlApi + 'api/posts/:id/interactions',
   
 

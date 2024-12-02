@@ -6,6 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import PostDetail from '../screens/PostDetail';
 import ProfileScreen from '../screens/ProfileScreen';
 import BackIcon from '../assets/imgs/back.svg';
+import FullScreen from '../screens/FullScreen';
 
 const Stack = createStackNavigator();
 
@@ -73,6 +74,7 @@ const HomeStackScreen = () => {
           },
         })}
       />
+      <Stack.Screen name="FullScreen" component={FullScreen} />
     </Stack.Navigator>
   );
 };
