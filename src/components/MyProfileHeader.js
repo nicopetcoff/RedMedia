@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#14171A',
     fontFamily: 'Roboto',
+    marginTop: 15, // Añadir un pequeño margen superior
   },
 });
 

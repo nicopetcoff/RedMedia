@@ -18,7 +18,7 @@ import { signUp } from '../controller/miApp.controller';
 const SignUpScreen = () => {
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedGender, setSelectedGender] = useState('Prefiere no decirlo');
+  const [selectedGender, setSelectedGender] = useState('Not specified');
 
   const handleSignUp = async userData => {
     try {
@@ -51,7 +51,7 @@ const SignUpScreen = () => {
     name: '',
     lastName: '',
     nick: '',
-    genero: 'Prefiere no decirlo',
+    genero: 'Not specified',
   };
 
   return (

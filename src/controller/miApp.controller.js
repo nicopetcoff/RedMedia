@@ -23,6 +23,37 @@ export const getPosts = async function () {
   }
 };
 
+export const getUserPosts = async token => {
+  const url = urlWebServices.getUserPosts;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        '❌ Error en respuesta de getUserPosts, código:',
+        response.status,
+      );
+      throw new Error(
+        'Error al obtener los posts del usuario: ' + response.status,
+      );
+    }
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error('❌ Error en getUserPosts:', error);
+    throw error;
+  }
+};
+
 export const getTimelinePosts = async token => {
   try {
     const followingResponse = await fetch(urlWebServices.getFollowingPosts, {
@@ -58,11 +89,15 @@ export const signUp = async userData => {
     });
 
     let data = await response.json();
+
     if (data.status === 400) {
+      console.error('Error del servidor:', data.message); // Log del mensaje de error del servidor
       throw new Error(data.message);
     }
+
     return data;
   } catch (error) {
+    console.error('Error en signUp:', error); // Log del error capturado
     throw error;
   }
 };

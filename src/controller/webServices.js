@@ -11,18 +11,16 @@ const urlWebServices = {
   getNotifications: urlApi + 'api/users/notificaciones',
   getUsers: urlApi + 'api/users',
   updateUserProfile: urlApi + 'api/users/me',
-  followUser: urlApi + "api/users/:id/follow",
+  followUser: urlApi + 'api/users/:id/follow',
   searchUsers: urlApi + 'api/users/search',
   deleteAccount: urlApi + 'api/users/me',
 
-  
   // Posts
   getPosts: urlApi + 'api/posts',
+  getUserPosts: urlApi + 'api/posts/me',
   getFollowingPosts: urlApi + 'api/posts/following',
   postPost: urlApi + 'api/posts/create',
   interactWithPost: urlApi + 'api/posts/:id/interactions',
-  
-
 
   // Mail
   passwordReset: urlApi + 'api/mail',
