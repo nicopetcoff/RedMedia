@@ -15,7 +15,6 @@ import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserContext, useToggleContext } from '../context/AuthProvider';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import { updateUserProfile, getUserData } from '../controller/miApp.controller';
 import { useToggleMode } from '../context/ThemeContext';
 import { updateUserProfile, getUserData, deleteUserAccount } from '../controller/miApp.controller';
 
@@ -178,7 +177,7 @@ const EditProfileScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleChangeTheme = () =>  toggleTheme
+  const handleChangeTheme =   () =>   toggleTheme
   
 
   return (
@@ -269,14 +268,12 @@ const EditProfileScreen = ({ navigation, route }) => {
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>SETTINGS</Text>
           <View style={styles.appearanceRow}>
-            <Text style={[styles.appearanceLabel,{color:colors.text}]}>Appearance:</Text>
+            <Text style={[styles.appearanceLabel,{color:colors.text}]}>Dark mode:</Text>
             <View style={styles.switchContainer}>
-              <Text style={[styles.lightText,{color:colors.text}]}>Light</Text>
               <Switch
                 value={isDark}
                 onValueChange={handleChangeTheme()}
               />
-              <Text style={[styles.darkText,{color:colors.text}]}>Dark</Text>
             </View>
           </View>
 

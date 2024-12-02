@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {useContext} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = React.createContext();
 
@@ -8,24 +9,26 @@ export function useToggleMode() {
 }
 
 export const ThemeProvider = ({children}) => {
-  const [theme, setTheme] = useState('light');
+  
   const [isDark, setIsDark] = useState(false);
-
   const [colors, setColors] = useState({
     background: '#faefef',
     text: '#000000',
     post: '#e7e7e7',
     detailes: '#838181',
     separator: 'rgba(131, 129, 129, 0.01)',
+    followText: "#1DA1F2"
   });
 
-  const toggleTheme = () => {
+  const toggleTheme = async () => {
     let background = '#121212';
     let text = '#faefef';
     let post = '#323232';
     let details = '#beb9b9';
+    await AsyncStorage.setItem('theme', 'dark');
   
     if (isDark) {
+      await AsyncStorage.setItem('theme', 'light');
       background = '#faefef';
       text = '#000000';
       post = '#e7e7e7';
@@ -38,10 +41,11 @@ export const ThemeProvider = ({children}) => {
       post: post,
       detailes: details,
       separator: 'rgba(131, 129, 129, 0.01)',
+      followText: "#1DA1F2"
     });
     
-
     setIsDark(!isDark);
+
   };
 
   return (
