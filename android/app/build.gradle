@@ -71,6 +71,9 @@ dependencies {
     // Dependencias adicionales para evitar conflictos
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core:1.9.0'
+
+    //Dependencia para Locacion
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
 }
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
