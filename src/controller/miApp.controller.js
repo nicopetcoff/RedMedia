@@ -495,3 +495,57 @@ export const deleteUserAccount = async token => {
     throw error;
   }
 };
+
+export const markPostAsFavorite = async (postId, token) => {
+  const url = urlWebServices.addFavoritePost.replace(':id', postId);
+
+  try {
+    console.log(`Adding post ${postId} to favorites...`);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Error adding post to favorites:', data.message);
+      throw new Error(data.message || 'Error adding to favorites');
+    }
+
+    console.log('Post added to favorites successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in addPostToFavorites:', error);
+    throw error;
+  }
+};
+
+export const getFavoritePosts = async (token) => {
+  const url = urlWebServices.getFavoritePosts;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Error al obtener los posts favoritos:', response.status);
+      throw new Error('Error al obtener los posts favoritos');
+    }
+
+    const data = await response.json();
+    console.log('Posts favoritos obtenidos:', data);
+    return data;
+  } catch (error) {
+    console.error('Error al obtener los posts favoritos:', error);
+    throw error;
+  }
+};

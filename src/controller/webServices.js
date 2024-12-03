@@ -14,6 +14,7 @@ const urlWebServices = {
   followUser: urlApi + 'api/users/:id/follow',
   searchUsers: urlApi + 'api/users/search',
   deleteAccount: urlApi + 'api/users/me',
+  getFavoritePosts: urlApi + 'api/users/favorites', // Nueva ruta para obtener los favoritos
 
   // Posts
   getPosts: urlApi + 'api/posts',
@@ -21,6 +22,8 @@ const urlWebServices = {
   getFollowingPosts: urlApi + 'api/posts/following',
   postPost: urlApi + 'api/posts/create',
   interactWithPost: urlApi + 'api/posts/:id/interactions',
+  addFavoritePost: urlApi + 'api/posts/:id/favorite',  
+
 
   // Mail
   passwordReset: urlApi + 'api/mail',

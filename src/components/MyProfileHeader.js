@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,12 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {updateUserProfile} from '../controller/miApp.controller';
-import {useUserContext} from '../context/AuthProvider';
+import { useNavigation } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { updateUserProfile } from '../controller/miApp.controller';
+import { useUserContext } from '../context/AuthProvider';
 
-const {width: windowWidth} = Dimensions.get('window');
+const { width: windowWidth } = Dimensions.get('window');
 
 const MyProfileHeader = ({
   userData,
@@ -28,14 +28,14 @@ const MyProfileHeader = ({
   onRefresh,
 }) => {
   const navigation = useNavigation();
-  const {token} = useUserContext();
+  const { token } = useUserContext();
   const [loading, setLoading] = useState(false);
 
   const handleEditPress = () => {
-    navigation.navigate('EditProfile', {avatar: userData?.avatar});
+    navigation.navigate('EditProfile', { avatar: userData?.avatar });
   };
 
-  const formatNumber = num => {
+  const formatNumber = (num) => {
     if (!num) return '0';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
@@ -53,7 +53,7 @@ const MyProfileHeader = ({
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
-        },
+        }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
@@ -69,24 +69,23 @@ const MyProfileHeader = ({
         Alert.alert('Error', 'Permission to access gallery is required.');
         return;
       }
-  
+
       const result = await launchImageLibrary({
         mediaType: 'photo',
         includeBase64: false,
         maxHeight: 2000,
         maxWidth: 2000,
       });
-  
+
       if (!result.didCancel && result.assets?.[0]) {
         setLoading(true);
         try {
-          // Crear el objeto que se enviará
           const coverImageData = {
-            coverImage: result.assets[0].uri
+            coverImage: result.assets[0].uri,
           };
-  
+
           const response = await updateUserProfile(coverImageData, token);
-  
+
           if (response.data?.coverImage) {
             Alert.alert('Success', 'Cover image updated successfully');
             if (onRefresh) {
@@ -106,6 +105,11 @@ const MyProfileHeader = ({
     }
   };
 
+  // Navegación al screen de favoritos
+  const handleViewFavorites = () => {
+    navigation.navigate('FavoriteScreen');
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -115,7 +119,7 @@ const MyProfileHeader = ({
         <Image
           source={
             userData?.coverImage
-              ? {uri: userData.coverImage}
+              ? { uri: userData.coverImage }
               : require('../assets/imgs/portadaDefault.png')
           }
           style={styles.coverImage}
@@ -135,7 +139,7 @@ const MyProfileHeader = ({
         <Image
           source={
             userData?.avatar
-              ? {uri: userData.avatar}
+              ? { uri: userData.avatar }
               : require('../assets/imgs/avatarDefault.jpg')
           }
           style={styles.avatar}
@@ -187,6 +191,13 @@ const MyProfileHeader = ({
       <View style={styles.levelContainer}>
         <Text style={styles.level}>Level: {userData?.level || 0}</Text>
       </View>
+
+      {/* Botón "Ver Favoritos" */}
+      <TouchableOpacity
+        style={styles.favoriteButton}
+        onPress={handleViewFavorites}>
+        <Text style={styles.favoriteButtonText}>Favoritos</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -319,7 +330,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#14171A',
     fontFamily: 'Roboto',
-    marginTop: 15, // Añadir un pequeño margen superior
+    marginTop: 15,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 15,
+    backgroundColor: '#1DA1F2',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    elevation: 5,
+  },
+  favoriteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 });
 
