@@ -34,7 +34,10 @@ const PostDetail = ({route, navigation}) => {
   //);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [currentPost, setCurrentPost] = useState({ ...item, videos: item?.videos || [] });
+  const [currentPost, setCurrentPost] = useState({
+    ...item,
+    videos: item?.videos || [],
+  });
   const [userData, setUserData] = useState(null);
   const [postUserData, setPostUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -263,17 +266,13 @@ const PostDetail = ({route, navigation}) => {
           <Text style={styles.description}>Sin descripción</Text>
         )}
       </View>
-      {console.log("currentPost",currentPost)}
-      {console.log("IMAGENES",currentPost.image)}
-      {console.log("VIDEOS",currentPost.videos)}
-      
-      <PostMedia
-  media={[
-    ...(currentPost.image || []).map(img => ({ type: 'image', url: img })),
-    ...(currentPost.videos || []).map(vid => ({ type: 'video', url: vid }))
-  ]}
-/>
 
+      <PostMedia
+        media={[
+          ...(currentPost.image || []).map(img => ({type: 'image', url: img})),
+          ...(currentPost.videos || []).map(vid => ({type: 'video', url: vid})),
+        ]}
+      />
 
       {currentPost.location && (
         <View style={styles.locationContainer}>
