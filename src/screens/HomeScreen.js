@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo, useCallback} from 'react';
+import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useScrollToTop} from '@react-navigation/native';
 import {useUserContext} from '../context/AuthProvider';
 import {usePost} from '../context/PostContext';
 import Post from '../components/Post';
@@ -32,6 +32,9 @@ const HomeScreen = () => {
   const postContext = usePost();
   const { colors } = useToggleMode();
 
+  const flatListRef = useRef(null);
+  useScrollToTop(flatListRef);
+
   const updatePost = useCallback(updatedPost => {
     if (!updatedPost?._id) return;
     setPosts(prevPosts =>
@@ -44,6 +47,7 @@ const HomeScreen = () => {
   useEffect(() => {
     postContext.updatePost = updatePost;
   }, [updatePost, postContext]);
+
   const fetchData = useCallback(
     async (isLoadMore = false) => {
       if (isLoadMore && loadingMore) return;
@@ -115,19 +119,24 @@ const HomeScreen = () => {
       (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
     );
   }, [posts, ads]);
+
   const renderPost = useCallback(
     ({item, index}) => {
       const adIndex = adIndices[index];
 
       if (adIndex !== null && ads[adIndex]) {
         const randomAd = ads[adIndex];
+        const adImageUri = randomAd?.imagePath?.[0]?.landscape;
+
+        if (!adImageUri) return null;
+
         return (
           <TouchableOpacity
             key={`ad-${index}-${Date.now()}`}
             style={styles.adContainer}
             onPress={() => Linking.openURL(randomAd.Url)}>
             <Image
-              source={{uri: randomAd.imagePath[0].landscape}}
+              source={{uri: adImageUri}}
               style={styles.adImage}
               resizeMode="cover"
             />
@@ -138,7 +147,7 @@ const HomeScreen = () => {
       if (!item?._id) return null;
 
       return (
-        <View style={styles.postContainer} key={`post-container-${item._id}`}>
+        <View style={styles.postContainer}>
           <Post item={item} source="Home" />
         </View>
       );
@@ -176,6 +185,7 @@ const HomeScreen = () => {
     }
     return null;
   }, [loadingMore]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -189,9 +199,10 @@ const HomeScreen = () => {
         </View>
 
         <FlatList
+          ref={flatListRef}
           data={posts}
           renderItem={renderPost}
-          keyExtractor={item => `post-${item._id}-${item.user}`}
+          keyExtractor={(item, index) => `post-${item._id}-${index}`}
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={[
@@ -205,8 +216,8 @@ const HomeScreen = () => {
           onEndReachedThreshold={0.5}
           ListEmptyComponent={renderEmptyComponent}
           ListFooterComponent={renderFooter}
-          initialNumToRender={6}
-          maxToRenderPerBatch={3}
+          initialNumToRender={5}
+          maxToRenderPerBatch={10}
           windowSize={5}
           removeClippedSubviews={Platform.OS === 'android'}
           updateCellsBatchingPeriod={50}
@@ -291,10 +302,10 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#555', // Color gris para un tono suave
+    color: '#555',
     textAlign: 'center',
     marginTop: 50,
-    paddingHorizontal: 10, // Asegura que el texto no toque los bordes
+    paddingHorizontal: 10,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   footerLoader: {

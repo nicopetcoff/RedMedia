@@ -23,6 +23,37 @@ export const getPosts = async function () {
   }
 };
 
+export const getUserPosts = async token => {
+  const url = urlWebServices.getUserPosts;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        '❌ Error en respuesta de getUserPosts, código:',
+        response.status,
+      );
+      throw new Error(
+        'Error al obtener los posts del usuario: ' + response.status,
+      );
+    }
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error('❌ Error en getUserPosts:', error);
+    throw error;
+  }
+};
+
 export const getTimelinePosts = async token => {
   try {
     const followingResponse = await fetch(urlWebServices.getFollowingPosts, {
@@ -68,6 +99,7 @@ export const signUp = async userData => {
     throw error;
   }
 };
+
 export const googleAutenticacion = async (userData) => {
   let url = urlWebServices.googleLogin;
 
@@ -82,12 +114,15 @@ export const googleAutenticacion = async (userData) => {
     });
 
     let data = await response.json();
+
     if (data.status === 400) {
+      console.error('Error del servidor:', data.message); // Log del mensaje de error del servidor
       throw new Error(data.message);
     }
+
     return data;
   } catch (error) {
-    console.error('Error en googleSignUp:', error);
+    console.error('Error en googleAutenticacion:', error); // Cambié el nombre de la función a googleAutenticacion
     throw error;
   }
 };
@@ -167,60 +202,99 @@ export const getUserData = async token => {
 
 export const publishPost = async (postData, token) => {
   try {
-    let url = urlWebServices.postPost;
 
+    // La URL de los servicios web
+    const url = urlWebServices.postPost;
+
+    // Crear un objeto FormData para enviar los datos y archivos
     const formData = new FormData();
 
-    // Agregar datos del post
+    // Agregar datos de texto del post
     formData.append('title', postData.title);
     formData.append('description', postData.description);
     formData.append('location', postData.location);
     formData.append('user', postData.user);
+    formData.append('userAvatar', postData.userAvatar);
 
-    // Agregar imágenes
-    postData.images.forEach((imageUri, index) => {
-      let localUri = imageUri;
-      let filename = localUri.split('/').pop();
+    // Agregar archivos multimedia (imágenes y videos)
+    if (Array.isArray(postData.media) && postData.media.length > 0) {
+      postData.media.forEach((fileUri) => {
+        const localUri = fileUri;
+        const filename = localUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const fileExtension = match ? match[1].toLowerCase() : '';
+        let type = '';
 
-      // Extraer la extensión del archivo
-      let match = /\.(\w+)$/.exec(filename);
-      let type = match ? `image/${match[1]}` : `image/jpeg`;
-
-      formData.append('images', {
-        uri: localUri,
-        name: filename,
-        type,
+        // Verificar si el archivo es una imagen
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+          type = `image/${fileExtension}`;
+          // Cambiar 'images' a un nombre de campo único
+          formData.append(`images`, {
+            uri: localUri,
+            name: filename,
+            type: type,
+          });
+        }
+        // Verificar si el archivo es un video
+        else if (['mp4', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
+          type = `video/${fileExtension}`;
+          // Cambiar 'videos' a un nombre de campo único
+          formData.append(`videos`, {
+            uri: localUri,
+            name: filename,
+            type: type,
+          });
+        }
       });
-    });
+    }
 
+    // Verificar los datos enviados
+    for (let i = 0; i < formData._parts.length; i++) {
+      const part = formData._parts[i];
+    }
+
+    // Realizar la solicitud fetch para enviar los datos al backend
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        Accept: 'application/json',
-        'x-access-token': token,
+        'Accept': 'application/json',
+        'x-access-token': token
       },
-      body: formData,
+      body: formData
     });
 
+    // Verificar si la respuesta es exitosa
+    const contentType = response.headers.get("content-type");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error en la respuesta: ${response.status} - ${errorText}`);
+    } else if (!contentType || !contentType.includes("application/json")) {
+      const errorText = await response.text();
+      throw new Error(`Respuesta no es JSON: ${errorText}`);
+    }
+
+    // Analizar JSON si la respuesta es válida
     const responseData = await response.json();
 
+    // Si la respuesta es exitosa, retornar el resultado
     if (response.ok) {
-      return {
-        success: true,
-        message: 'Post published successfully',
-        data: responseData.data,
+      return { 
+        success: true, 
+        message: 'Post published successfully', 
+        data: responseData.data 
       };
     } else {
       throw new Error(responseData.message || 'Failed to publish post');
     }
   } catch (error) {
     console.error('Error en publishPost:', error);
-    return {
-      success: false,
-      message: error.message || 'Error connecting to server',
+    return { 
+      success: false, 
+      message: error.message || 'Error connecting to server'
     };
   }
 };
+
 
 export const getAds = async () => {
   let url = urlWebServices.getAds;

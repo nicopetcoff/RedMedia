@@ -4,7 +4,8 @@ import {TouchableOpacity} from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import PostDetail from '../screens/PostDetail';
 import ProfileScreen from '../screens/ProfileScreen';
-import { useToggleMode } from '../context/ThemeContext';
+import { useToggleMode } from '../context/ThemeContext';  // Mantén solo esta importación si necesitas el tema
+import FullScreen from '../screens/FullScreen';
 
 const Stack = createStackNavigator();
 
@@ -29,7 +30,6 @@ const HomeStackScreen = () => {
         component={PostDetail}
         options={({route, navigation}) => ({
           headerTitle: '',
-          
           headerStyle: {
             backgroundColor: colors.background, 
           },
@@ -47,6 +47,7 @@ const HomeStackScreen = () => {
           headerTintColor: 'white',
         })}
       />
+      <Stack.Screen name="FullScreen" component={FullScreen} />
     </Stack.Navigator>
   );
 };

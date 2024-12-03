@@ -15,7 +15,11 @@ import {
 } from 'react-native';
 import MyProfileHeader from '../components/MyProfileHeader';
 import Post from '../components/Post';
-import {getPosts, getUserData, getUsers} from '../controller/miApp.controller';
+import {
+  getUserPosts,
+  getUserData,
+  getUsers,
+} from '../controller/miApp.controller';
 import {useUserContext} from '../context/AuthProvider';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import { useToggleMode } from '../context/ThemeContext';
@@ -49,7 +53,12 @@ const LoggedInUserProfileScreen = () => {
       );
 
       if (currentUser) {
-        setUserData(currentUser);
+        // Calcula el nivel según la cantidad de posts
+        const userLevel = calculateUserLevel(userPosts.length);
+        setUserData({
+          ...currentUser,
+          level: userLevel,
+        });
 
         if (currentUser.followers?.length > 0) {
           const followers = currentUser.followers
@@ -74,28 +83,36 @@ const LoggedInUserProfileScreen = () => {
     } catch (error) {
       console.error('Error al obtener datos del usuario:', error);
     }
-  }, [token]);
+  }, [token, userPosts.length]);
 
   const fetchUserPosts = useCallback(async () => {
+    // Verifica si el token es válido antes de realizar la solicitud
+    if (!token) {
+      setUserPosts([]); // Asigna un array vacío si no hay token
+      return; // Si no hay token, no hacer la solicitud
+    }
+
     try {
-      const data = await getPosts();
-      const filteredPosts = data.data.filter(
-        post => post.user === userData?.usernickname,
-      );
-      setUserPosts(filteredPosts);
+      const data = await getUserPosts(token); // Llama al nuevo endpoint
+      if (data.data && data.data.length > 0) {
+        setUserPosts(data.data); // Almacena directamente los posts
+      } else {
+        setUserPosts([]); // Si no hay posts, asigna un array vacío
+      }
     } catch (error) {
       console.error('Error al obtener posts:', error);
+      setUserPosts([]); // Si ocurre un error (por ejemplo 404), asigna un array vacío
     }
-  }, [userData?.usernickname]);
+  }, [token]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([fetchUserData(), userData && fetchUserPosts()]);
+      await Promise.all([fetchUserData(), fetchUserPosts()]);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchUserData, fetchUserPosts, userData]);
+  }, [fetchUserData, fetchUserPosts]);
 
   useFocusEffect(
     useCallback(() => {
@@ -120,6 +137,23 @@ const LoggedInUserProfileScreen = () => {
     ),
     [],
   );
+
+  const renderEmptyListMessage = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyMessage}>
+        You don’t have any posts yet. Feel free to create one!
+      </Text>
+    </View>
+  );
+
+  // Función que calcula el nivel del usuario en función de los posts
+  const calculateUserLevel = postCount => {
+    if (postCount === 0) return 0; // Nivel 0 si no hay posts
+    if (postCount >= 1 && postCount <= 5) return 1; // Nivel 1 si hay entre 1 y 5 posts
+    if (postCount <= 10) return 2; // Nivel 2 si hay entre 6 y 10 posts
+    if (postCount <= 20) return 3; // Nivel 3 si hay entre 11 y 20 posts
+    return 4; // Nivel 4 si hay más de 20 posts
+  };
 
   const UserListModal = ({visible, onClose, users, title}) => (
     <Modal
@@ -176,7 +210,7 @@ const LoggedInUserProfileScreen = () => {
         followingCount={followingData.length}
         onFollowersPress={() => setShowFollowers(true)}
         onFollowingPress={() => setShowFollowing(true)}
-        onRefresh={handleRefresh} // Añade esta prop
+        onRefresh={handleRefresh}
       />
     );
   }, [
@@ -204,6 +238,7 @@ const LoggedInUserProfileScreen = () => {
         numColumns={2}
         columnWrapperStyle={styles.row}
         ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmptyListMessage} // Muestra el mensaje cuando no hay posts
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
         refreshControl={
@@ -252,6 +287,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyMessage: {
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+  },
+  levelText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center',
+    marginVertical: 10,
   },
   modalContainer: {
     flex: 1,

@@ -265,6 +265,17 @@ const EditProfileScreen = ({ navigation, route }) => {
           </View>
         </View>
 
+        {/* Save Changes Button */}
+        <View style={styles.saveButtonContainer}>
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleUpdateProfile}
+            disabled={loading}
+          >
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>SETTINGS</Text>
           <View style={styles.appearanceRow}>
@@ -419,6 +430,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  saveButtonContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#1FA1FF',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 
