@@ -177,7 +177,6 @@ export const getUserData = async token => {
 
 export const publishPost = async (postData, token) => {
   try {
-
     // La URL de los servicios web
     const url = urlWebServices.postPost;
 
@@ -193,7 +192,7 @@ export const publishPost = async (postData, token) => {
 
     // Agregar archivos multimedia (imágenes y videos)
     if (Array.isArray(postData.media) && postData.media.length > 0) {
-      postData.media.forEach((fileUri) => {
+      postData.media.forEach(fileUri => {
         const localUri = fileUri;
         const filename = localUri.split('/').pop();
         const match = /\.(\w+)$/.exec(filename);
@@ -232,18 +231,20 @@ export const publishPost = async (postData, token) => {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'x-access-token': token
+        Accept: 'application/json',
+        'x-access-token': token,
       },
-      body: formData
+      body: formData,
     });
 
     // Verificar si la respuesta es exitosa
-    const contentType = response.headers.get("content-type");
+    const contentType = response.headers.get('content-type');
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Error en la respuesta: ${response.status} - ${errorText}`);
-    } else if (!contentType || !contentType.includes("application/json")) {
+      throw new Error(
+        `Error en la respuesta: ${response.status} - ${errorText}`,
+      );
+    } else if (!contentType || !contentType.includes('application/json')) {
       const errorText = await response.text();
       throw new Error(`Respuesta no es JSON: ${errorText}`);
     }
@@ -253,23 +254,22 @@ export const publishPost = async (postData, token) => {
 
     // Si la respuesta es exitosa, retornar el resultado
     if (response.ok) {
-      return { 
-        success: true, 
-        message: 'Post published successfully', 
-        data: responseData.data 
+      return {
+        success: true,
+        message: 'Post published successfully',
+        data: responseData.data,
       };
     } else {
       throw new Error(responseData.message || 'Failed to publish post');
     }
   } catch (error) {
     console.error('Error en publishPost:', error);
-    return { 
-      success: false, 
-      message: error.message || 'Error connecting to server'
+    return {
+      success: false,
+      message: error.message || 'Error connecting to server',
     };
   }
 };
-
 
 export const getAds = async () => {
   let url = urlWebServices.getAds;
@@ -500,7 +500,6 @@ export const markPostAsFavorite = async (postId, token) => {
   const url = urlWebServices.addFavoritePost.replace(':id', postId);
 
   try {
-    console.log(`Adding post ${postId} to favorites...`);
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -516,7 +515,6 @@ export const markPostAsFavorite = async (postId, token) => {
       throw new Error(data.message || 'Error adding to favorites');
     }
 
-    console.log('Post added to favorites successfully:', data);
     return data;
   } catch (error) {
     console.error('Error in addPostToFavorites:', error);
@@ -524,7 +522,7 @@ export const markPostAsFavorite = async (postId, token) => {
   }
 };
 
-export const getFavoritePosts = async (token) => {
+export const getFavoritePosts = async token => {
   const url = urlWebServices.getFavoritePosts;
 
   try {
@@ -542,7 +540,6 @@ export const getFavoritePosts = async (token) => {
     }
 
     const data = await response.json();
-    console.log('Posts favoritos obtenidos:', data);
     return data;
   } catch (error) {
     console.error('Error al obtener los posts favoritos:', error);
