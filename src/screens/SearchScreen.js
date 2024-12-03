@@ -15,11 +15,9 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de retroceso
-import BackDarkIcon from '../assets/imgs/backBlue.svg'; // Icono personalizado de retroceso en modo
 import SearchIcon from '../assets/imgs/search.svg'; // Icono de búsqueda personalizado
 import { searchUsers } from '../controller/miApp.controller'; // Importa el método searchUsers
 import { useUserContext } from '../context/AuthProvider'; // Asumiendo que usas un contexto para la autenticación
-import { useToggleMode } from '../context/ThemeContext';
 
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/docrp6wwd/image/upload/v1731610184/default-avatar.jpg'; // URL de imagen predeterminada
 
@@ -30,8 +28,6 @@ const SearchScreen = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const { colors, isDark } = useToggleMode();
 
   // Función para buscar usuarios desde el backend
   const handleSearch = async (text) => {
@@ -77,22 +73,22 @@ const SearchScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea,{backgroundColor: colors.background}]}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header con botón de retroceso */}
-      <View style={[styles.header,{backgroundColor: colors.background}]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backButton,{color:colors.text}]}>
-        {isDark ? <BackDarkIcon/> : <BackIcon/>}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <BackIcon width={24} height={24} />
         </TouchableOpacity>
       </View>
 
       {/* Barra de búsqueda */}
-      <View style={[styles.searchContainer]}>
-        <View style={[styles.searchBar,{backgroundColor:colors.post}]}>
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
           <SearchIcon width={20} height={20} style={styles.searchIcon} />
           <TextInput
-            style={[styles.searchInput,{color:colors.text}]}
+            style={styles.searchInput}
             placeholder="Search users..."
             value={searchText}
             onChangeText={handleSearch}
@@ -136,12 +132,14 @@ const SearchScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
@@ -167,6 +165,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    color: '#000',
   },
   listContainer: {
     paddingHorizontal: 10,

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { View, ActivityIndicator } from "react-native";
@@ -9,30 +9,11 @@ import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import BottomTabNavigator from "./BottomTabNavigator";
 import { useUserContext } from "../context/AuthProvider";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useToggleMode } from "../context/ThemeContext";
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const getTheme = async () => {
-      const theme = await AsyncStorage.getItem('theme');
-      return theme==='dark';
-    }
-
-  const {toggleTheme} = useToggleMode();
   const { isAuthenticated, loading } = useUserContext();
-
-  useEffect(() => {
-    fetchTheme()
-  }, []);
-
-  const fetchTheme = async () => {
-    const theme = await getTheme();
-    if (theme) {
-      toggleTheme();
-    }
-  }
 
   if (loading) {
     return (
