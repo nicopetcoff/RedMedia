@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,9 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
-import { useNavigation, useScrollToTop } from '@react-navigation/native';
-import { useUserContext } from '../context/AuthProvider';
-import { getFavoritePosts, toggleLikePost } from '../controller/miApp.controller'; // Nueva función para manejar like
+import {useNavigation, useScrollToTop} from '@react-navigation/native';
+import {useUserContext} from '../context/AuthProvider';
+import {getFavoritePosts, toggleLikePost} from '../controller/miApp.controller'; // Nueva función para manejar like
 import Skeleton from '../components/Skeleton';
 import Post from '../components/Post';
 
@@ -20,19 +20,17 @@ const FavoriteScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true); // Inicializamos el estado de carga como true
   const [refreshing, setRefreshing] = useState(false);
-  const { token } = useUserContext();
+  const {token} = useUserContext();
   const navigation = useNavigation();
-  
+
   const flatListRef = useRef(null);
   useScrollToTop(flatListRef);
 
   const fetchFavoritePosts = useCallback(async () => {
-    console.log('Iniciando carga de posts favoritos');
     setLoading(true); // Activar el estado de carga
 
     try {
       const response = await getFavoritePosts(token);
-      console.log('Posts obtenidos:', response?.data);
 
       if (response?.data && Array.isArray(response.data)) {
         setPosts(response.data); // Si se obtienen posts, actualizamos el estado
@@ -47,15 +45,15 @@ const FavoriteScreen = () => {
     }
   }, [token]);
 
-  const handleLikePost = (postId) => {
-    setPosts((prevPosts) => {
-      return prevPosts.map((post) => {
+  const handleLikePost = postId => {
+    setPosts(prevPosts => {
+      return prevPosts.map(post => {
         if (post._id === postId) {
           // Cambiar el estado del like del post
           const updatedPost = {
             ...post,
             likes: post.likes.includes(token)
-              ? post.likes.filter((like) => like !== token) // Si ya está dado el like, lo eliminamos
+              ? post.likes.filter(like => like !== token) // Si ya está dado el like, lo eliminamos
               : [...post.likes, token], // Si no está dado el like, lo agregamos
           };
           return updatedPost;
@@ -66,39 +64,38 @@ const FavoriteScreen = () => {
 
     // Realizar la actualización en el backend
     toggleLikePost(postId, token)
-      .then((response) => {
-        console.log('Post after like toggle:', response);
-      })
-      .catch((error) => {
+      .then(response => {})
+      .catch(error => {
         console.error('Error al actualizar el like del post:', error);
       });
   };
 
   const refreshData = useCallback(async () => {
     if (refreshing || loading) {
-      console.log('Ya se está refrescando o cargando, evitando nueva solicitud');
-      return;  // Si ya estamos refrescando o cargando, no hacemos otra solicitud
+      return; // Si ya estamos refrescando o cargando, no hacemos otra solicitud
     }
 
     setRefreshing(true); // Activamos el estado de refresco
-    console.log('Iniciando refresco de los posts favoritos');
     await fetchFavoritePosts(); // Recargamos los favoritos
     setRefreshing(false); // Desactivamos el estado de refresco
   }, [fetchFavoritePosts, refreshing, loading]);
 
   useEffect(() => {
-    fetchFavoritePosts();  // Llamada inicial para cargar los posts favoritos cuando se monta el componente
+    fetchFavoritePosts(); // Llamada inicial para cargar los posts favoritos cuando se monta el componente
   }, [fetchFavoritePosts]);
 
-  const renderPost = useCallback(({ item }) => {
-    if (!item?._id) return null;
+  const renderPost = useCallback(
+    ({item}) => {
+      if (!item?._id) return null;
 
-    return (
-      <View style={styles.postContainer}>
-        <Post item={item} source="Favorite" onLikePost={handleLikePost} />
-      </View>
-    );
-  }, [handleLikePost]);
+      return (
+        <View style={styles.postContainer}>
+          <Post item={item} source="Favorite" onLikePost={handleLikePost} />
+        </View>
+      );
+    },
+    [handleLikePost],
+  );
 
   const renderEmptyComponent = useCallback(() => {
     if (loading) {
@@ -112,7 +109,9 @@ const FavoriteScreen = () => {
     }
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No has agregado posts a favoritos aún.</Text>
+        <Text style={styles.emptyText}>
+          No has agregado posts a favoritos aún.
+        </Text>
       </View>
     );
   }, [loading]);
