@@ -34,7 +34,7 @@ const HomeScreen = () => {
   useScrollToTop(flatListRef);
 
   const updatePost = useCallback(updatedPost => {
-    if (!updatedPost?._id) { return; }
+    if (!updatedPost?._id) return;
     setPosts(prevPosts =>
       prevPosts.map(post =>
         post._id === updatedPost._id ? updatedPost : post,
@@ -45,9 +45,10 @@ const HomeScreen = () => {
   useEffect(() => {
     postContext.updatePost = updatePost;
   }, [updatePost, postContext]);
+
   const fetchData = useCallback(
     async (isLoadMore = false) => {
-      if (isLoadMore && loadingMore) { return; }
+      if (isLoadMore && loadingMore) return;
 
       try {
         if (isLoadMore) {
@@ -90,7 +91,7 @@ const HomeScreen = () => {
   );
 
   const refreshData = useCallback(async () => {
-    if (refreshing) { return;}
+    if (refreshing) return;
     setPage(1);
     setRefreshing(true);
     await fetchData(false);
@@ -110,24 +111,29 @@ const HomeScreen = () => {
   }, [navigation, refreshing, loading, refreshData]);
 
   const adIndices = useMemo(() => {
-    if (!ads.length) { return []; }
+    if (!ads.length) return [];
     return posts.map((_, index) =>
       (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
     );
   }, [posts, ads]);
+
   const renderPost = useCallback(
     ({item, index}) => {
       const adIndex = adIndices[index];
 
       if (adIndex !== null && ads[adIndex]) {
         const randomAd = ads[adIndex];
+        const adImageUri = randomAd?.imagePath?.[0]?.landscape;
+
+        if (!adImageUri) return null;
+
         return (
           <TouchableOpacity
             key={`ad-${index}-${Date.now()}`}
             style={styles.adContainer}
             onPress={() => Linking.openURL(randomAd.Url)}>
             <Image
-              source={{uri: randomAd.imagePath[0].landscape}}
+              source={{uri: adImageUri}}
               style={styles.adImage}
               resizeMode="cover"
             />
@@ -135,10 +141,10 @@ const HomeScreen = () => {
         );
       }
 
-      if (!item?._id) { return null; }
+      if (!item?._id) return null;
 
       return (
-        <View style={styles.postContainer} key={`post-container-${item._id}`}>
+        <View style={styles.postContainer}>
           <Post item={item} source="Home" />
         </View>
       );
@@ -176,6 +182,7 @@ const HomeScreen = () => {
     }
     return null;
   }, [loadingMore]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -297,10 +304,10 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#555', // Color gris para un tono suave
+    color: '#555',
     textAlign: 'center',
     marginTop: 50,
-    paddingHorizontal: 10, // Asegura que el texto no toque los bordes
+    paddingHorizontal: 10,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   footerLoader: {
