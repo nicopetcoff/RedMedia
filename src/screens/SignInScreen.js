@@ -1,137 +1,62 @@
-// SignInScreen.js
-
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from "react-native";
-import { useToggleContext } from "../context/AuthProvider";
-import { Formik } from "formik";
-import { SignInValidationSchema } from "../context/validationSchemas";
-import { FormikInputValue } from "../components/FormikInputValue";
-import EyeIcon from '../assets/imgs/eyeIcon.svg'; // Icono para mostrar/ocultar contraseña
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { Formik } from 'formik';
+import { signInValidationSchema } from '../context/validationSchemas';
+import { FormikInputValue } from '../components/FormikInputValue';
+import EyeIcon from '../assets/imgs/eyeIcon.svg';
+import { useToggleContext } from '../context/AuthProvider';
 
 const SignInScreen = ({ navigation }) => {
   const { login } = useToggleContext();
-  const [showPassword, setShowPassword] = useState(false); // Estado para la visibilidad de la contraseña
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = async ({ email, password }) => {
+  const handleSignIn = async (values) => {
     try {
-      await login({ email, password });
+      await login(values);
     } catch (error) {
-      // Verifica si el error tiene un mensaje definido
-      if (error.message) {
-        // Identifica mensajes específicos del backend para mostrar alertas personalizadas
-        if (error.message.includes("Debes confirmar tu cuenta")) {
-          Alert.alert(
-            "Cuenta no confirmada",
-            "Por favor, revisa tu correo electrónico para confirmar tu cuenta."
-          );
-        } else if (error.message.includes("Contraseña incorrecta")) {
-          Alert.alert(
-            "Credenciales incorrectas",
-            "La contraseña ingresada no es correcta. Inténtalo nuevamente."
-          );
-        } else if (error.message.includes("El usuario no existe")) {
-          Alert.alert(
-            "Usuario no encontrado",
-            "No se encontró una cuenta asociada con este correo electrónico. Por favor, regístrate primero."
-          );
-        } else {
-          // Mensaje genérico para errores no manejados
-          Alert.alert("Error", error.message || "Error al iniciar sesión");
-        }
-      } else {
-        // Mensaje genérico si no hay detalles del error
-        Alert.alert("Error", "Ocurrió un error inesperado. Inténtalo nuevamente.");
-      }
+      Alert.alert('Error', error.message || 'An unexpected error occurred.');
     }
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate("ForgotPassword");
-  };
-
-  const initialValues = { 
-    email: "", 
-    password: "" 
   };
 
   return (
     <Formik
-      validationSchema={SignInValidationSchema}
-      initialValues={initialValues}
-      onSubmit={(values) => handleSignIn(values)}
+      validationSchema={signInValidationSchema}
+      initialValues={{ email: '', password: '' }}
+      onSubmit={handleSignIn}
     >
-      {({ handleSubmit, errors, touched }) => {
-        return (
-          <View style={styles.container}>
-            <Image
-              source={require("../assets/imgs/logo.png")}
-              style={styles.logo}
-            />
-            <Text style={styles.title}>REDMEDIA</Text>
-            <Text style={styles.welcomeText}>Welcome Again</Text>
+      {({ handleSubmit }) => (
+        <View style={styles.container}>
+          <Image source={require('../assets/imgs/logo.png')} style={styles.logo} />
+          <Text style={styles.title}>Sign In</Text>
 
-            {/* Campo de Email */}
-            <FormikInputValue 
-              name="email" 
-              placeholder="Enter your email" 
-              placeholderTextColor="#aaa" 
-              keyboardType="email-address" 
-            />
-            {errors.email && touched.email && (
-              <Text style={styles.error}>{errors.email}</Text>
-            )}
+          <FormikInputValue
+            name="email"
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            testID="email"
+          />
+          <FormikInputValue
+            name="password"
+            placeholder="Enter your password"
+            secureTextEntry={!showPassword}
+            testID="password"
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeButton}
+          >
+            <EyeIcon width={24} height={24} />
+          </TouchableOpacity>
 
-            {/* Campo de Contraseña con Toggle */}
-            <View style={styles.passwordContainer}>
-              <FormikInputValue 
-                name="password" 
-                placeholder="Enter your password" 
-                placeholderTextColor="#aaa" 
-                secureTextEntry={!showPassword} 
-                style={styles.passwordInput}
-              />
-              <TouchableOpacity 
-                onPress={() => setShowPassword(!showPassword)} 
-                style={styles.eyeButton}
-                accessibilityLabel={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                accessibilityRole="button"
-              >
-                <EyeIcon 
-                  width={24} 
-                  height={24} 
-                  style={[
-                    styles.eyeIcon, 
-                    showPassword && styles.eyeIconActive
-                  ]}
-                />
-              </TouchableOpacity>
-            </View>
-            {errors.password && touched.password && (
-              <Text style={styles.error}>{errors.password}</Text>
-            )}
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          </TouchableOpacity>
 
-            {/* Enlace de Olvidé mi Contraseña */}
-            <TouchableOpacity onPress={handleForgotPassword}>
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-            </TouchableOpacity>
-
-            {/* Botón de Iniciar Sesión */}
-            <TouchableOpacity
-              style={styles.signInButton}
-              onPress={handleSubmit}
-            >
-              <Text style={styles.signInButtonText}>Login</Text>
-            </TouchableOpacity>
-          </View>
-        );
-      }}
+          <TouchableOpacity style={styles.signInButton} onPress={handleSubmit} testID="Login">
+            <Text style={styles.signInButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </Formik>
   );
 };
@@ -139,79 +64,40 @@ const SignInScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
   logo: {
     width: 100,
     height: 100,
     marginBottom: 20,
-    resizeMode: 'contain',
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
-  },
-  welcomeText: {
     fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 40,
-    color: "#333",
-  },
-  passwordContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-  },
-  passwordInput: {
-    flex: 1,
-    height: 40,
-    color: "black",
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
   eyeButton: {
-    padding: 5,
-  },
-  eyeIcon: {
-    transition: 'transform 0.3s', // Animación suave al rotar
-  },
-  eyeIconActive: {
-    transform: [{ rotate: '180deg' }], // Rota el icono cuando la contraseña es visible
+    position: 'absolute',
+    right: 10,
+    top: 10,
   },
   forgotPasswordText: {
-    color: "#4285F4",
-    fontSize: 14,
-    alignSelf: "flex-end",
-    marginBottom: 30,
+    color: '#4285F4',
+    marginTop: 10,
   },
   signInButton: {
-    backgroundColor: "#4285F4",
-    paddingVertical: 12,
-    paddingHorizontal: 60,
-    borderRadius: 5,
-    marginTop: 10,
-    width: '100%',
+    backgroundColor: '#4285F4',
+    borderRadius: 8,
+    padding: 15,
     alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
   },
   signInButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  error: {
-    color: "red",
-    marginBottom: 10,
-    fontSize: 12,
-    alignSelf: 'flex-start',
-    marginLeft: '5%',
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
