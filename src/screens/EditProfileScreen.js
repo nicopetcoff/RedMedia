@@ -15,6 +15,7 @@ import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserContext, useToggleContext } from '../context/AuthProvider';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
+import { useToggleMode } from '../context/ThemeContext';
 import { updateUserProfile, getUserData, deleteUserAccount } from '../controller/miApp.controller';
 
 const EditProfileScreen = ({ navigation, route }) => {
@@ -26,10 +27,11 @@ const EditProfileScreen = ({ navigation, route }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [gender, setGender] = useState('Not specified');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileImage, setProfileImage] = useState(avatar);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const { toggleTheme, isDark,colors } = useToggleMode();
 
   useEffect(() => {
     loadUserData();
@@ -175,9 +177,12 @@ const EditProfileScreen = ({ navigation, route }) => {
     }
   };
 
+  const handleChangeTheme =   () =>   toggleTheme
+  
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+    <SafeAreaView style={[styles.safeArea,{backgroundColor:colors.background}]}>
+      <ScrollView style={[styles.container,{backgroundColor:colors.background}]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Text style={styles.closeButtonText}>×</Text>
         </TouchableOpacity>
@@ -223,27 +228,30 @@ const EditProfileScreen = ({ navigation, route }) => {
           <Text style={styles.sectionTitle}>PROFILE</Text>
           <TextInput
             placeholder="Nickname"
+             placeholderTextColor="#999"
             value={nickname}
             style={[styles.input, { color: '#999' }]}
             editable={false}
           />
           <TextInput
             placeholder="Name"
+             placeholderTextColor="#999"
             value={name}
             onChangeText={setName}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             editable={!loading}
           />
           <TextInput
             placeholder="Description"
+             placeholderTextColor="#999"
             value={description}
             onChangeText={setDescription}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             multiline
             editable={!loading}
           />
           <View style={styles.pickerContainer}>
-            <Text style={styles.label}>Gender:</Text>
+            <Text style={[styles.label,{color:colors.text}]}>Gender:</Text>
             <Picker
               selectedValue={gender}
               style={styles.picker}
@@ -270,6 +278,15 @@ const EditProfileScreen = ({ navigation, route }) => {
 
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>SETTINGS</Text>
+          <View style={styles.appearanceRow}>
+            <Text style={[styles.appearanceLabel,{color:colors.text}]}>Dark mode:</Text>
+            <View style={styles.switchContainer}>
+              <Switch
+                value={isDark}
+                onValueChange={handleChangeTheme()}
+              />
+            </View>
+          </View>
 
           <TouchableOpacity
             style={styles.deleteButton}
@@ -299,7 +316,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   closeButton: {
     alignSelf: 'flex-start',

@@ -16,10 +16,10 @@ import {
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import Geolocation from '@react-native-community/geolocation';
 import Geocoder from 'react-native-geocoding';
-import Video from 'react-native-video'; // Importar el componente Video
-import {publishPost, getUserData} from '../controller/miApp.controller';
+import {publishPost, getUserData} from '../controller/miApp.controller'; // Mantener las importaciones necesarias
 import {useUserContext} from '../context/AuthProvider';
 import {useFocusEffect} from '@react-navigation/native';
+import {useToggleMode} from '../context/ThemeContext'; // Asegurarse de importar el contexto de tema
 
 Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc');
 
@@ -33,6 +33,8 @@ const ImagePickerScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true);
   const [isVideo, setIsVideo] = useState(false);
+
+  const {colors} = useToggleMode(); // Mantener la lógica de los colores
 
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
@@ -299,7 +301,7 @@ const ImagePickerScreen = ({navigation}) => {
     !title.trim() || selectedImages.length === 0 || loading;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container,{backgroundColor:colors.background}]}>
       <View style={styles.header}>
         <Text></Text>
         <TouchableOpacity onPress={handlePush} disabled={isPublishDisabled}>
@@ -322,7 +324,7 @@ const ImagePickerScreen = ({navigation}) => {
           }}
           style={styles.profileImage}
         />
-        <Text style={styles.username}>
+        <Text style={[styles.username,{color:colors.text}]}>
           @{userData?.usernickname || 'Loading...'}
         </Text>
       </View>

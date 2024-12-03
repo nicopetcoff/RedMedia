@@ -21,4 +21,10 @@ class MainActivity : ReactActivity() {
         SplashScreen.show(this)
         super.onCreate(null)
     }
+
+    @override
+    public void onConfigurationChanged(Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
+        getReactInstanceManager().onConfigurationChanged(this,newConfig);
+    }
 }

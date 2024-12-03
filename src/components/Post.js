@@ -1,6 +1,7 @@
 import React, {memo, useCallback} from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import { useToggleMode } from '../context/ThemeContext';
 import {usePost} from '../context/PostContext';
 import Video from 'react-native-video';
 
@@ -11,6 +12,8 @@ const Post = ({item, source}) => {
 
   const hasVideo = item.videos && item.videos.length > 0;
   const hasImage = item.image && item.image.length > 0;
+
+  const { colors } = useToggleMode();
 
   const navigateToDetail = useCallback(() => {
     const params = {
@@ -25,7 +28,7 @@ const Post = ({item, source}) => {
   return (
     <TouchableOpacity 
       onPress={navigateToDetail} 
-      style={styles.container}
+      style={[styles.container,{backgroundColor: colors.background}]}
       key={`post-${item._id}-${item.user}`}
     >
       <View style={styles.mediaContainer}>
@@ -66,7 +69,7 @@ const Post = ({item, source}) => {
         )}
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={[styles.title,{color:colors.text}]} numberOfLines={2}>
           {item.title}
         </Text>
         <Text style={styles.username}>@{item.user}</Text>
@@ -78,7 +81,6 @@ const Post = ({item, source}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
     marginBottom: 2,
     borderRadius: 12,
     overflow: 'hidden',

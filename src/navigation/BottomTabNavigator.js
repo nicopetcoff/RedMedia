@@ -13,10 +13,12 @@ import ImagePickerScreen from '../screens/ImagePickerScreen';
 import NotificationStackScreen from '../navigation/NotificationStackScreen';
 import LoggedInUserProfileScreen from '../screens/LoggedInUserProfileScreen';
 import SearchStackScreen from './SearchStackScreen';
+import { useToggleMode } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 const TabBarIcon = ({ route, size }) => {
+  
   const icons = {
     HomeStack: HomeIcon,
     Search: SearchIcon,
@@ -30,6 +32,7 @@ const TabBarIcon = ({ route, size }) => {
 };
 
 const BottomTabNavigator = () => {
+  const { colors } = useToggleMode();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -38,6 +41,9 @@ const BottomTabNavigator = () => {
         tabBarActiveTintColor: 'black',
         tabBarInactiveTintColor: 'gray',
         tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: colors.post
+        },
       })}
     >
       <Tab.Screen name="HomeStack" component={HomeStackScreen} />

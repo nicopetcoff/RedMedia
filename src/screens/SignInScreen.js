@@ -51,7 +51,6 @@ const SignInScreen = ({ navigation }) => {
       }
     }
   };
-
   const handleForgotPassword = () => {
     navigation.navigate("ForgotPassword");
   };

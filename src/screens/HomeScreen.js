@@ -17,7 +17,8 @@ import {useUserContext} from '../context/AuthProvider';
 import {usePost} from '../context/PostContext';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
-import {getTimelinePosts, getAds} from '../controller/miApp.controller';
+import { getTimelinePosts, getAds } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -29,6 +30,7 @@ const HomeScreen = () => {
   const {token} = useUserContext();
   const navigation = useNavigation();
   const postContext = usePost();
+  const { colors } = useToggleMode();
 
   const flatListRef = useRef(null);
   useScrollToTop(flatListRef);
@@ -98,6 +100,7 @@ const HomeScreen = () => {
   }, [fetchData, refreshing]);
 
   useEffect(() => {
+
     fetchData();
   }, []);
 
@@ -186,13 +189,13 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.headerContainer}>
           <Image
             source={require('../assets/imgs/logo.png')}
             style={styles.logo}
           />
-          <Text style={styles.header}>REDMEDIA</Text>
+          <Text style={[styles.header,{color:colors.text}]}>REDMEDIA</Text>
         </View>
 
         <FlatList
@@ -227,11 +230,9 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -240,7 +241,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#efefef',
-    backgroundColor: '#fff',
   },
   logo: {
     width: 50,
@@ -250,7 +250,6 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'black',
   },
   listContent: {
     paddingHorizontal: 10,
@@ -293,7 +292,6 @@ const styles = StyleSheet.create({
     width: '48%',
     height: 200,
     marginBottom: 15,
-    backgroundColor: '#f0f0f0',
     borderRadius: 8,
   },
   emptyContainer: {

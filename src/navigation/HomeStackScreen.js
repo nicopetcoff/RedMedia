@@ -4,12 +4,14 @@ import {TouchableOpacity} from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import PostDetail from '../screens/PostDetail';
 import ProfileScreen from '../screens/ProfileScreen';
-import BackIcon from '../assets/imgs/back.svg';
+import { useToggleMode } from '../context/ThemeContext';  // Mantén solo esta importación si necesitas el tema
 import FullScreen from '../screens/FullScreen';
 
 const Stack = createStackNavigator();
 
 const HomeStackScreen = () => {
+
+  const { colors } = useToggleMode();
   return (
     <Stack.Navigator
       screenOptions={{
@@ -28,45 +30,10 @@ const HomeStackScreen = () => {
         component={PostDetail}
         options={({route, navigation}) => ({
           headerTitle: '',
-          headerLeft: () => {
-            const {previousScreen, username, fromScreen} = route.params || {};
-
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  if (
-                    previousScreen === 'Profile' &&
-                    fromScreen === 'Profile'
-                  ) {
-                    // Limpiar la pila de navegación antes de navegar al perfil
-                    navigation.reset({
-                      index: 1,
-                      routes: [
-                        {name: 'Home'},
-                        {
-                          name: 'Profile',
-                          params: {
-                            username,
-                            fromScreen: 'Home',
-                            timestamp: Date.now(),
-                          },
-                        },
-                      ],
-                    });
-                  } else {
-                    navigation.goBack();
-                  }
-                }}
-                style={{
-                  marginLeft: 10,
-                  padding: 10,
-                }}>
-                <BackIcon width={24} height={24} />
-              </TouchableOpacity>
-            );
+          headerStyle: {
+            backgroundColor: colors.background, 
           },
-          headerStyle: defaultScreenOptions.headerStyle,
-          cardStyle: defaultScreenOptions.cardStyle,
+          headerTintColor: colors.text,
         })}
       />
       <Stack.Screen
@@ -74,23 +41,10 @@ const HomeStackScreen = () => {
         component={ProfileScreen}
         options={({navigation}) => ({
           headerTitle: '',
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{name: 'Home'}],
-                });
-              }}
-              style={{
-                marginLeft: 10,
-                padding: 10,
-              }}>
-              <BackIcon width={24} height={24} />
-            </TouchableOpacity>
-          ),
-          headerStyle: defaultScreenOptions.headerStyle,
-          cardStyle: defaultScreenOptions.cardStyle,
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: 'white',
         })}
       />
       <Stack.Screen name="FullScreen" component={FullScreen} />
