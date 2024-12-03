@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo, useCallback} from 'react';
+import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useScrollToTop} from '@react-navigation/native';
 import {useUserContext} from '../context/AuthProvider';
 import {usePost} from '../context/PostContext';
 import Post from '../components/Post';
@@ -30,8 +30,11 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const postContext = usePost();
 
+  const flatListRef = useRef(null);
+  useScrollToTop(flatListRef);
+
   const updatePost = useCallback(updatedPost => {
-    if (!updatedPost?._id) return;
+    if (!updatedPost?._id) { return; }
     setPosts(prevPosts =>
       prevPosts.map(post =>
         post._id === updatedPost._id ? updatedPost : post,
@@ -44,7 +47,7 @@ const HomeScreen = () => {
   }, [updatePost, postContext]);
   const fetchData = useCallback(
     async (isLoadMore = false) => {
-      if (isLoadMore && loadingMore) return;
+      if (isLoadMore && loadingMore) { return; }
 
       try {
         if (isLoadMore) {
@@ -87,7 +90,7 @@ const HomeScreen = () => {
   );
 
   const refreshData = useCallback(async () => {
-    if (refreshing) return;
+    if (refreshing) { return;}
     setPage(1);
     setRefreshing(true);
     await fetchData(false);
@@ -107,7 +110,7 @@ const HomeScreen = () => {
   }, [navigation, refreshing, loading, refreshData]);
 
   const adIndices = useMemo(() => {
-    if (!ads.length) return [];
+    if (!ads.length) { return []; }
     return posts.map((_, index) =>
       (index + 1) % 4 === 0 ? Math.floor(Math.random() * ads.length) : null,
     );
@@ -132,7 +135,7 @@ const HomeScreen = () => {
         );
       }
 
-      if (!item?._id) return null;
+      if (!item?._id) { return null; }
 
       return (
         <View style={styles.postContainer} key={`post-container-${item._id}`}>
@@ -186,9 +189,10 @@ const HomeScreen = () => {
         </View>
 
         <FlatList
+          ref={flatListRef}
           data={posts}
           renderItem={renderPost}
-          keyExtractor={item => `post-${item._id}-${item.user}`}
+          keyExtractor={(item, index) => `post-${item._id}-${index}`}
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={[
@@ -202,8 +206,8 @@ const HomeScreen = () => {
           onEndReachedThreshold={0.5}
           ListEmptyComponent={renderEmptyComponent}
           ListFooterComponent={renderFooter}
-          initialNumToRender={6}
-          maxToRenderPerBatch={3}
+          initialNumToRender={5}
+          maxToRenderPerBatch={10}
           windowSize={5}
           removeClippedSubviews={Platform.OS === 'android'}
           updateCellsBatchingPeriod={50}
