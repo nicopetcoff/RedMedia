@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,12 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
-import {useNavigation, useScrollToTop} from '@react-navigation/native';
-import {useUserContext} from '../context/AuthProvider';
-import {usePost} from '../context/PostContext';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useUserContext } from '../context/AuthProvider';
+import { usePost } from '../context/PostContext';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
-import {getTimelinePosts, getAds} from '../controller/miApp.controller';
+import { getTimelinePosts, getAds } from '../controller/miApp.controller';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -26,7 +26,7 @@ const HomeScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
-  const {token} = useUserContext();
+  const { token } = useUserContext();
   const navigation = useNavigation();
   const postContext = usePost();
 
@@ -118,7 +118,7 @@ const HomeScreen = () => {
   }, [posts, ads]);
 
   const renderPost = useCallback(
-    ({item, index}) => {
+    ({ item, index }) => {
       const adIndex = adIndices[index];
 
       if (adIndex !== null && ads[adIndex]) {
@@ -133,7 +133,7 @@ const HomeScreen = () => {
             style={styles.adContainer}
             onPress={() => Linking.openURL(randomAd.Url)}>
             <Image
-              source={{uri: adImageUri}}
+              source={{ uri: adImageUri }}
               style={styles.adImage}
               resizeMode="cover"
             />
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   adContainer: {
     flex: 1,
     marginHorizontal: 5,
-    marginBottom: 15,
+    marginBottom: 10,  // Reduce el margen inferior de las publicidades
     height: 200,
     borderRadius: 8,
     overflow: 'hidden',
