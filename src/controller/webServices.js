@@ -1,5 +1,5 @@
 const urlApi = 'https://backend-redmedia.onrender.com/'; // Para producción
-// const urlApi = 'http://10.0.2.2:4000/'; // Para Android Emulator
+//const urlApi = 'http://10.0.2.2:4000/'; // Para Android Emulator
 // const urlApi = "http://[TU_IP_LOCAL]:4000/";  // Para dispositivos reales o iOS
 
 const urlWebServices = {
@@ -11,7 +11,6 @@ const urlWebServices = {
   getNotifications: urlApi + 'api/users/notificaciones',
   getUsers: urlApi + 'api/users',
   updateUserProfile: urlApi + 'api/users/me',
-  googleLogin: urlApi + 'api/users/google',
   followUser: urlApi + 'api/users/:id/follow',
   searchUsers: urlApi + 'api/users/search',
   deleteAccount: urlApi + 'api/users/me',

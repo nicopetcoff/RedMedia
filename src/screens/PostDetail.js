@@ -23,7 +23,6 @@ import Video from 'react-native-video';
 import PostInteractionBar from '../components/PostInteractionBar';
 import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
-import { useToggleMode } from '../context/ThemeContext';
 
 const PostDetail = ({route, navigation}) => {
   const {item, previousScreen, username, fromScreen, updatePost} =
@@ -45,7 +44,6 @@ const PostDetail = ({route, navigation}) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState(item?.comments || []);
-  const { colors } = useToggleMode();
   const getCurrentUserId = useCallback(() => {
     try {
       if (!token) return null;
@@ -236,7 +234,7 @@ const PostDetail = ({route, navigation}) => {
 
   if (loading && !userData && !postUserData) {
     return (
-      <View style={[styles.loaderContainer,{backgroundColor:colors.post}]}>
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#1DA1F2" />
       </View>
     );
@@ -245,7 +243,7 @@ const PostDetail = ({route, navigation}) => {
   const isOwnPost = userData?.usernickname === currentPost.user;
 
   return (
-    <ScrollView contentContainerStyle={[styles.container,{backgroundColor: colors.background}]}>
+    <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity onPress={handleUserPress} disabled={isOwnPost}>
         <PostHeader
           userAvatar={isOwnPost ? userData?.avatar : postUserData?.avatar}
@@ -260,7 +258,7 @@ const PostDetail = ({route, navigation}) => {
 
       <View style={styles.titleContainer}>
         {currentPost.title && (
-          <Text style={[styles.title,{color:colors.text}]}>{currentPost.title}</Text>
+          <Text style={styles.title}>{currentPost.title}</Text>
         )}
         {currentPost.description ? (
           <Text style={styles.description}>{currentPost.description}</Text>
@@ -292,7 +290,7 @@ const PostDetail = ({route, navigation}) => {
       <View style={styles.line} />
 
       <View style={styles.likeSection}>
-        <Text style={[styles.likeText,{color:colors.text}]}>
+        <Text style={styles.likeText}>
           Le gusta a{' '}
           <Text style={styles.boldText}>{currentPost.likes?.length || 0}</Text>{' '}
           personas
@@ -335,6 +333,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   titleContainer: {
     paddingHorizontal: 15,
@@ -343,6 +342,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: 'bold',
+    color: '#000',
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   description: {
@@ -359,13 +359,13 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 12,
-    color: '#848383',
+    color: '#555',
     marginLeft: 4,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   line: {
     height: 1,
-    backgroundColor: '#848383',
+    backgroundColor: '#E1E8ED',
     marginHorizontal: 15,
     marginVertical: 10,
   },
