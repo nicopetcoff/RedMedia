@@ -1,32 +1,43 @@
-import * as yup from "yup";
+import * as yup from 'yup';
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d{1,})(?!.*(\d)\1{1,})(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,16}$/;
+const nameRegex = /^[a-zA-Z]{3,16}$/;
 
 export const signUpValidationSchema = yup.object().shape({
   email: yup
     .string()
-    .email("Invalid email")
-    .required("Email is required"),
+    .matches(emailRegex, 'Email must be well-formed')
+    .required('Email is required'),
   password: yup
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .required("Password is required")
-    .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/, 'Password must contain at least one letter and one number'),
+    .min(8, 'Password must be at least 8 characters')
+    .max(16, 'Password must be at most 16 characters')
+    .matches(passwordRegex, 'Password must include at least one uppercase letter, one lowercase letter, one special character, and at least two non-consecutive numbers')
+    .required('Password is required'),
   name: yup
     .string()
-    .required("Name is required"),
+    .matches(nameRegex, 'Name must contain only letters and be 3 to 16 characters long')
+    .required('Name is required'),
   lastName: yup
     .string()
-    .required("Last name is required"),
+    .matches(nameRegex, 'Last name must contain only letters and be 3 to 16 characters long')
+    .required('Last name is required'),
   nick: yup
     .string()
-    .required("Nickname is required"),
+    .matches(nameRegex, 'Nickname must contain only letters and be 3 to 16 characters long')
+    .required('Nickname is required'),
 });
 
-export const SignInValidationSchema = yup.object().shape({
+export const signInValidationSchema = yup.object().shape({
   email: yup
     .string()
-    .email("Invalid email")
-    .required("Email is required"),
+    .matches(emailRegex, 'Email must be well-formed')
+    .required('Email is required'),
   password: yup
     .string()
-    .required("Password is required"),
+    .min(8, 'Password must be at least 8 characters')
+    .max(16, 'Password must be at most 16 characters')
+    .matches(passwordRegex, 'Password must include at least one uppercase letter, one lowercase letter, one special character, and at least two non-consecutive numbers')
+    .required('Password is required'),
 });
