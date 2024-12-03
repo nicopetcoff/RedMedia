@@ -43,7 +43,6 @@ const ImagePickerScreen = ({navigation}) => {
 
       if (!isEnabled) {
         setSelectedLocation(currentLocation);
-        console.log("toogleSwitch",selectedLocation);
       }
 
   };
@@ -185,9 +184,6 @@ const ImagePickerScreen = ({navigation}) => {
               setLocation(formattedAddress);
               setSelectedLocation(formattedAddress);
               setCurrentLocation(formattedAddress)
-              console.log("formattedAddress",formattedAddress)
-              console.log("Location",location)
-              console.log("getCurrentLocation",selectedLocation)
             } catch (error) {
               setLocation('Error getting location details');
             }
@@ -463,7 +459,6 @@ const ImagePickerScreen = ({navigation}) => {
         <Text style={styles.textTitles}>Location</Text>
         <View style={styles.switchContainer}>
           <Text>Use Actual Location</Text>
-          {console.log("switch",selectedLocation)}
           <Switch
             trackColor={{false: '#767577', true: '#81b0ff'}}
             thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
