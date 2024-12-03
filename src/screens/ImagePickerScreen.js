@@ -12,6 +12,7 @@ import {
   Switch,
   Platform,
   PermissionsAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import Geolocation from '@react-native-community/geolocation';
@@ -20,6 +21,8 @@ import Video from 'react-native-video'; // Importar el componente Video
 import {publishPost, getUserData} from '../controller/miApp.controller';
 import {useUserContext} from '../context/AuthProvider';
 import {useFocusEffect} from '@react-navigation/native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import BackIcon from '../assets/imgs/back.svg';
 
 Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc');
 
@@ -32,9 +35,17 @@ const ImagePickerScreen = ({navigation}) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true);
-  const [isVideo, setIsVideo] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState('');
 
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => {
+      setIsEnabled(previousState => !previousState);
+      deleteLocation();
+
+      if (!isEnabled) {
+        setSelectedLocation(currentLocation);
+      }
+
+  };
 
   const deleteLocation = () => setSelectedLocation('');
 
@@ -57,11 +68,7 @@ const ImagePickerScreen = ({navigation}) => {
     }, [token]),
   );
 
-  const toggleMediaType = () => {
-    setIsVideo(!isVideo); // Cambia el estado entre video y foto
-  };
-
-  const openCamera = () => {
+  const openCamera = (isVideo) => {
     launchCamera(
       {
         mediaType: isVideo ? 'video' : 'photo', // Cambia entre foto y video
@@ -176,6 +183,7 @@ const ImagePickerScreen = ({navigation}) => {
               const formattedAddress = `${city}, ${state}, ${country}`;
               setLocation(formattedAddress);
               setSelectedLocation(formattedAddress);
+              setCurrentLocation(formattedAddress)
             } catch (error) {
               setLocation('Error getting location details');
             }
@@ -299,8 +307,21 @@ const ImagePickerScreen = ({navigation}) => {
     !title.trim() || selectedImages.length === 0 || loading;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.mainContainer}>
+      {loading ? (
+        // Pantalla de carga
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size={175} color="#007bff" />
+          <Text style={styles.loadingText}>Publishing your post.....</Text>
+        </View>
+      ) : (
+      <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
+        <View style={styles.goBack}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <BackIcon width={24} height={24} />
+          </TouchableOpacity>
+        </View>
         <Text></Text>
         <TouchableOpacity onPress={handlePush} disabled={isPublishDisabled}>
           <Text
@@ -327,51 +348,60 @@ const ImagePickerScreen = ({navigation}) => {
         </Text>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={openGallery}
-          style={[
-            styles.selectButton,
-            selectedImages.length >= 10 && styles.selectButtonDisabled,
-          ]}
-          disabled={selectedImages.length >= 10}>
-          <Text style={styles.selectButtonText}>
-            {selectedImages.length >= 10
-              ? 'Maximum items selected'
-              : 'Open Gallery'}
-          </Text>
-        </TouchableOpacity>
+      {selectedImages.length >= 10 ? <Text style={styles.maximum}>Maximum items selected!</Text>
+            : (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              onPress={openGallery}
+              style={[
+                styles.selectButton,
+                selectedImages.length >= 10 && styles.selectButtonDisabled,
+              ]}
+              disabled={selectedImages.length >= 10}>
+                <MaterialIcons name="photo-library" size={24} color="white" />
+              <Text style={styles.selectButtonText}>
+                {selectedImages.length >= 10
+                  ? 'Maximum items selected'
+                  : 'Open Gallery'}
+              </Text>
+            </TouchableOpacity>
 
-        {/* Botón para tomar foto o grabar video */}
-        <TouchableOpacity
-          onPress={openCamera}
-          style={[
-            styles.selectButton,
-            selectedImages.length >= 10 && styles.selectButtonDisabled,
-          ]}
-          disabled={selectedImages.length >= 10}>
-          <Text style={styles.selectButtonText}>
-            {selectedImages.length >= 10
-              ? 'Maximum items selected'
-              : isVideo
-              ? 'Record Video'
-              : 'Take Photo'}
-          </Text>
-        </TouchableOpacity>
+            {/* Botón para tomar foto */}
+            <TouchableOpacity
+              onPress={() => openCamera(false)}
+              style={[
+                styles.selectButton,
+                selectedImages.length >= 10 && styles.selectButtonDisabled,
+              ]}
+              disabled={selectedImages.length >= 10}>
+              <MaterialIcons name="photo-camera" size={24} color="white" />
+              <Text style={styles.selectButtonText}>
+                {selectedImages.length >= 10
+                  ? 'Maximum items selected'
+                  : 'Take Photo'}
+              </Text>
+            </TouchableOpacity>
 
-        {/* Componente Switch para alternar entre modo foto o video */}
-        <View>
-          <Text style={styles.switchText}>{isVideo ? 'Photo' : 'Video'}</Text>
-          <Switch
-            trackColor={{false: '#767577', true: '#81b0ff'}}
-            thumbColor={isVideo ? '#f5dd4b' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
-            value={isVideo}
-            onValueChange={toggleMediaType} // Cambiar el estado de isVideo
-            disabled={selectedImages.length >= 10} // Deshabilitar el switch si ya se seleccionaron 10 imágenes
-          />
-        </View>
-      </View>
+            {/* Botón para grabar video */}
+            <TouchableOpacity
+              onPress={() => openCamera(true)}
+              style={[
+                styles.selectButton,
+                selectedImages.length >= 10 && styles.selectButtonDisabled,
+              ]}
+              disabled={selectedImages.length >= 10}>
+              {selectedImages.length >= 10 ? null
+                : (<MaterialIcons name="videocam" size={24} color="white" />)
+              }
+              <Text style={styles.selectButtonText}>
+                {selectedImages.length >= 10
+                  ? 'Maximum items selected'
+                  : 'Take Video'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+              )
+            }
 
       {selectedImages.length > 0 && (
         <FlatList
@@ -434,7 +464,6 @@ const ImagePickerScreen = ({navigation}) => {
             thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
             ios_backgroundColor="#3e3e3e"
             onValueChange={() => {
-              deleteLocation();
               toggleSwitch();
             }}
             value={isEnabled}
@@ -451,6 +480,8 @@ const ImagePickerScreen = ({navigation}) => {
           />
         )}
       </View>
+      </ScrollView>
+      )}
     </ScrollView>
   );
 };
@@ -461,11 +492,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     flexGrow: 1,
   },
+  mainContainer: {
+    backgroundColor: '#FFF',
+    flexGrow: 1,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: 16,
+  },
+  goBack: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   publishText: {
     color: '#007AFF',
@@ -526,6 +565,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginBottom: 20,
+    width: 125,
+    alignItems: 'center', // Centrar verticalmente
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
   selectButtonDisabled: {
     backgroundColor: '#999',
@@ -575,6 +618,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 16,
+  },
+  maximum: {
+    color: 'white',
+    fontSize: 20,
+    margin: 20,
+    alignContent: "center",
+    textAlign: "center",
+    backgroundColor: '#007AFF',
+  },
+  loadingContainer: {
+    fontSize: 20,
+    textAlign: "center",
+    height: 777,
+    width:375,
+    alignSelf: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 25,
+    margin: 20,
+    alignContent: "center",
+    textAlign: "center",
+    backgroundColor: '#007AFF',
   },
 });
 
