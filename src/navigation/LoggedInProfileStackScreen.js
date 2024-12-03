@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoggedInUserProfileScreen from "../screens/LoggedInUserProfileScreen";
 import PostDetailScreen from "../screens/PostDetail"; // Pantalla de detalle de cada post
 import EditProfileScreen from "../screens/EditProfileScreen"; // Nueva pantalla de edición de perfil
+import FavoriteScreen from "../screens/FavoriteScreen"; // Agregada pantalla de favoritos
 import { TouchableOpacity } from "react-native";
 import BackIcon from "../assets/imgs/back.svg"; // Icono personalizado para volver
 
@@ -32,7 +33,17 @@ const LoggedInProfileStackScreen = () => {
           ),
         })}
       />
-      <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: false }}/>
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ headerShown: false }}
+      />
+      {/* Nueva pantalla de Favoritos */}
+      <Stack.Screen
+        name="FavoriteScreen"
+        component={FavoriteScreen}
+        options={{ title: "" }}
+      />
     </Stack.Navigator>
   );
 };

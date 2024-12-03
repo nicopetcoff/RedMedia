@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -10,30 +10,27 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import {useUserContext} from '../context/AuthProvider';
+import { useUserContext } from '../context/AuthProvider';
 import {
   getUserData,
   getUsers,
   interactWithPost,
   handleFollowUser,
+  markPostAsFavorite,
 } from '../controller/miApp.controller';
 import PostHeader from '../components/PostHeader';
 import PostMedia from '../components/PostMedia';
-import Video from 'react-native-video';
 import PostInteractionBar from '../components/PostInteractionBar';
 import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
 
-const PostDetail = ({route, navigation}) => {
-  const {item, previousScreen, username, fromScreen, updatePost} =
-    route.params || {};
-  const {token} = useUserContext();
+const PostDetail = ({ route, navigation }) => {
+  const { item, previousScreen, username, fromScreen, updatePost } = route.params || {};
+  const { token } = useUserContext();
 
-  //const [currentPost, setCurrentPost] = useState(() =>
-  //  item ? JSON.parse(JSON.stringify(item)) : null,
-  //);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false); // Nuevo estado para marcar como favorito
   const [currentPost, setCurrentPost] = useState({
     ...item,
     videos: item?.videos || [],
@@ -44,6 +41,7 @@ const PostDetail = ({route, navigation}) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState(item?.comments || []);
+
   const getCurrentUserId = useCallback(() => {
     try {
       if (!token) return null;
@@ -53,7 +51,7 @@ const PostDetail = ({route, navigation}) => {
         atob(base64)
           .split('')
           .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join(''),
+          .join('')
       );
       return JSON.parse(jsonPayload).id;
     } catch (error) {
@@ -85,8 +83,7 @@ const PostDetail = ({route, navigation}) => {
 
       if (foundUser) {
         const currentUserId = getCurrentUserId();
-        const isCurrentUserFollowing =
-          foundUser.followers?.includes(currentUserId);
+        const isCurrentUserFollowing = foundUser.followers?.includes(currentUserId);
         setPostUserData(foundUser);
         setIsFollowing(isCurrentUserFollowing);
       }
@@ -118,6 +115,7 @@ const PostDetail = ({route, navigation}) => {
       setComments([]);
     };
   }, []);
+
   const toggleFollow = async () => {
     if (!postUserData?._id) return;
 
@@ -140,11 +138,9 @@ const PostDetail = ({route, navigation}) => {
   const handleLike = async () => {
     if (!currentPost?._id || !userData?.usernickname) return;
 
-    // Optimistic update
     const newLikeState = !isLiked;
     setIsLiked(newLikeState);
 
-    // Actualizar el post actual de manera optimista
     setCurrentPost(prev => ({
       ...prev,
       likes: newLikeState
@@ -154,18 +150,11 @@ const PostDetail = ({route, navigation}) => {
 
     try {
       const response = await interactWithPost(currentPost._id, token, 'like');
-
       if (response.data) {
-        // Actualizar con los datos del servidor
         setCurrentPost(response.data);
-
-        // Actualizar el timeline
-        if (updatePost) {
-          updatePost(response.data);
-        }
+        if (updatePost) updatePost(response.data);
       }
     } catch (error) {
-      // Revertir cambios en caso de error
       setIsLiked(!newLikeState);
       setCurrentPost(prev => ({
         ...prev,
@@ -178,17 +167,15 @@ const PostDetail = ({route, navigation}) => {
   };
 
   const handleAddComment = async () => {
-    if (!currentPost?._id || !newComment.trim() || !userData?.usernickname)
-      return;
+    if (!currentPost?._id || !newComment.trim() || !userData?.usernickname) return;
 
     const optimisticComment = {
       user: userData.usernickname,
       comment: newComment.trim(),
       createdAt: new Date().toISOString(),
-      _id: Date.now().toString(), // ID temporal para optimistic update
+      _id: Date.now().toString(),
     };
 
-    // Optimistic update
     setComments(prev => [...prev, optimisticComment]);
     setNewComment('');
     setShowCommentInput(false);
@@ -204,18 +191,28 @@ const PostDetail = ({route, navigation}) => {
       if (response.data) {
         setCurrentPost(response.data);
         setComments(response.data.comments);
-
-        // Actualizar el timeline
-        if (updatePost) {
-          updatePost(response.data);
-        }
+        if (updatePost) updatePost(response.data);
       }
     } catch (error) {
-      // Revertir optimistic update en caso de error
       setComments(prev =>
         prev.filter(comment => comment._id !== optimisticComment._id),
       );
       console.error('Error al agregar comentario:', error);
+    }
+  };
+
+  // Nueva función para manejar la interacción de marcar/desmarcar favorito
+  const handleFavorite = async () => {
+    if (!currentPost?._id || !userData?.usernickname) return;
+
+    const newFavoriteState = !isFavorite;
+    setIsFavorite(newFavoriteState);
+
+    try {
+      await markPostAsFavorite(currentPost._id, token, newFavoriteState);
+    } catch (error) {
+      setIsFavorite(!newFavoriteState);
+      console.error('Error al marcar/desmarcar favorito:', error);
     }
   };
 
@@ -228,6 +225,7 @@ const PostDetail = ({route, navigation}) => {
       });
     }
   }, [isOwnPost, currentPost?.user, navigation, previousScreen]);
+
   if (!currentPost) {
     return null;
   }
@@ -269,8 +267,8 @@ const PostDetail = ({route, navigation}) => {
 
       <PostMedia
         media={[
-          ...(currentPost.image || []).map(img => ({type: 'image', url: img})),
-          ...(currentPost.videos || []).map(vid => ({type: 'video', url: vid})),
+          ...(currentPost.image || []).map(img => ({ type: 'image', url: img })),
+          ...(currentPost.videos || []).map(vid => ({ type: 'video', url: vid })),
         ]}
       />
 
@@ -286,6 +284,15 @@ const PostDetail = ({route, navigation}) => {
         onLikePress={handleLike}
         onCommentPress={() => setShowCommentInput(!showCommentInput)}
       />
+
+      {/* Nueva barra de favoritos */}
+      <View style={styles.favoriteContainer}>
+        <TouchableOpacity onPress={handleFavorite} style={styles.favoriteButton}>
+          <Text style={styles.favoriteText}>
+            {isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.line} />
 
@@ -362,6 +369,24 @@ const styles = StyleSheet.create({
     color: '#555',
     marginLeft: 4,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  // Estilo actualizado para el botón de favoritos
+  favoriteContainer: {
+    paddingHorizontal: 15,
+    marginTop: 10,
+  },
+  favoriteButton: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#007BFF', // Color sutil
+    borderRadius: 5,
+    alignItems: 'center',
+    backgroundColor: 'transparent', // Fondo transparente para hacerlo más discreto
+  },
+  favoriteText: {
+    color: '#007BFF', // Color discreto, pero visible
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   line: {
     height: 1,
