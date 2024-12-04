@@ -1,39 +1,28 @@
 import React, { useState } from 'react';
 import {
   View,
-  TouchableOpacity,
   Text,
+  TextInput,
+  TouchableOpacity,
   StyleSheet,
-  Image,
   Alert,
+  Image,
 } from 'react-native';
+import EyeIcon from '../assets/imgs/eyeIcon.svg';
 import { Picker } from '@react-native-picker/picker';
 import { Formik } from 'formik';
 import { signUpValidationSchema } from '../context/validationSchemas';
-import { FormikInputValue } from '../components/FormikInputValue';
-import EyeIcon from '../assets/imgs/eyeIcon.svg';
-import { useNavigation } from '@react-navigation/native';
 import { signUp } from '../controller/miApp.controller';
 
 const SignUpScreen = () => {
-  const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedGender, setSelectedGender] = useState('Not specified');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignUp = async userData => {
+  const handleSignUp = async (values) => {
     try {
-      const response = await signUp(userData);
+      const response = await signUp(values);
       if (response.message) {
-        if (response.message.includes('confirmar tu cuenta')) {
-          Alert.alert(
-            'Registro exitoso',
-            response.message,
-            [{ text: 'OK', onPress: () => navigation.goBack() }],
-            { cancelable: false }
-          );
-        } else {
-          Alert.alert('Error', response.message, [{ text: 'OK' }], { cancelable: true });
-        }
+        Alert.alert('Registro exitoso', response.message, [{ text: 'OK' }]);
       } else {
         Alert.alert('Error', 'Error inesperado al registrarse.');
       }
@@ -45,137 +34,223 @@ const SignUpScreen = () => {
     }
   };
 
-  const initialValues = {
-    email: '',
-    password: '',
-    name: '',
-    lastName: '',
-    nick: '',
-    genero: 'Not specified',
-  };
-
-  return (
-    <Formik
-      validationSchema={signUpValidationSchema}
-      initialValues={initialValues}
-      onSubmit={values => handleSignUp({ ...values, genero: selectedGender })}
-    >
-      {({ handleSubmit, errors, touched }) => (
-        <View style={styles.container}>
-          <Image source={require('../assets/imgs/logo.png')} style={styles.logo} />
-          <Text style={styles.title}>Create your account</Text>
-          <FormikInputValue name="name" placeholder="Enter your name" placeholderTextColor="#aaa" />
-          {errors.name && touched.name && <Text style={styles.error}>{errors.name}</Text>}
-          <FormikInputValue name="lastName" placeholder="Enter your last name" placeholderTextColor="#aaa" />
-          {errors.lastName && touched.lastName && <Text style={styles.error}>{errors.lastName}</Text>}
-          <FormikInputValue name="nick" placeholder="Enter your nickname" placeholderTextColor="#aaa" />
-          {errors.nick && touched.nick && <Text style={styles.error}>{errors.nick}</Text>}
-          <FormikInputValue
-            name="email"
-            placeholder="Enter your email"
-            placeholderTextColor="#aaa"
-            keyboardType="email-address"
-          />
-          {errors.email && touched.email && <Text style={styles.error}>{errors.email}</Text>}
-          <View style={styles.passwordContainer}>
-            <FormikInputValue
-              name="password"
-              placeholder="Enter your password"
-              placeholderTextColor="#aaa"
-              secureTextEntry={!showPassword}
-              style={styles.passwordInput}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeButton}
-              accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              accessibilityRole="button"
-            >
-              <EyeIcon
-                width={24}
-                height={24}
-                style={[styles.eyeIcon, showPassword && styles.eyeIconActive]}
-              />
-            </TouchableOpacity>
-          </View>
-          {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
-          <View style={styles.pickerContainer}>
-            <Text style={styles.label}>Gender:</Text>
-            <Picker
-              selectedValue={selectedGender}
-              style={styles.picker}
-              onValueChange={itemValue => setSelectedGender(itemValue)}
-            >
-              <Picker.Item label="Male" value="Masculino" />
-              <Picker.Item label="Female" value="Femenino" />
-              <Picker.Item label="Prefer not to say" value="Not specified" />
-            </Picker>
-          </View>
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSubmit}>
-            <Text style={styles.signUpButtonText}>Sign up</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </Formik>
+  return React.createElement(
+    Formik,
+    {
+      initialValues: {
+        name: '',
+        lastName: '',
+        nick: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        gender: 'Not specified',
+      },
+      validationSchema: signUpValidationSchema,
+      onSubmit: handleSignUp,
+    },
+    (formikProps) => React.createElement(
+      View,
+      { style: styles.container },
+      // Logo de Red Media
+      React.createElement(Image, {
+        source: require('../assets/imgs/logo.png'),
+        style: styles.logo,
+      }),
+      // Título
+      React.createElement(Text, { style: styles.title }, 'Create Your Account'),
+      // Nombre
+      React.createElement(TextInput, {
+        style: [
+          styles.input,
+          formikProps.touched.name && formikProps.errors.name
+            ? styles.inputError
+            : null,
+        ],
+        placeholder: 'Enter your name',
+        placeholderTextColor: '#aaa',
+        value: formikProps.values.name,
+        onChangeText: formikProps.handleChange('name'),
+        onBlur: formikProps.handleBlur('name'),
+      }),
+      formikProps.touched.name && formikProps.errors.name
+        ? React.createElement(Text, { style: styles.errorText }, formikProps.errors.name)
+        : null,
+      // Apellido
+      React.createElement(TextInput, {
+        style: [
+          styles.input,
+          formikProps.touched.lastName && formikProps.errors.lastName
+            ? styles.inputError
+            : null,
+        ],
+        placeholder: 'Enter your last name',
+        placeholderTextColor: '#aaa',
+        value: formikProps.values.lastName,
+        onChangeText: formikProps.handleChange('lastName'),
+        onBlur: formikProps.handleBlur('lastName'),
+      }),
+      formikProps.touched.lastName && formikProps.errors.lastName
+        ? React.createElement(Text, { style: styles.errorText }, formikProps.errors.lastName)
+        : null,
+      // Nickname
+      React.createElement(TextInput, {
+        style: [
+          styles.input,
+          formikProps.touched.nick && formikProps.errors.nick
+            ? styles.inputError
+            : null,
+        ],
+        placeholder: 'Enter your nickname',
+        placeholderTextColor: '#aaa',
+        value: formikProps.values.nick,
+        onChangeText: formikProps.handleChange('nick'),
+        onBlur: formikProps.handleBlur('nick'),
+      }),
+      formikProps.touched.nick && formikProps.errors.nick
+        ? React.createElement(Text, { style: styles.errorText }, formikProps.errors.nick)
+        : null,
+      // Email
+      React.createElement(TextInput, {
+        style: [
+          styles.input,
+          formikProps.touched.email && formikProps.errors.email
+            ? styles.inputError
+            : null,
+        ],
+        placeholder: 'Enter your email',
+        placeholderTextColor: '#aaa',
+        keyboardType: 'email-address',
+        value: formikProps.values.email,
+        onChangeText: formikProps.handleChange('email'),
+        onBlur: formikProps.handleBlur('email'),
+      }),
+      formikProps.touched.email && formikProps.errors.email
+        ? React.createElement(Text, { style: styles.errorText }, formikProps.errors.email)
+        : null,
+      // Contraseña
+      React.createElement(
+        View,
+        { style: styles.passwordContainer },
+        React.createElement(TextInput, {
+          style: [
+            styles.passwordInput,
+            formikProps.touched.password && formikProps.errors.password
+              ? styles.inputError
+              : null,
+          ],
+          placeholder: 'Enter your password',
+          placeholderTextColor: '#aaa',
+          secureTextEntry: !showPassword,
+          value: formikProps.values.password,
+          onChangeText: formikProps.handleChange('password'),
+          onBlur: formikProps.handleBlur('password'),
+        }),
+        React.createElement(
+          TouchableOpacity,
+          {
+            onPress: () => setShowPassword(!showPassword),
+            style: styles.eyeButton,
+          },
+          React.createElement(EyeIcon, {
+            width: 24,
+            height: 24,
+            style: showPassword ? styles.eyeIconActive : styles.eyeIcon,
+          })
+        )
+      ),
+      formikProps.touched.password && formikProps.errors.password
+        ? React.createElement(Text, { style: styles.errorText }, formikProps.errors.password)
+        : null,
+      // Género (Picker)
+      React.createElement(
+        View,
+        { style: styles.pickerContainer },
+        React.createElement(Picker, {
+          selectedValue: formikProps.values.gender,
+          onValueChange: formikProps.handleChange('gender'),
+        }, [
+          React.createElement(Picker.Item, { label: 'Not specified', value: 'Not specified', key: '1' }),
+          React.createElement(Picker.Item, { label: 'Male', value: 'Male', key: '2' }),
+          React.createElement(Picker.Item, { label: 'Female', value: 'Female', key: '3' }),
+        ])
+      ),
+      // Botón de Registro
+      React.createElement(
+        TouchableOpacity,
+        {
+          style: styles.signUpButton,
+          onPress: formikProps.handleSubmit,
+        },
+        React.createElement(Text, { style: styles.signUpButtonText }, 'Sign Up')
+      )
+    )
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-    resizeMode: 'contain',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#000',
+    textAlign: 'center',
+    color: '#333',
+  },
+  input: {
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
   },
   passwordContainer: {
-    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
-    marginBottom: 15,
+    marginBottom: 10,
+    backgroundColor: '#fff',
   },
   passwordInput: {
     flex: 1,
-    height: 40,
+    height: 50,
+    fontSize: 16,
     color: 'black',
   },
-  pickerContainer: {
-    width: '100%',
-    marginVertical: 15,
+  inputError: {
+    borderColor: 'red',
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  eyeButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 5,
+  eyeIcon: {
+    tintColor: '#aaa',
+  },
+  eyeIconActive: {
+    tintColor: '#4285F4',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: -5,
+    marginBottom: 15,
   },
   signUpButton: {
     backgroundColor: '#4285F4',
     paddingVertical: 12,
-    paddingHorizontal: 60,
-    borderRadius: 5,
-    marginTop: 10,
-    width: '100%',
+    borderRadius: 8,
     alignItems: 'center',
   },
   signUpButtonText: {
@@ -183,13 +258,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-    fontSize: 12,
-    alignSelf: 'flex-start',
-    marginLeft: '5%',
-  },
+  pickerContainer: { marginBottom: 20 },
+  logo: { width: 100, height: 100, marginBottom: 20, alignSelf: 'center' },
 });
 
 export default SignUpScreen;
