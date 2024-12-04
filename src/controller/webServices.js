@@ -4,26 +4,24 @@ const urlApi = 'http://10.0.2.2:4000/'; // Para Android Emulator
 
 const urlWebServices = {
   // Auth & Users
-  signUp: urlApi + "api/users/register",
-  signIn: urlApi + "api/users/singin",
-  getProfile: urlApi + "api/users/me",
-  updateProfileImage: urlApi + "api/users/updateProfileImage",
-  getNotifications: urlApi + "api/users/notificaciones",
-  getUsers: urlApi + "api/users",
-  updateUserProfile: urlApi + "api/users/me",
-  googleLogin: urlApi + "api/users/google",
-  followUser: urlApi + "api/users/:id/follow",
+  signUp: urlApi + 'api/users/register',
+  signIn: urlApi + 'api/users/singin',
+  getProfile: urlApi + 'api/users/me',
+  updateProfileImage: urlApi + 'api/users/updateProfileImage',
+  getNotifications: urlApi + 'api/users/notificaciones',
+  getUsers: urlApi + 'api/users',
+  updateUserProfile: urlApi + 'api/users/me',
+  googleLogin: urlApi + 'api/users/google',
+  followUser: urlApi + 'api/users/:id/follow',
   searchUsers: urlApi + 'api/users/search',
   deleteAccount: urlApi + 'api/users/me',
 
-  
   // Posts
   getPosts: urlApi + 'api/posts',
+  getUserPosts: urlApi + 'api/posts/me',
   getFollowingPosts: urlApi + 'api/posts/following',
-  postPost: urlApi + 'api/posts/crear',
+  postPost: urlApi + 'api/posts/create',
   interactWithPost: urlApi + 'api/posts/:id/interactions',
-  
-
 
   // Mail
   passwordReset: urlApi + 'api/mail',
