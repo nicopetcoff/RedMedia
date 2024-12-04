@@ -540,14 +540,27 @@ export const searchUsers = async (query, token) => {
     });
 
     if (!response.ok) {
-      throw new Error('Error al buscar usuarios: ' + response.status);
+      // Si la respuesta no es correcta, tratamos los errores
+      if (response.status === 500) {
+        // No se imprime ningún mensaje en la consola
+        return []; // Devuelve una lista vacía si es error 500
+      } else {
+        // Para otros errores (por ejemplo 404), lanzamos un error normal
+        throw new Error('Error al buscar usuarios: ' + response.status);
+      }
     }
 
     const data = await response.json();
+
+    // Si no se encontraron usuarios, simplemente retorna una lista vacía
+    if (data.status === 404 || data.data.length === 0) {
+      return []; // Devuelve una lista vacía si no se encontraron usuarios
+    }
+
     return data.data; // Retorna los usuarios encontrados
   } catch (error) {
     console.error('Error en searchUsers:', error);
-    throw error;
+    return []; // En caso de un error de red o cualquier otro problema, devolvemos una lista vacía
   }
 };
 

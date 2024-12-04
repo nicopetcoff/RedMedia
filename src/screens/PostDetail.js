@@ -247,7 +247,7 @@ const PostDetail = ({route, navigation}) => {
         {currentPost.description ? (
           <Text style={styles.description}>{currentPost.description}</Text>
         ) : (
-          <Text style={styles.description}>Sin descripción</Text>
+          <Text style={styles.description}>No description</Text>
         )}
       </View>
 
@@ -276,9 +276,9 @@ const PostDetail = ({route, navigation}) => {
 
       <View style={styles.likeSection}>
         <Text style={styles.likeText}>
-          Le gusta a{' '}
+          Like by{' '}
           <Text style={styles.boldText}>{currentPost.likes?.length || 0}</Text>{' '}
-          personas
+          person
         </Text>
       </View>
 
