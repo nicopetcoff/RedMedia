@@ -318,6 +318,7 @@ const ProfileScreen = ({route, navigation}) => {
               style={[
                 styles.followButtonText,
                 isFollowing && styles.followingButtonText,
+                !isFollowing && {color: '#1DA1F2' },
               ]}>
               {isFollowing ? 'Following' : 'Follow'}
             </Text>

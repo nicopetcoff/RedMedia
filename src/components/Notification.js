@@ -3,6 +3,7 @@ import React from 'react';
 import {View, Text, StyleSheet, Image,TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import { useToggleMode } from '../context/ThemeContext';
+import {getTimeDifference} from '../controller/miApp.controller';
 
 const Notification = ({item}) => {
   const navigation = useNavigation();
@@ -34,15 +35,20 @@ const Notification = ({item}) => {
             } style={styles.action}>
             <Text style={[styles.activityUser,{color:colors.text}]}>{item.user}</Text>
             </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => 
-              navigation.navigate('PostDetail', {item: item.post})}>
-            <Text style={[styles.activityText,{color:colors.text}]}>{item.text}</Text>
-          </TouchableOpacity>     
+          {
+            item.type ==='Followed' ?
+              <Text style={[styles.activityText,{color:colors.text}]}> {item.text}</Text>
+              :
+              <TouchableOpacity 
+                onPress={() => 
+                  navigation.navigate('PostDetail', {item: item.post})}>
+                <Text style={[styles.activityText,{color:colors.text}]}>{item.text}</Text>
+              </TouchableOpacity> 
+          }
+              
 
         </View>
-        <Text style={[styles.activityTime,{color:colors.details}]}>{item.time}</Text>
+        <Text style={[styles.activityTime,{color:colors.text}]}>{ getTimeDifference(item.time)}</Text>
       </View>
     </View>
   );
