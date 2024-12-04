@@ -10,7 +10,6 @@ describe('SignUpScreen - Validations', () => {
     signUp.mockReset();
   });
 
-  // Tests para entradas inválidas (Nombre)
   it('shows error for name with less than 3 characters', async () => {
     render(<SignUpScreen />);
     await act(async () => {
@@ -43,7 +42,6 @@ describe('SignUpScreen - Validations', () => {
     expect(screen.getByTestId('error-name').props.children).toContain('Name must contain only letters and be 3 to 16 characters long');
   });
 
-  // Tests para entradas inválidas (Apellido)
   it('shows error for last name with less than 3 characters', async () => {
     render(<SignUpScreen />);
     await act(async () => {
@@ -76,7 +74,6 @@ describe('SignUpScreen - Validations', () => {
     expect(screen.getByTestId('error-lastName').props.children).toContain('Last name must contain only letters and be 3 to 16 characters long');
   });
 
-  // Tests para entradas inválidas (Nickname)
   it('shows error for nickname with less than 3 characters', async () => {
     render(<SignUpScreen />);
     await act(async () => {
