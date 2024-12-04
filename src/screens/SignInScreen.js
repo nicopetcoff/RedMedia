@@ -28,25 +28,30 @@ const SignInScreen = ({ navigation }) => {
         <View style={styles.container}>
           <Image source={require('../assets/imgs/logo.png')} style={styles.logo} />
           <Text style={styles.title}>Sign In</Text>
-
+        <View style={styles.passwordContainer}>
           <FormikInputValue
             name="email"
             placeholder="Enter your email"
             keyboardType="email-address"
             testID="email"
-          />
-          <FormikInputValue
-            name="password"
-            placeholder="Enter your password"
-            secureTextEntry={!showPassword}
-            testID="password"
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={styles.eyeButton}
-          >
-            <EyeIcon width={24} height={24} />
-          </TouchableOpacity>
+            />
+        </View>
+
+          {/* Password Input with Eye Icon */}
+        <View style={styles.passwordContainer}>
+            <FormikInputValue
+              name="password"
+              placeholder="Enter your password"
+              secureTextEntry={!showPassword}
+              testID="password"
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeButtonContainer}
+            >
+              <EyeIcon width={24} height={24} />
+            </TouchableOpacity>
+        </View>
 
           <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
             <Text style={styles.forgotPasswordText}>Forgot password?</Text>
@@ -62,6 +67,27 @@ const SignInScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    width: '95%',
+    borderWidth: 0,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 10, // Añadido para dar espacio interno al texto
+    color: '#000', // Asegura que el texto sea visible
+  },
+  eyeButtonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -79,9 +105,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   eyeButton: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
+    padding: 5,
   },
   forgotPasswordText: {
     color: '#4285F4',
@@ -93,7 +117,7 @@ const styles = StyleSheet.create({
     padding: 15,
     alignItems: 'center',
     marginTop: 20,
-    width: '100%',
+    width: '90%',
   },
   signInButtonText: {
     color: '#fff',
