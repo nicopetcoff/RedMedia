@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import Notification from '../components/Notification'; 
 import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso.

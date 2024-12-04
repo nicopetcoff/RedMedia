@@ -35,12 +35,12 @@ const Notification = ({item}) => {
             </TouchableOpacity>
             {
             item.type ==='Followed' ?
-              <Text style={[styles.activityText,{color:colors.text}]}> {item.text}</Text>
+              <Text style={[styles.activityText]}> {item.text}</Text>
               :
               <TouchableOpacity 
                 onPress={() => 
                   navigation.navigate('PostDetail', {item: item.post})}>
-                <Text style={[styles.activityText,{color:colors.text}]}>{item.text}</Text>
+                <Text style={[styles.activityText]}>{item.text}</Text>
               </TouchableOpacity> 
             }
 

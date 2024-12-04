@@ -71,7 +71,7 @@ export const getTimeDifference=(dateNotification)=> {
   const formattedHour = `${hours}:${minutes} hs`;
 
   // Retornar el mensaje correspondiente
-  if (daysDifference === 0) {
+  if (daysDifference <= 0) {
     return `${formattedHour}`;
   } else if (daysDifference === 1) {
     return 'Yesterday';
@@ -82,6 +82,29 @@ export const getTimeDifference=(dateNotification)=> {
   }
 }
 
+export const getNotifications = async (token) => {
+  let url = urlWebServices.getNotifications;
+
+  try {
+    let response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener las notificaciones: ' + response.status);
+    }
+
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
+
+}
 
 export const getTimelinePosts = async token => {
   try {
