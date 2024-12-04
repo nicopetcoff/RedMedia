@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { signIn as signInAPI } from '../controller/miApp.controller';
 import { Alert } from 'react-native';
 import * as Keychain from 'react-native-keychain';
+import { googleAutenticacion } from '../controller/miApp.controller';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const AuthContext = React.createContext();
 const toggleContext = React.createContext();
@@ -50,6 +52,31 @@ export const AuthProvider = ({ children }) => {
     fetchData();
   }, []);
 
+  const googleLogin = async (userData) => {
+    try{
+      const response =await googleAutenticacion(userData);
+      if(response.token){
+        const user = response.user || { email: userData.email };
+        const userString = JSON.stringify(user);
+
+        // Guardar token
+        await Keychain.setGenericPassword('username', String(response.token), { service: 'token' });
+        // Guardar datos del usuario
+        await Keychain.setGenericPassword('username', userString, { service: 'user' });
+
+        setAuthState({
+          user,
+          token: response.token,
+          isAuthenticated: true,
+        });
+      }else{
+        Alert.alert('Error', 'Inicio de sesión fallido. Por favor, inténtalo de nuevo.');
+      }
+    }catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  }
+
   const login = async (userData) => {
     try {
       const response = await signInAPI(userData);
@@ -94,7 +121,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ ...authState, loading }}>
-      <toggleContext.Provider value={{ login, signOut }}>
+      <toggleContext.Provider value={{ login, signOut, googleLogin   }}>
         {children}
       </toggleContext.Provider>
     </AuthContext.Provider>
