@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,14 +18,14 @@ import {
   getUsers,
   handleFollowUser,
 } from '../controller/miApp.controller';
-import {useUserContext} from '../context/AuthProvider';
+import { useUserContext } from '../context/AuthProvider';
 
-const {width: windowWidth} = Dimensions.get('window');
+const { width: windowWidth } = Dimensions.get('window');
 
-const ProfileScreen = ({route, navigation}) => {
-  const {username, fromScreen, postId} = route.params;
+const ProfileScreen = ({ route, navigation }) => {
+  const { username, fromScreen, postId } = route.params;
 
-  const {token} = useUserContext();
+  const { token } = useUserContext();
   const [user, setUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,6 +137,7 @@ const ProfileScreen = ({route, navigation}) => {
       setFollowersData([]);
     };
   }, [navigation, username, token, fetchUserData]);
+
   const handleFollowPress = async () => {
     if (followLoading || !user?._id) return;
 
@@ -169,7 +170,7 @@ const ProfileScreen = ({route, navigation}) => {
       if (!post?._id || !user) return;
 
       // Limpiamos la navegación anterior
-      navigation.setParams({timestamp: Date.now()});
+      navigation.setParams({ timestamp: Date.now() });
 
       const postCopy = JSON.parse(JSON.stringify(post));
 
@@ -253,7 +254,7 @@ const ProfileScreen = ({route, navigation}) => {
         source={{
           uri: user.coverImage || 'https://via.placeholder.com/500x150',
         }}
-        style={[styles.coverImage, {width: windowWidth}]}
+        style={[styles.coverImage, { width: windowWidth }]}
         resizeMode="cover"
       />
 
@@ -297,6 +298,13 @@ const ProfileScreen = ({route, navigation}) => {
 
       {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
 
+      {/* Agregar Nivel abajo de la Bio */}
+      {user.level && (
+        <View style={styles.levelContainer}>
+          <Text style={styles.levelText}>Level: {user.level}</Text>
+        </View>
+      )}
+
       {getCurrentUserId() !== user._id && (
         <TouchableOpacity
           style={[
@@ -324,8 +332,9 @@ const ProfileScreen = ({route, navigation}) => {
       )}
     </View>
   );
+
   const renderPost = useCallback(
-    ({item}) => {
+    ({ item }) => {
       if (!item?._id) return null;
 
       return (
@@ -461,6 +470,16 @@ const styles = StyleSheet.create({
     color: '#14171A',
     marginHorizontal: 20,
     marginTop: 10,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  levelContainer: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  levelText: {
+    fontSize: 14,
+    color: '#14171A',
+    fontWeight: 'bold',
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   statsContainer: {

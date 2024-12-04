@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
           isAuthenticated: true,
         });
       } else {
-        Alert.alert('Error', 'Inicio de sesión fallido. Por favor, inténtalo de nuevo.');
+        Alert.alert('Error', 'Login failed. Plase try again.');
       }
     } catch (error) {
       Alert.alert('Error', error.message);

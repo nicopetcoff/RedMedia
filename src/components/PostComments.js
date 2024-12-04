@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 
 const PostComments = ({ comments }) => {
   if (!comments || comments.length === 0) {
-    return <Text style={styles.noCommentsText}>No hay comentarios aún</Text>;
+    return <Text style={styles.noCommentsText}>No comments yet</Text>;
   }
 
   return (
