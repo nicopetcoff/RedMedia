@@ -2,7 +2,8 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image,TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {getTimeDifference} from '../controller/miApp.controller';
+import {getTimeDifference,getPostDetails} from '../controller/miApp.controller';
+
 
 const Notification = ({item}) => {
   const navigation = useNavigation();
@@ -19,6 +20,11 @@ const Notification = ({item}) => {
         return require('../assets/imgs/comment.png');
     }
   };
+
+  const  getPost=async (postId)=>{
+    const post= await getPostDetails(postId);
+    navigation.navigate('PostDetail', {item: post})
+  }
 
   return (
     <View style={styles.Notification}>
@@ -39,7 +45,7 @@ const Notification = ({item}) => {
               :
               <TouchableOpacity 
                 onPress={() => 
-                  navigation.navigate('PostDetail', {item: item.post})}>
+                   getPost(item.post)}>
                 <Text style={[styles.activityText]}>{item.text}</Text>
               </TouchableOpacity> 
             }

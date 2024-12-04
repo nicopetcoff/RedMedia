@@ -82,6 +82,29 @@ export const getTimeDifference=(dateNotification)=> {
   }
 }
 
+export const getPostDetails = async (postId) => {
+  try{
+    const baseUrl = urlWebServices.getPostDetails
+    const url = baseUrl.replace(':id', postId);
+    console.log("URL: ", url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener los detalles del post: ' + response.status);
+    }
+
+    const data = await response.json();
+    return data.data;
+  }catch(error){
+    throw error;
+  }
+}
+
 export const getNotifications = async (token) => {
   let url = urlWebServices.getNotifications;
 
