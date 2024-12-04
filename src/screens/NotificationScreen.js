@@ -1,12 +1,25 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
-import Notification from '../components/Notification'; // Asegúrate de que este componente funcione sin dependencias de Expo.
-import MyData from '../data/MyData'; // Tu archivo local con las notificaciones.
+import Notification from '../components/Notification'; 
 import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de regreso.
 import { useNavigation } from '@react-navigation/native'; // React Navigation para CLI.
+import { getNotifications } from '../controller/miApp.controller'; //NOTIFICACIONES
+//context
+import { useUserContext } from '../context/AuthProvider';
 
 const NotificationScreen = () => {
   const navigation = useNavigation(); // Hook de navegación.
+  const [notificaciones, setNotificaciones] = React.useState([]); // Estado local para las notificaciones.
+  const {token}=useUserContext()
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const notifications = await getNotifications(token); // Llama a la función de notificaciones.
+      setNotificaciones(notifications); // Actualiza el estado local con las notificaciones.
+    }
+    fetchNotifications(); 
+    
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -20,9 +33,9 @@ const NotificationScreen = () => {
         <Text style={styles.title}>Activity</Text>
       </View>
       <FlatList
-        data={MyData.notificaciones} // Asegúrate de que este arreglo esté bien estructurado.
+        data={notificaciones} // Asegúrate de que este arreglo esté bien estructurado.
         renderItem={({ item }) => <Notification item={item} />}
-        keyExtractor={(item) => item.id.toString()} // Convierte el ID a string si no lo es.
+        keyExtractor={(item) => item._id.toString()} // Convierte el ID a string si no lo es.
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         showsVerticalScrollIndicator={false}
       />

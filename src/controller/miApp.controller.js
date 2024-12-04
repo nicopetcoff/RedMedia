@@ -1,5 +1,4 @@
 import urlWebServices from './webServices';
-import {useSelector} from 'react-redux';
 
 export const getPosts = async function () {
   let url = urlWebServices.getPosts;
@@ -54,6 +53,36 @@ export const getUserPosts = async token => {
   }
 };
 
+export const getTimeDifference=(dateNotification)=> {
+  // Convertir las fechas a objetos Date
+  const fechaNotificacion = new Date(dateNotification);
+  const fechaActual = new Date();
+
+  // Calcular la diferencia en milisegundos
+  const timeDifference = fechaActual - fechaNotificacion;
+
+  // Convertir la diferencia a días
+  const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+  const weeksDifference = Math.floor(daysDifference / 7);
+
+  // Formatear la hora de la acción
+  const hours = fechaNotificacion.getHours().toString().padStart(2, '0'); // Aseguramos 2 dígitos
+  const minutes = fechaNotificacion.getMinutes().toString().padStart(2, '0');
+  const formattedHour = `${hours}:${minutes} hs`;
+
+  // Retornar el mensaje correspondiente
+  if (daysDifference === 0) {
+    return `${formattedHour}`;
+  } else if (daysDifference === 1) {
+    return 'Yesterday';
+  } else if (daysDifference <= 7) {
+    return  daysDifference + ' days ago';
+  } else {
+    return weeksDifference + "weeks ago";
+  }
+}
+
+
 export const getTimelinePosts = async token => {
   try {
     const followingResponse = await fetch(urlWebServices.getFollowingPosts, {
@@ -98,6 +127,33 @@ export const signUp = async userData => {
     return data;
   } catch (error) {
     console.error('Error en signUp:', error); // Log del error capturado
+    throw error;
+  }
+};
+
+export const googleAutenticacion = async (userData) => {
+  let url = urlWebServices.googleLogin;
+
+  try {
+    let response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    let data = await response.json();
+
+    if (data.status === 400) {
+      console.error('Error del servidor:', data.message); // Log del mensaje de error del servidor
+      throw new Error(data.message);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error en googleAutenticacion:', error); // Cambié el nombre de la función a googleAutenticacion
     throw error;
   }
 };

@@ -1,10 +1,40 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useToggleContext } from "../context/AuthProvider";
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const LoginScreen = ({navigation}) => {
+  console.log("ENTRO AL MENOS?")
+  const { googleLogin } = useToggleContext();
+  console.log("despues de aca? ",GoogleSignin)
+  GoogleSignin.configure({
+    webClientId:
+      '895596152155-f8b19uhs8ne11vcjhk54fh5emcolc6vb.apps.googleusercontent.com',
+    offlineAccess: true,
+  });
 
-  const handleGooglePress = () => {
-    console.log("Google Sign In button pressed");
+  const handleGooglePress = async () => {
+    try{
+      await GoogleSignin.hasPlayServices();
+      // Cierra la sesión actual antes de iniciar una nueva
+      await GoogleSignin.signOut();
+      const userInfo = await GoogleSignin.signIn();
+      const userData = {
+        email: userInfo.data.user.email,
+        name: userInfo.data.user.givenName,
+        lastName: userInfo.data.user.familyName,
+        nick: userInfo.data.user.name,
+        userId: userInfo.data.user.id,
+      };
+      const response = await googleLogin(userData);
+    }catch (apiError) {
+			setError(
+				apiError?.response?.data?.error?.message || 'Something went wrong'
+			);
+		} finally {
+			setLoading(false);
+		}
+    
   };
 
   const handleEmailSignUp = () => {
