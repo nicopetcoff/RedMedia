@@ -122,7 +122,7 @@ const FavoriteScreen = () => {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>
-          No has agregado posts a favoritos aún.
+        You haven’t added any posts to favorites yet.
         </Text>
       </View>
     );

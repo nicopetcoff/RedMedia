@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Switch,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -25,8 +24,7 @@ const EditProfileScreen = ({ navigation, route }) => {
   const [nickname, setNickname] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [gender, setGender] = useState('Not specified');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [gender, setGender] = useState('Not specified'); // Default value set to 'Not specified'
   const [profileImage, setProfileImage] = useState(avatar);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,7 +42,7 @@ const EditProfileScreen = ({ navigation, route }) => {
       setName(userData.data.nombre || '');
       setDescription(userData.data.bio || '');
       setProfileImage(userData.data.avatar || avatar);
-      setGender(userData.data.genero || 'Not specified');
+      setGender(userData.data.genero || 'Not specified'); // Set gender from API response
     } catch (error) {
       showMessage('Error loading user data: ' + error.message);
     } finally {
@@ -97,7 +95,7 @@ const EditProfileScreen = ({ navigation, route }) => {
       const updateData = {
         nombre: name,
         bio: description,
-        genero: gender,
+        genero: gender, // Send selected gender
       };
 
       await updateUserProfile(updateData, token);
@@ -245,7 +243,7 @@ const EditProfileScreen = ({ navigation, route }) => {
           <View style={styles.pickerContainer}>
             <Text style={styles.label}>Gender:</Text>
             <Picker
-              selectedValue={gender}
+              selectedValue={gender} // Set gender as the selected value
               style={styles.picker}
               onValueChange={(itemValue) => setGender(itemValue)}
               enabled={!loading}

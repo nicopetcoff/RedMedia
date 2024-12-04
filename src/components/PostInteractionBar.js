@@ -82,7 +82,7 @@ const PostInteractionBar = ({
         style={styles.favoriteButton}
         disabled={isLoading}
         activeOpacity={0.7}>
-        <FavoritesIcon width={24} height={24} fill={isFavorite ? "#000" : "none"} />
+        <FavoritesIcon width={24} height={24} />
       </TouchableOpacity>
     </View>
   );
