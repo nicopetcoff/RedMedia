@@ -12,90 +12,102 @@ import {
 } from 'react-native';
 import {useNavigation, useScrollToTop} from '@react-navigation/native';
 import {useUserContext} from '../context/AuthProvider';
-import {getFavoritePosts, toggleLikePost} from '../controller/miApp.controller'; // Nueva función para manejar like
+import {usePost} from '../context/PostContext';
+import {getFavoritePosts} from '../controller/miApp.controller';
 import Skeleton from '../components/Skeleton';
 import Post from '../components/Post';
 
 const FavoriteScreen = () => {
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true); // Inicializamos el estado de carga como true
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const {token} = useUserContext();
   const navigation = useNavigation();
+  const postContext = usePost();
 
   const flatListRef = useRef(null);
   useScrollToTop(flatListRef);
 
+  const updatePost = useCallback(updatedPost => {
+    if (!updatedPost?._id) return;
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === updatedPost._id ? updatedPost : post,
+      ),
+    );
+  }, []);
+
+  useEffect(() => {
+    postContext.updatePost = updatePost;
+  }, [updatePost, postContext]);
+
+  // Efecto para actualizar posts cuando cambian en el contexto
+  useEffect(() => {
+    const updatedPostsEntries = Object.entries(postContext.updatedPosts);
+    if (updatedPostsEntries.length > 0) {
+      setPosts(prevPosts =>
+        prevPosts.map(post => {
+          const updatedPost = postContext.getUpdatedPost(post._id);
+          return updatedPost || post;
+        }),
+      );
+    }
+  }, [postContext.updatedPosts]);
+
   const fetchFavoritePosts = useCallback(async () => {
-    setLoading(true); // Activar el estado de carga
+    setLoading(true);
 
     try {
       const response = await getFavoritePosts(token);
 
       if (response?.data && Array.isArray(response.data)) {
-        setPosts(response.data); // Si se obtienen posts, actualizamos el estado
+        // Actualizar con los posts más recientes del contexto
+        const updatedPostsData = response.data.map(post => {
+          const updatedPost = postContext.getUpdatedPost(post._id);
+          return updatedPost || post;
+        });
+        setPosts(updatedPostsData);
       } else {
-        setPosts([]); // Si no se obtienen posts, aseguramos que esté vacío
+        setPosts([]);
       }
     } catch (error) {
       console.error('Error al cargar los posts favoritos:', error);
-      setPosts([]); // Si hay un error, mantenemos el estado de posts vacío
+      setPosts([]);
     } finally {
-      setLoading(false); // Desactivamos el estado de carga
+      setLoading(false);
     }
-  }, [token]);
-
-  const handleLikePost = postId => {
-    setPosts(prevPosts => {
-      return prevPosts.map(post => {
-        if (post._id === postId) {
-          // Cambiar el estado del like del post
-          const updatedPost = {
-            ...post,
-            likes: post.likes.includes(token)
-              ? post.likes.filter(like => like !== token) // Si ya está dado el like, lo eliminamos
-              : [...post.likes, token], // Si no está dado el like, lo agregamos
-          };
-          return updatedPost;
-        }
-        return post;
-      });
-    });
-
-    // Realizar la actualización en el backend
-    toggleLikePost(postId, token)
-      .then(response => {})
-      .catch(error => {
-        console.error('Error al actualizar el like del post:', error);
-      });
-  };
+  }, [token, postContext]);
 
   const refreshData = useCallback(async () => {
-    if (refreshing || loading) {
-      return; // Si ya estamos refrescando o cargando, no hacemos otra solicitud
-    }
+    if (refreshing || loading) return;
 
-    setRefreshing(true); // Activamos el estado de refresco
-    await fetchFavoritePosts(); // Recargamos los favoritos
-    setRefreshing(false); // Desactivamos el estado de refresco
+    setRefreshing(true);
+    await fetchFavoritePosts();
+    setRefreshing(false);
   }, [fetchFavoritePosts, refreshing, loading]);
 
   useEffect(() => {
-    fetchFavoritePosts(); // Llamada inicial para cargar los posts favoritos cuando se monta el componente
+    fetchFavoritePosts();
   }, [fetchFavoritePosts]);
 
-  const renderPost = useCallback(
-    ({item}) => {
-      if (!item?._id) return null;
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!refreshing && !loading) {
+        refreshData();
+      }
+    });
+    return unsubscribe;
+  }, [navigation, refreshing, loading, refreshData]);
 
-      return (
-        <View style={styles.postContainer}>
-          <Post item={item} source="Favorite" onLikePost={handleLikePost} />
-        </View>
-      );
-    },
-    [handleLikePost],
-  );
+  const renderPost = useCallback(({item}) => {
+    if (!item?._id) return null;
+
+    return (
+      <View style={styles.postContainer}>
+        <Post item={item} source="Favorite" />
+      </View>
+    );
+  }, []);
 
   const renderEmptyComponent = useCallback(() => {
     if (loading) {
@@ -132,7 +144,6 @@ const FavoriteScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.container}>
         <View style={styles.headerContainer}>
-          {/* El logo fue eliminado aquí */}
           <Text style={styles.header}>Favoritos</Text>
         </View>
 
@@ -149,9 +160,9 @@ const FavoriteScreen = () => {
           ]}
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
-          onRefresh={refreshData} // Permitir el refresco de los datos
-          ListEmptyComponent={renderEmptyComponent} // Mostrar mensaje vacío si no hay posts
-          ListFooterComponent={renderFooter} // Mostrar footer con carga mientras esperamos la respuesta
+          onRefresh={refreshData}
+          ListEmptyComponent={renderEmptyComponent}
+          ListFooterComponent={renderFooter}
           initialNumToRender={5}
           maxToRenderPerBatch={10}
           windowSize={5}

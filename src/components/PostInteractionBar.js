@@ -37,7 +37,6 @@ const PostInteractionBar = ({
       const response = await markPostAsFavorite(postId, token);
       console.log('Respuesta del servidor:', response);
 
-      // Si tenemos una respuesta con mensaje, considerarlo exitoso
       if (response && response.message) {
         setIsFavorite(newFavoriteState);
         if (onFavoriteChange) {
@@ -83,7 +82,7 @@ const PostInteractionBar = ({
         style={styles.favoriteButton}
         disabled={isLoading}
         activeOpacity={0.7}>
-        <FavoritesIcon width={24} height={24} />
+        <FavoritesIcon width={24} height={24} fill={isFavorite ? "#000" : "none"} />
       </TouchableOpacity>
     </View>
   );
