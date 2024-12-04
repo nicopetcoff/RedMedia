@@ -200,7 +200,7 @@ export const publishPost = async (postData, token) => {
         let type = '';
 
         // Verificar si el archivo es una imagen
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+        if (['jpg', 'jpeg', 'png', 'gif', 'heif'].includes(fileExtension)) {
           type = `image/${fileExtension}`;
           // Cambiar 'images' a un nombre de campo único
           formData.append(`images`, {
