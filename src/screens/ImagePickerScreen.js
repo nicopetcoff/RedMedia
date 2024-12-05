@@ -69,6 +69,20 @@ const ImagePickerScreen = ({navigation}) => {
   );
 
   const openCamera = (isVideo) => {
+    const hasPermission = requestPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Permission to access gallery is required!',
+        );
+        return;
+      }
+
+      if (selectedImages.length >= 10) {
+        Alert.alert('Limit Reached', 'You can only add up to 10 items.');
+        return;
+      }
+
     launchCamera(
       {
         mediaType: isVideo ? 'video' : 'photo', // Cambia entre foto y video
@@ -323,13 +337,13 @@ const ImagePickerScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <Text></Text>
-        <TouchableOpacity onPress={handlePush} disabled={isPublishDisabled}>
+        <TouchableOpacity onPress={handlePush} style={styles.buttonPublish} disabled={isPublishDisabled}>
           <Text
             style={[
               styles.publishText,
               isPublishDisabled && styles.publishTextDisabled,
             ]}>
-            {loading ? 'Publishing...' : 'Push'}
+            Publish
           </Text>
         </TouchableOpacity>
       </View>
@@ -507,9 +521,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   publishText: {
+    color: '#FFF',
+    fontSize: 16,
+    textAlign:"center",
+  },
+  buttonPublish: {
     color: '#007AFF',
     fontSize: 16,
-    marginTop: 50,
+    backgroundColor: '#007AFF',
+    borderRadius: 15,
+    alignItems:"center",
+    justifyContent: 'center',
+    height: 35,
+    width: 100,
+    marginTop: 30,
   },
   publishTextDisabled: {
     color: '#999',
@@ -566,7 +591,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
     width: 125,
-    alignItems: 'center', // Centrar verticalmente
+    alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
