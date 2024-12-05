@@ -80,7 +80,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (userData) => {
     try {
       const response = await signInAPI(userData);
-
       if (response.token) {
         const user = response.user || { email: userData.email };
         const userString = JSON.stringify(user);
@@ -96,7 +95,7 @@ export const AuthProvider = ({ children }) => {
           isAuthenticated: true,
         });
       } else {
-        Alert.alert('Error', 'Login failed. Plase try again.');
+        Alert.alert('Error',response.message || 'Inicio de sesión fallido. Por favor, inténtalo de nuevo.');
       }
     } catch (error) {
       Alert.alert('Error', error.message);
