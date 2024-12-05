@@ -11,7 +11,6 @@ const urlWebServices = {
   getNotifications: urlApi + 'api/users/notificaciones',
   getUsers: urlApi + 'api/users',
   updateUserProfile: urlApi + 'api/users/me',
-  googleLogin: urlApi + 'api/users/google',
   followUser: urlApi + 'api/users/:id/follow',
   searchUsers: urlApi + 'api/users/search',
   deleteAccount: urlApi + 'api/users/me',
