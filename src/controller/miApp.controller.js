@@ -180,32 +180,6 @@ export const signUp = async userData => {
   }
 };
 
-export const googleAutenticacion = async userData => {
-  let url = urlWebServices.googleLogin;
-
-  try {
-    let response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    let data = await response.json();
-
-    if (data.status === 400) {
-      console.error('Error del servidor:', data.message); // Log del mensaje de error del servidor
-      throw new Error(data.message);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error en googleAutenticacion:', error); // Cambié el nombre de la función a googleAutenticacion
-    throw error;
-  }
-};
 
 export const signIn = async userData => {
   let url = urlWebServices.signIn;
