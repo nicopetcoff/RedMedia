@@ -334,7 +334,7 @@ const ImagePickerScreen = ({navigation}) => {
         </View>
       ) : (
       <ScrollView contentContainerStyle={[styles.container,{backgroundColor:colors.background}]}>
-      <View style={styles.header}>
+      <View style={[styles.header,{color:colors.background}]}>
         <View style={styles.goBack}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <BackDarkIcon/>
@@ -455,7 +455,7 @@ const ImagePickerScreen = ({navigation}) => {
       <View style={styles.inputContainer}>
         <Text style={[styles.textTitles,{color:colors.text}]}>Title</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input,{color:colors.text}]}
           placeholder="Write something..."
            placeholderTextColor="#999"
           value={title}
@@ -467,7 +467,7 @@ const ImagePickerScreen = ({navigation}) => {
 
         <Text style={[styles.textTitles,{color:colors.text}]}>Description</Text>
         <TextInput
-          style={[styles.input, styles.descriptionInput]}
+          style={[styles.input, styles.descriptionInput,{color:colors.text}] }
           placeholder="Write something..."
            placeholderTextColor="#999"
           value={description}
@@ -512,17 +512,14 @@ const ImagePickerScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal:16,
-    backgroundColor: '#FFF',
     flexGrow: 1,
   },
   mainContainer: {
-    backgroundColor: '#FFF',
     flexGrow: 1,
   },
   header: {
      flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     justifyContent: "space-between",

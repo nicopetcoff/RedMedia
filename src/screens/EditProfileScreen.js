@@ -195,7 +195,7 @@ const EditProfileScreen = ({ navigation, route }) => {
           <Text style={[styles.closeButtonText,{color:colors.text}]}>×</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>My Account</Text>
+        <Text style={[styles.title,{color:colors.text}]}>My Account</Text>
 
         <View style={styles.profileImageContainer}>
           <Image
@@ -259,7 +259,7 @@ const EditProfileScreen = ({ navigation, route }) => {
             <Text style={[styles.label,{color:colors.text}]}>Gender:</Text>
             <Picker
               selectedValue={gender}
-              style={styles.picker}
+              style={[styles.picker,{color:colors.text}] }
               onValueChange={(itemValue) => {
                 setGender(itemValue);
               }}
