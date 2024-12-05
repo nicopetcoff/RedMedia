@@ -27,7 +27,7 @@ const EditProfileScreen = ({ navigation, route }) => {
   const [nickname, setNickname] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [gender, setGender] = useState('Not specified'); // Default value set to 'Not specified'
+  const [gender, setGender] = useState('Not specified');
   const [profileImage, setProfileImage] = useState(avatar);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,7 +45,11 @@ const EditProfileScreen = ({ navigation, route }) => {
       setName(userData.data.nombre || '');
       setDescription(userData.data.bio || '');
       setProfileImage(userData.data.avatar || avatar);
-      setGender(userData.data.genero || 'Not specified'); // Set gender from API response
+      
+      const backendGender = userData.data.genero;
+      if (backendGender) {
+        setGender(backendGender);
+      }
     } catch (error) {
       showMessage('Error loading user data: ' + error.message);
     } finally {
@@ -98,11 +102,18 @@ const EditProfileScreen = ({ navigation, route }) => {
       const updateData = {
         nombre: name,
         bio: description,
-        genero: gender, // Send selected gender
+        genero: gender,
       };
 
-      await updateUserProfile(updateData, token);
+      const result = await updateUserProfile(updateData, token);
+      
+      if (result?.data?.genero) {
+        setGender(result.data.genero);
+      }
       showMessage('Profile updated successfully');
+      
+      // Refresh user data after update
+      await loadUserData();
     } catch (error) {
       showMessage('Error updating profile: ' + error.message);
     } finally {
@@ -247,9 +258,11 @@ const EditProfileScreen = ({ navigation, route }) => {
           <View style={styles.pickerContainer}>
             <Text style={[styles.label,{color:colors.text}]}>Gender:</Text>
             <Picker
-              selectedValue={gender} // Set gender as the selected value
+              selectedValue={gender}
               style={styles.picker}
-              onValueChange={(itemValue) => setGender(itemValue)}
+              onValueChange={(itemValue) => {
+                setGender(itemValue);
+              }}
               enabled={!loading}
             >
               <Picker.Item label="Male" value="Masculino" />
@@ -259,7 +272,6 @@ const EditProfileScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Save Changes Button */}
         <View style={styles.saveButtonContainer}>
           <TouchableOpacity
             style={styles.saveButton}

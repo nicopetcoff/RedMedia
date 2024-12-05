@@ -341,7 +341,9 @@ const ImagePickerScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <Text></Text>
-        <TouchableOpacity onPress={handlePush} style={styles.buttonPublish} disabled={isPublishDisabled}>
+      </View>
+      <View style={styles.containerPublish}>
+      <TouchableOpacity onPress={handlePush} style={styles.buttonPublish} disabled={isPublishDisabled}>
           <Text
             style={[
               styles.publishText,
@@ -509,7 +511,7 @@ const ImagePickerScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingHorizontal:16,
     backgroundColor: '#FFF',
     flexGrow: 1,
   },
@@ -518,14 +520,24 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    justifyContent: "space-between",
+    height: 45,
   },
   goBack: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  containerPublish: {
+    height:20,
+    alignItems:"flex-end",
   },
   publishText: {
     color: '#FFF',

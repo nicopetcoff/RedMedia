@@ -53,15 +53,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   headerContainer: {
-    height: 60, // Reducido para ajustarse mejor
-    backgroundColor: '#fcfcfc',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    backgroundColor: '#fcfcfc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    height: 45,
+    paddingHorizontal: 4,
   },
   icon: {
-    width: 24,
-    height: 24,
     marginRight: 10,
   },
   title: {
