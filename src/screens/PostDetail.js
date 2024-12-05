@@ -22,8 +22,10 @@ import PostMedia from '../components/PostMedia';
 import PostInteractionBar from '../components/PostInteractionBar';
 import PostComments from '../components/PostComments';
 import LocationIcon from '../assets/imgs/location.svg';
+import { useToggleMode } from '../context/ThemeContext';
 
 const PostDetail = ({route, navigation}) => {
+  const { colors } = useToggleMode();
   const {item, previousScreen, username, fromScreen, updatePost} =
     route.params || {};
   const {token} = useUserContext();
@@ -218,7 +220,7 @@ const PostDetail = ({route, navigation}) => {
 
   if (loading && !userData && !postUserData) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={[styles.loaderContainer,{backgroundColor:colors.post}]}>
         <ActivityIndicator size="large" color="#1DA1F2" />
       </View>
     );
@@ -226,8 +228,15 @@ const PostDetail = ({route, navigation}) => {
 
   const isOwnPost = userData?.usernickname === currentPost.user;
 
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return `${date.getFullYear()}/${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container,{backgroundColor: colors.background}]}>
       <TouchableOpacity onPress={handleUserPress} disabled={isOwnPost}>
         <PostHeader
           userAvatar={isOwnPost ? userData?.avatar : postUserData?.avatar}
@@ -242,12 +251,12 @@ const PostDetail = ({route, navigation}) => {
 
       <View style={styles.titleContainer}>
         {currentPost.title && (
-          <Text style={styles.title}>{currentPost.title}</Text>
+          <Text style={[styles.title,{color:colors.text}]}>{currentPost.title}</Text>
         )}
         {currentPost.description ? (
-          <Text style={styles.description}>{currentPost.description}</Text>
+          <Text style={[styles.description,{color:colors.detailes}]}>{currentPost.description}</Text>
         ) : (
-          <Text style={styles.description}>No description</Text>
+          <Text style={[styles.description,{color:colors.detailes}]}>No description</Text>
         )}
       </View>
 
@@ -265,6 +274,10 @@ const PostDetail = ({route, navigation}) => {
         </View>
       )}
 
+      <View>
+        <Text style={styles.time}>{formatDate(currentPost.createdAt)} </Text>
+      </View>
+
       <PostInteractionBar
         postId={currentPost?._id}
         isLiked={isLiked}
@@ -275,7 +288,7 @@ const PostDetail = ({route, navigation}) => {
       <View style={styles.line} />
 
       <View style={styles.likeSection}>
-        <Text style={styles.likeText}>
+        <Text style={[styles.likeText,{color:colors.text}]}>
           Like by{' '}
           <Text style={styles.boldText}>{currentPost.likes?.length || 0}</Text>{' '}
           person
@@ -346,6 +359,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
     marginLeft: 4,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  time: {
+    fontSize: 12,
+    color: '#555',
+    marginTop:5,
+    marginLeft:19,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   line: {
