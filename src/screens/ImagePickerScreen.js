@@ -23,10 +23,13 @@ import {useUserContext} from '../context/AuthProvider';
 import {useFocusEffect} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BackIcon from '../assets/imgs/back.svg';
+import BackDarkIcon from '../assets/imgs/backBlue.svg';
+import { useToggleMode } from '../context/ThemeContext';
 
 Geocoder.init('AIzaSyAWjptknqVfMwmLDOiN5sBOoP5Rx2sxiSc');
 
 const ImagePickerScreen = ({navigation}) => {
+
   const [selectedImages, setSelectedImages] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -36,6 +39,7 @@ const ImagePickerScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true);
   const [currentLocation, setCurrentLocation] = useState('');
+  const { colors, isDark } = useToggleMode();
 
   const toggleSwitch = () => {
       setIsEnabled(previousState => !previousState);
@@ -321,7 +325,7 @@ const ImagePickerScreen = ({navigation}) => {
     !title.trim() || selectedImages.length === 0 || loading;
 
   return (
-    <ScrollView contentContainerStyle={styles.mainContainer}>
+    <ScrollView contentContainerStyle={[styles.mainContainer,{backgroundColor:colors.background}]}>
       {loading ? (
         // Pantalla de carga
         <View style={styles.loadingContainer}>
@@ -329,11 +333,11 @@ const ImagePickerScreen = ({navigation}) => {
           <Text style={styles.loadingText}>Publishing your post.....</Text>
         </View>
       ) : (
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container,{backgroundColor:colors.background}]}>
       <View style={styles.header}>
         <View style={styles.goBack}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <BackIcon width={24} height={24} />
+          <BackDarkIcon/>
           </TouchableOpacity>
         </View>
         <Text></Text>
@@ -357,7 +361,7 @@ const ImagePickerScreen = ({navigation}) => {
           }}
           style={styles.profileImage}
         />
-        <Text style={styles.username}>
+        <Text  style={[styles.username,{color:colors.text}]}>
           @{userData?.usernickname || 'Loading...'}
         </Text>
       </View>
@@ -447,10 +451,11 @@ const ImagePickerScreen = ({navigation}) => {
       )}
 
       <View style={styles.inputContainer}>
-        <Text style={styles.textTitles}>Title</Text>
+        <Text style={[styles.textTitles,{color:colors.text}]}>Title</Text>
         <TextInput
           style={styles.input}
           placeholder="Write something..."
+           placeholderTextColor="#999"
           value={title}
           onChangeText={setTitle}
           maxLength={60}
@@ -458,10 +463,11 @@ const ImagePickerScreen = ({navigation}) => {
         />
         <Text style={styles.characterCount}>{60 - title.length}</Text>
 
-        <Text style={styles.textTitles}>Description</Text>
+        <Text style={[styles.textTitles,{color:colors.text}]}>Description</Text>
         <TextInput
           style={[styles.input, styles.descriptionInput]}
           placeholder="Write something..."
+           placeholderTextColor="#999"
           value={description}
           onChangeText={setDescription}
           maxLength={300}
@@ -470,9 +476,9 @@ const ImagePickerScreen = ({navigation}) => {
         />
         <Text style={styles.characterCount}>{300 - description.length}</Text>
 
-        <Text style={styles.textTitles}>Location</Text>
+        <Text style={[styles.textTitles,{color:colors.text}]}>Location</Text>
         <View style={styles.switchContainer}>
-          <Text>Use Actual Location</Text>
+          <Text style={{color:colors.text}}>Use Actual Location</Text>
           <Switch
             trackColor={{false: '#767577', true: '#81b0ff'}}
             thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
@@ -484,11 +490,12 @@ const ImagePickerScreen = ({navigation}) => {
           />
         </View>
         {isEnabled ? (
-          <Text style={styles.locationText}>{location}</Text>
+          <Text style={[styles.locationText,{color:"#999"}]}>{location}</Text>
         ) : (
           <TextInput
             style={styles.input}
             placeholder="Enter location"
+            placeholderTextColor="#999"
             onChangeText={setSelectedLocation}
             editable={!loading}
           />

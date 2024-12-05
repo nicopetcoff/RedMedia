@@ -15,9 +15,11 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import BackIcon from '../assets/imgs/back.svg'; // Icono personalizado de retroceso
+import BackDarkIcon from '../assets/imgs/backBlue.svg';
 import SearchIcon from '../assets/imgs/search.svg'; // Icono de búsqueda personalizado
 import { searchUsers } from '../controller/miApp.controller'; // Importa el método searchUsers
 import { useUserContext } from '../context/AuthProvider'; // Asumiendo que usas un contexto para la autenticación
+import { useToggleMode } from '../context/ThemeContext';
 
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/docrp6wwd/image/upload/v1731610184/default-avatar.jpg'; // URL de imagen predeterminada
 
@@ -28,6 +30,7 @@ const SearchScreen = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { colors, isDark } = useToggleMode();
 
   // Función para buscar usuarios desde el backend
   const handleSearch = async (text) => {
@@ -66,29 +69,29 @@ const SearchScreen = () => {
         defaultSource={{ uri: DEFAULT_AVATAR }} // Para manejar carga inicial en iOS
       />
       <View style={styles.userInfo}>
-        <Text style={styles.name}>{item.nombre}</Text>
+        <Text style={[styles.name,{color:colors.text}]}>{item.nombre}</Text>
         <Text style={styles.username}>@{item.usernickname}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea,{backgroundColor: colors.background}]}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header con botón de retroceso */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <BackIcon width={24} height={24} />
+      <View style={[styles.header,{backgroundColor: colors.background}]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backButton,{color:colors.text}]}>
+        <BackDarkIcon/>
         </TouchableOpacity>
       </View>
 
       {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
+        <View style={[styles.searchBar,{backgroundColor:colors.post}]}>
           <SearchIcon width={20} height={20} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput,{color:colors.text}]}
             placeholder="Search users..."
             value={searchText}
             onChangeText={handleSearch}
