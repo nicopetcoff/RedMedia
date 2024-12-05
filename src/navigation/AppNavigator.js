@@ -20,7 +20,7 @@ const AppNavigator = () => {
     return theme==='dark';
   }
 
-  const {toggleTheme} = useToggleMode();
+  const {toggleTheme,colors} = useToggleMode();
   const { isAuthenticated, loading } = useUserContext();
 
   useEffect(() => {
@@ -50,9 +50,9 @@ const AppNavigator = () => {
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerTitle: "" }} />
-            <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerTitle: "" }} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerTitle: "" }} />
+            <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerTitle: "",headerStyle: { backgroundColor: colors.background},headerTintColor: colors.text}} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerTitle: "",headerStyle: { backgroundColor: colors.background},headerTintColor: colors.text}} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerTitle: "",headerStyle: { backgroundColor: colors.background},headerTintColor: colors.text }} />
             <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           </>
         )}

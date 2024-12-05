@@ -89,8 +89,8 @@ const PostHeader = ({
             <Text
               style={[
                 styles.followButtonText,
-                followState && styles.followingButtonText,{color:colors.text},
-                !followState && { color: "white" }
+                followState && styles.followingButtonText,{color:""},
+                !followState && { color: "#c6c2c2" }
               ]}>
               {followState ? 'Following' : 'Follow'}
             </Text>

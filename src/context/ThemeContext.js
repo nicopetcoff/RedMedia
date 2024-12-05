@@ -12,6 +12,7 @@ export const ThemeProvider = ({children}) => {
   
   const [isDark, setIsDark] = useState(false);
   const [colors, setColors] = useState({
+    //light mode
     background: '#faefef',
     text: '#000000',
     post: '#e7e7e7',
@@ -28,6 +29,7 @@ export const ThemeProvider = ({children}) => {
   
     if (isDark) {
       await AsyncStorage.setItem('theme', 'light');
+      //light mode
       background = '#faefef';
       text = '#000000';
       post = '#e7e7e7';
