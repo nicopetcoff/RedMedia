@@ -228,13 +228,6 @@ const PostDetail = ({route, navigation}) => {
 
   const isOwnPost = userData?.usernickname === currentPost.user;
 
-  const formatDate = (isoDate) => {
-    const date = new Date(isoDate);
-    return `${date.getFullYear()}/${(date.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
-  };
-
   return (
     <ScrollView contentContainerStyle={[styles.container,{backgroundColor: colors.background}]}>
       <TouchableOpacity onPress={handleUserPress} disabled={isOwnPost}>
@@ -273,10 +266,6 @@ const PostDetail = ({route, navigation}) => {
           <Text style={styles.location}>{currentPost.location}</Text>
         </View>
       )}
-
-      <View>
-        <Text style={styles.time}>{formatDate(currentPost.createdAt)} </Text>
-      </View>
 
       <PostInteractionBar
         postId={currentPost?._id}
@@ -359,13 +348,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
     marginLeft: 4,
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
-  },
-  time: {
-    fontSize: 12,
-    color: '#555',
-    marginTop:5,
-    marginLeft:19,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   line: {
