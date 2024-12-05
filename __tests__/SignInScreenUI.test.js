@@ -15,6 +15,26 @@ jest.mock('../src/controller/miApp.controller', () => ({
   signIn: jest.fn(),
 }));
 
+jest.mock('../src/context/ThemeContext', () => ({
+  useToggleMode: jest.fn(() => ({
+    colors: { primary: 'blue', secondary: 'red' },
+  })),
+}));
+
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPlayServices: jest.fn().mockResolvedValue(true),
+    signIn: jest.fn().mockResolvedValue({
+      user: {
+        email: 'test@example.com',
+        id: '1234567890',
+      },
+    }),
+    signOut: jest.fn(),
+  },
+}));
+
 describe('SignInScreen with AuthProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
