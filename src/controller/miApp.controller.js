@@ -53,7 +53,7 @@ export const getUserPosts = async token => {
   }
 };
 
-export const getTimeDifference = dateNotification => {
+export const getTimeDifference=(dateNotification)=> {
   // Convertir las fechas a objetos Date
   const fechaNotificacion = new Date(dateNotification);
   const fechaActual = new Date();
@@ -76,17 +76,17 @@ export const getTimeDifference = dateNotification => {
   } else if (daysDifference === 1) {
     return 'Yesterday';
   } else if (daysDifference <= 7) {
-    return daysDifference + ' days ago';
+    return  daysDifference + ' days ago';
   } else {
-    return weeksDifference + 'weeks ago';
+    return weeksDifference + "weeks ago";
   }
-};
+}
 
-export const getPostDetails = async postId => {
-  try {
-    const baseUrl = urlWebServices.getPostDetails;
+export const getPostDetails = async (postId) => {
+  try{
+    const baseUrl = urlWebServices.getPostDetails
     const url = baseUrl.replace(':id', postId);
-
+    console.log("URL: ", url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -95,19 +95,17 @@ export const getPostDetails = async postId => {
     });
 
     if (!response.ok) {
-      throw new Error(
-        'Error al obtener los detalles del post: ' + response.status,
-      );
+      throw new Error('Error al obtener los detalles del post: ' + response.status);
     }
 
     const data = await response.json();
     return data.data;
-  } catch (error) {
+  }catch(error){
     throw error;
   }
-};
+}
 
-export const getNotifications = async token => {
+export const getNotifications = async (token) => {
   let url = urlWebServices.getNotifications;
 
   try {
@@ -120,9 +118,7 @@ export const getNotifications = async token => {
     });
 
     if (!response.ok) {
-      throw new Error(
-        'Error al obtener las notificaciones: ' + response.status,
-      );
+      throw new Error('Error al obtener las notificaciones: ' + response.status);
     }
 
     let data = await response.json();
@@ -130,7 +126,8 @@ export const getNotifications = async token => {
   } catch (error) {
     throw error;
   }
-};
+
+}
 
 export const getTimelinePosts = async token => {
   try {
@@ -180,7 +177,7 @@ export const signUp = async userData => {
   }
 };
 
-export const googleAutenticacion = async userData => {
+export const googleAutenticacion = async (userData) => {
   let url = urlWebServices.googleLogin;
 
   try {
@@ -458,79 +455,29 @@ export const updateUserProfile = async (userData, token) => {
     // Agregar otros campos si existen
     if (userData.nombre) formData.append('nombre', userData.nombre);
     if (userData.bio) formData.append('bio', userData.bio);
-    if (userData.genero) formData.append('genero', userData.genero);
 
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'multipart/form-data',
+        'x-access-token': token,
+      },
+      body: formData,
+    });
 
-    // Agregamos un timeout a la petición fetch
-    const timeoutDuration = 15000; // 15 segundos
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
-
-    try {
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'multipart/form-data',
-          'x-access-token': token,
-        },
-        body: formData,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId); // Limpiamos el timeout si la petición fue exitosa
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ Server error response:', errorData);
-        throw new Error(errorData.message || 'Error updating profile');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (fetchError) {
-      if (fetchError.name === 'AbortError') {
-        throw new Error(
-          'La conexión ha excedido el tiempo de espera. Por favor, verifica tu conexión a internet e intenta nuevamente.',
-        );
-      }
-      if (
-        fetchError instanceof TypeError &&
-        fetchError.message === 'Network request failed'
-      ) {
-        throw new Error(
-          'No se pudo conectar al servidor. Por favor, verifica tu conexión a internet.',
-        );
-      }
-      throw fetchError;
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Error response:', errorData);
+      throw new Error(errorData.message || 'Error updating profile');
     }
+
+    const data = await response.json();
+
+    return data;
   } catch (error) {
     console.error('❌ Full error:', error);
-
-    // Manejo específico de errores comunes
-    if (error.message.includes('Network request failed')) {
-      throw new Error(
-        'Error de conexión: Verifica tu conexión a internet e intenta nuevamente',
-      );
-    }
-    if (error.message.includes('timed out')) {
-      throw new Error(
-        'La conexión ha excedido el tiempo de espera. Por favor, intenta nuevamente',
-      );
-    }
-    if (error.message.includes('JSON')) {
-      throw new Error(
-        'Error al procesar la respuesta del servidor. Por favor, intenta nuevamente',
-      );
-    }
-
-    // Si es un error que ya hemos formateado, lo pasamos tal cual
-    if (error.message.includes('Error:')) {
-      throw error;
-    }
-
-    // Para cualquier otro tipo de error
-    throw new Error(`Error inesperado: ${error.message}`);
+    throw error;
   }
 };
 
