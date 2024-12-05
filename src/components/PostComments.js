@@ -12,8 +12,8 @@ const PostComments = ({ comments }) => {
     <View style={styles.commentSection}>
       {comments.map((comment, index) => (
         <View key={index} style={[styles.commentContainer,{color:colors.text}]}>
-          <Text style={[styles.commentUsername,{color:colors.details}]}>{comment.username}</Text>
-          <Text style={[styles.commentText,{color:colors.details}]}>{comment.comment}</Text>
+          <Text style={[styles.commentUsername,{color:colors.text}]}>{comment.username}</Text>
+          <Text style={[styles.commentText,{color:colors.text}]}>{comment.comment}</Text>
         </View>
       ))}
     </View>
