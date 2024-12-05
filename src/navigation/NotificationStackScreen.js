@@ -3,10 +3,12 @@ import {createStackNavigator} from '@react-navigation/stack';
 import ProfileScreen from '../screens/ProfileScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import PostDetail from '../screens/PostDetail';
+import { useToggleMode } from '../context/ThemeContext';
 
 const Stack = createStackNavigator();
 
 const NotificationStackScreen = () => {
+  const { colors } = useToggleMode();
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -19,6 +21,10 @@ const NotificationStackScreen = () => {
         component={ProfileScreen}
         options={{
           headerTitle: '',
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: colors.text,
         }}
       />
       <Stack.Screen
@@ -26,6 +32,10 @@ const NotificationStackScreen = () => {
         component={PostDetail}
         options={{
           headerTitle: '',
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: colors.text,
         }}
       />
     </Stack.Navigator>

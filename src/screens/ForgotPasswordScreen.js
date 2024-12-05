@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { sendPasswordResetEmail } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
-
+  const { colors } = useToggleMode();
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -27,9 +28,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor:colors.background}]}>
       <Text style={styles.title}>Forgot your password?</Text>
-      <Text style={styles.subtitle}>Don't worry, we will send you instructions</Text>
+      <Text style={[styles.subtitle,{color:colors.details}]}>Don't worry, we will send you instructions</Text>
       <Text style={styles.instructionText}>
           Please enter your email address. You will receive a link to create a new password via email.
       </Text>

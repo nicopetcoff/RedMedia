@@ -1,11 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useToggleMode } from '../context/ThemeContext';
 
 const LoginScreen = ({navigation}) => {
-
-  const handleGooglePress = () => {
-    console.log("Google Sign In button pressed");
-  };
+  const {colors} = useToggleMode();
 
   const handleEmailSignUp = () => {
     navigation.navigate('SignUp');
@@ -16,38 +14,32 @@ const LoginScreen = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{backgroundColor:colors.background}]}>
       <Image 
 
         source={require('../assets/imgs/logo.png')} // Asegúrate de tener la imagen del logo en tu carpeta assets
 
         style={styles.logo}
       />
-      <Text style={styles.title}>REDMEDIA</Text>
+      <Text style={[styles.title,{color:colors.text}]}>REDMEDIA</Text>
 
-      <TouchableOpacity style={styles.googleButton} onPress={handleGooglePress}>
+      <TouchableOpacity style={styles.googleButton} onPress={handleSignInPress}>
         <View style={styles.googleButtonContent}>
-          <Image
-            source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png' }}
-            style={styles.googleIcon}
-          />
-          <Text style={styles.googleButtonText}>Sign Up with Google</Text>
+          
+          <Text style={styles.googleButtonText}>Sign in with RedMedia</Text>
         </View>
       </TouchableOpacity>
 
-      <Text style={styles.signInText}>
-        Already have an account?{' '}
-        <Text style={styles.signInLink} onPress={handleSignInPress}>Sign in</Text>
-      </Text>
+      
       
       <View style={styles.orContainer}>
         <View style={styles.line} />
-        <Text style={styles.orText}>OR</Text>
+        <Text style={[styles.orText,{color:colors.text}]}>OR</Text>
         <View style={styles.line} />
       </View>
 
       <TouchableOpacity style={styles.emailButton} onPress={handleEmailSignUp}>
-        <Text style={styles.emailButtonText}>Sign up with Email</Text>
+        <Text style={[styles.emailButtonText,{color:colors.text}]}>Sign up with Email</Text>
       </TouchableOpacity>
     </View>
   );

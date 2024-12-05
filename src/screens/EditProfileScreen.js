@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Switch,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -15,16 +16,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserContext, useToggleContext } from '../context/AuthProvider';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { updateUserProfile, getUserData, deleteUserAccount } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const EditProfileScreen = ({ navigation, route }) => {
   const { avatar } = route.params;
   const { token } = useUserContext();
   const { signOut } = useToggleContext();
+  const { toggleTheme, isDark,colors } = useToggleMode();
 
   const [nickname, setNickname] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [gender, setGender] = useState('Not specified'); // Default value set to 'Not specified'
+  const [gender, setGender] = useState('Not specified');
   const [profileImage, setProfileImage] = useState(avatar);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,7 +45,11 @@ const EditProfileScreen = ({ navigation, route }) => {
       setName(userData.data.nombre || '');
       setDescription(userData.data.bio || '');
       setProfileImage(userData.data.avatar || avatar);
-      setGender(userData.data.genero || 'Not specified'); // Set gender from API response
+      
+      const backendGender = userData.data.genero;
+      if (backendGender) {
+        setGender(backendGender);
+      }
     } catch (error) {
       showMessage('Error loading user data: ' + error.message);
     } finally {
@@ -95,11 +102,18 @@ const EditProfileScreen = ({ navigation, route }) => {
       const updateData = {
         nombre: name,
         bio: description,
-        genero: gender, // Send selected gender
+        genero: gender,
       };
 
-      await updateUserProfile(updateData, token);
+      const result = await updateUserProfile(updateData, token);
+      
+      if (result?.data?.genero) {
+        setGender(result.data.genero);
+      }
       showMessage('Profile updated successfully');
+      
+      // Refresh user data after update
+      await loadUserData();
     } catch (error) {
       showMessage('Error updating profile: ' + error.message);
     } finally {
@@ -172,12 +186,13 @@ const EditProfileScreen = ({ navigation, route }) => {
       showMessage('Error taking photo: ' + error.message);
     }
   };
+  const handleChangeTheme =   () =>   toggleTheme
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+    <SafeAreaView style={[styles.safeArea,{backgroundColor:colors.background}]}>
+      <ScrollView style={[styles.container,{backgroundColor:colors.background}]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>×</Text>
+          <Text style={[styles.closeButtonText,{color:colors.text}]}>×</Text>
         </TouchableOpacity>
 
         <Text style={styles.title}>My Account</Text>
@@ -222,30 +237,32 @@ const EditProfileScreen = ({ navigation, route }) => {
           <TextInput
             placeholder="Nickname"
             value={nickname}
-            style={[styles.input, { color: '#999' }]}
+            style={[styles.input,{color:colors.text}]}
             editable={false}
           />
           <TextInput
             placeholder="Name"
             value={name}
             onChangeText={setName}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             editable={!loading}
           />
           <TextInput
             placeholder="Description"
             value={description}
             onChangeText={setDescription}
-            style={styles.input}
+            style={[styles.input,{color:colors.text}]}
             multiline
             editable={!loading}
           />
           <View style={styles.pickerContainer}>
-            <Text style={styles.label}>Gender:</Text>
+            <Text style={[styles.label,{color:colors.text}]}>Gender:</Text>
             <Picker
-              selectedValue={gender} // Set gender as the selected value
+              selectedValue={gender}
               style={styles.picker}
-              onValueChange={(itemValue) => setGender(itemValue)}
+              onValueChange={(itemValue) => {
+                setGender(itemValue);
+              }}
               enabled={!loading}
             >
               <Picker.Item label="Male" value="Masculino" />
@@ -255,7 +272,6 @@ const EditProfileScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Save Changes Button */}
         <View style={styles.saveButtonContainer}>
           <TouchableOpacity
             style={styles.saveButton}
@@ -268,6 +284,15 @@ const EditProfileScreen = ({ navigation, route }) => {
 
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>SETTINGS</Text>
+          <View style={styles.appearanceRow}>
+            <Text style={[styles.appearanceLabel,{color:colors.text}]}>Dark mode:</Text>
+            <View style={styles.switchContainer}>
+              <Switch
+                value={isDark}
+                onValueChange={handleChangeTheme()}
+              />
+            </View>
+          </View>
 
           <TouchableOpacity
             style={styles.deleteButton}
@@ -307,7 +332,6 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 28,
-    color: '#000',
     fontWeight: '300',
   },
   title: {

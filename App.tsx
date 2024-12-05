@@ -7,17 +7,15 @@ import NetInfo from "@react-native-community/netinfo";
 import { Alert, StatusBar } from "react-native";
 import RNRestart from 'react-native-restart';
 import SplashScreen from 'react-native-splash-screen';
+import {ThemeProvider} from "./src/context/ThemeContext";
 
 const App = () => {
   const unsubscribe = NetInfo.addEventListener((state) => {
     if (!state.isConnected) {
       Alert.alert(
-        "Sin conexion a internet",
-        "Por favor conectese a internet para poder usar la aplicacion",
-        [{ 
-          text: "Reintentar", 
-          onPress: () => RNRestart.Restart() 
-        }]
+        "No internet connection",
+        "Please connect to the internet to use the applicatión",
+        [],
       );
     }
   });
@@ -40,11 +38,13 @@ const App = () => {
         barStyle="dark-content" 
         backgroundColor="#ffffff" 
       />
-      <AuthProvider>
-        <PostProvider> 
-          <AppNavigator />
-        </PostProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <PostProvider> 
+            <AppNavigator />
+          </PostProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </>
   );
 };

@@ -2,10 +2,12 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image,TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {getTimeDifference} from '../controller/miApp.controller';
+import {getTimeDifference,getPostDetails} from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const Notification = ({item}) => {
   const navigation = useNavigation();
+  const {colors} = useToggleMode();
 
   const getImage = () => {
     switch (item.type) {
@@ -20,32 +22,37 @@ const Notification = ({item}) => {
     }
   };
 
+  const  getPost=async (postId)=>{
+    const post= await getPostDetails(postId);
+    navigation.navigate('PostDetail', {item: post})
+  }
+
   return (
     <View style={styles.Notification}>
       <Image source={getImage()} style={styles.imagen} />
       <View style={styles.activityItem}>
-        <Text style={styles.activityType}>{item.type}</Text>
+        <Text style={[styles.activityType,{color:colors.text}]}>{item.type}</Text>
         <View style={styles.action}>
           {item.icon}
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('profile', {username: item.user})
             } style={styles.action}>
-            <Text style={styles.activityUser}>{item.user}</Text>
+            <Text style={[styles.activityUser,{color:colors.text}]}>{item.user}</Text>
             </TouchableOpacity>
             {
             item.type ==='Followed' ?
-              <Text style={[styles.activityText]}> {item.text}</Text>
+              <Text style={[styles.activityText,{color:colors.text}]}> {item.text}</Text>
               :
               <TouchableOpacity 
                 onPress={() => 
-                  navigation.navigate('PostDetail', {item: item.post})}>
-                <Text style={[styles.activityText]}>{item.text}</Text>
+                   getPost(item.post)}>
+                <Text style={[styles.activityText,{color:colors.text}]}> {item.text}</Text>
               </TouchableOpacity> 
             }
 
         </View>
-        <Text style={styles.activityTime}>{ getTimeDifference(item.time)}</Text>
+        <Text style={[styles.activityTime,{color:colors.text}]}>{ getTimeDifference(item.time)}</Text>
       </View>
     </View>
   );

@@ -5,12 +5,12 @@ import LoggedInUserProfileScreen from "../screens/LoggedInUserProfileScreen";
 import PostDetailScreen from "../screens/PostDetail"; // Pantalla de detalle de cada post
 import EditProfileScreen from "../screens/EditProfileScreen"; // Nueva pantalla de edición de perfil
 import FavoriteScreen from "../screens/FavoriteScreen"; // Agregada pantalla de favoritos
-import { TouchableOpacity } from "react-native";
-import BackIcon from "../assets/imgs/back.svg"; // Icono personalizado para volver
+import { useToggleMode } from "../context/ThemeContext";
 
 const Stack = createStackNavigator();
 
 const LoggedInProfileStackScreen = () => {
+  const { colors } = useToggleMode();
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -23,14 +23,10 @@ const LoggedInProfileStackScreen = () => {
         component={PostDetailScreen}
         options={({ navigation }) => ({
           headerTitle: "",
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{ marginLeft: 10 }}
-            >
-              <BackIcon width={24} height={24} />
-            </TouchableOpacity>
-          ),
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: colors.text,
         })}
       />
       <Stack.Screen

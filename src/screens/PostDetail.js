@@ -300,7 +300,7 @@ const PostDetail = ({route, navigation}) => {
       {showCommentInput && (
         <View style={styles.commentInputContainer}>
           <TextInput
-            style={styles.commentInput}
+            style={[styles.commentInput,{color:colors.text}]}
             value={newComment}
             onChangeText={setNewComment}
             placeholder="Escribe un comentario..."

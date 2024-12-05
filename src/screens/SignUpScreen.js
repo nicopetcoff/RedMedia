@@ -6,8 +6,10 @@ import { FormikInputValue } from '../components/FormikInputValue';
 import EyeIcon from '../assets/imgs/eyeIcon.svg';
 import { Picker } from '@react-native-picker/picker';
 import { signUp } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const SignUpScreen = () => {
+  const { colors } = useToggleMode();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -38,7 +40,7 @@ const SignUpScreen = () => {
       onSubmit={handleSignUp}
     >
       {({ handleSubmit, setFieldValue, values }) => (
-        <View style={styles.container}>
+        <View style={[styles.container,{backgroundColor:colors.background}]}>
           {/* Logo */}
           <Image source={require('../assets/imgs/logo.png')} style={styles.logo} testID="logo" />
 
@@ -49,6 +51,7 @@ const SignUpScreen = () => {
           <FormikInputValue
             name="name"
             placeholder="Enter your name"
+            placeholderTextColor="#aaa"
             width="95%"
             testID="name"
           />
@@ -57,6 +60,7 @@ const SignUpScreen = () => {
           <FormikInputValue
             name="lastName"
             placeholder="Enter your last name"
+            placeholderTextColor="#aaa"
             testID="lastName"
             width="95%"
           />
@@ -65,6 +69,7 @@ const SignUpScreen = () => {
           <FormikInputValue
             name="nick"
             placeholder="Enter your nickname"
+            placeholderTextColor="#aaa"
             testID="nick"
             width="95%"
           />
@@ -73,6 +78,7 @@ const SignUpScreen = () => {
           <FormikInputValue
             name="email"
             placeholder="Enter your email"
+            placeholderTextColor="#aaa"
             keyboardType="email-address"
             testID="email"
             width="95%"
@@ -83,6 +89,7 @@ const SignUpScreen = () => {
             <FormikInputValue
               name="password"
               placeholder="Enter your password"
+              placeholderTextColor="#aaa"
               secureTextEntry={!showPassword}
               testID="password"
             />
@@ -96,7 +103,7 @@ const SignUpScreen = () => {
 
           {/* Gender Dropdown */}
           <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>Gender</Text>
+            <Text style={[styles.pickerLabel,{color:colors.background}]}>Gender</Text>
             <Picker
               selectedValue={values.gender}
               onValueChange={(itemValue) => setFieldValue('gender', itemValue)}
