@@ -5,8 +5,10 @@ import { signInValidationSchema } from '../context/validationSchemas';
 import { FormikInputValue } from '../components/FormikInputValue';
 import EyeIcon from '../assets/imgs/eyeIcon.svg';
 import { useToggleContext } from '../context/AuthProvider';
+import { useToggleMode } from '../context/ThemeContext';
 
 const SignInScreen = ({ navigation }) => {
+  const {colors } = useToggleMode();
   const { login } = useToggleContext();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -25,13 +27,14 @@ const SignInScreen = ({ navigation }) => {
       onSubmit={handleSignIn}
     >
       {({ handleSubmit }) => (
-        <View style={styles.container}>
+        <View style={[styles.container,{backgroundColor:colors.background}]}>
           <Image source={require('../assets/imgs/logo.png')} style={styles.logo} />
-          <Text style={styles.title}>Sign In</Text>
-        <View style={styles.passwordContainer}>
+          <Text style={[styles.title,{color:colors.text}]}>Sign In</Text>
+        <View style={[styles.passwordContainer,{color:colors.text}]}>
           <FormikInputValue
             name="email"
             placeholder="Enter your email"
+            placeholderTextColor="#aaa"
             keyboardType="email-address"
             testID="email"
             />
@@ -42,6 +45,7 @@ const SignInScreen = ({ navigation }) => {
             <FormikInputValue
               name="password"
               placeholder="Enter your password"
+              placeholderTextColor="#aaa"
               secureTextEntry={!showPassword}
               testID="password"
             />

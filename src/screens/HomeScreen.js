@@ -18,6 +18,7 @@ import { usePost } from '../context/PostContext';
 import Post from '../components/Post';
 import Skeleton from '../components/Skeleton';
 import { getTimelinePosts, getAds } from '../controller/miApp.controller';
+import { useToggleMode } from '../context/ThemeContext';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -29,6 +30,7 @@ const HomeScreen = () => {
   const { token } = useUserContext();
   const navigation = useNavigation();
   const postContext = usePost();
+  const { colors } = useToggleMode();
 
   const flatListRef = useRef(null);
   useScrollToTop(flatListRef);
@@ -186,13 +188,13 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.headerContainer,{backgroundColor:colors.background}]}>
           <Image
             source={require('../assets/imgs/logo.png')}
             style={styles.logo}
           />
-          <Text style={styles.header}>REDMEDIA</Text>
+          <Text style={[styles.header,{color:colors.text}]}>REDMEDIA</Text>
         </View>
 
         <FlatList

@@ -23,14 +23,10 @@ const LoggedInProfileStackScreen = () => {
         component={PostDetailScreen}
         options={({ navigation }) => ({
           headerTitle: "",
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{ marginLeft: 10 }}
-            >
-              <BackIcon width={24} height={24} />
-            </TouchableOpacity>
-          ),
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: colors.text,
         })}
       />
       <Stack.Screen

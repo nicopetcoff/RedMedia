@@ -3,11 +3,13 @@ import {View, Text, Image, TouchableOpacity, StyleSheet, Platform} from 'react-n
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {usePost} from '../context/PostContext';
 import Video from 'react-native-video';
+import { useToggleMode } from '../context/ThemeContext';
 
 const Post = ({item, source}) => {
   const navigation = useNavigation();
   const route = useRoute();
   const {updatePost} = usePost();
+  const { colors } = useToggleMode();
 
   const hasVideo = item.videos && item.videos.length > 0;
   const hasImage = item.image && item.image.length > 0;
@@ -25,7 +27,7 @@ const Post = ({item, source}) => {
   return (
     <TouchableOpacity 
       onPress={navigateToDetail} 
-      style={styles.container}
+      style={[styles.container,{backgroundColor: colors.background}]}
       key={`post-${item._id}-${item.user}`}
     >
       <View style={styles.mediaContainer}>
@@ -66,7 +68,7 @@ const Post = ({item, source}) => {
         )}
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={[styles.title,{color:colors.text}]} numberOfLines={2}>
           {item.title}
         </Text>
         <Text style={styles.username}>@{item.user}</Text>

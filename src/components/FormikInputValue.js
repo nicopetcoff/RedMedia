@@ -1,14 +1,16 @@
 import React from 'react';
 import { useField } from 'formik';
 import { TextInput, Text, StyleSheet, View } from 'react-native';
+import { useToggleMode } from '../context/ThemeContext';
 
 export const FormikInputValue = ({ name, ...props }) => {
   const [field, meta, helpers] = useField(name);
+  const { colors } = useToggleMode();
 
   return (
     <View style={styles.inputContainer}>
       <TextInput
-        style={[styles.input, meta.error && styles.inputError]}
+        style={[styles.input,{color:colors.text}, meta.error && styles.inputError]}
         value={field.value}
         onChangeText={helpers.setValue}
         {...props}
