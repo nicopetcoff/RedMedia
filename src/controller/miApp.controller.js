@@ -279,7 +279,7 @@ export const publishPost = async (postData, token) => {
         let type = '';
 
         // Verificar si el archivo es una imagen
-        if (['jpg', 'jpeg', 'png', 'gif', 'heif'].includes(fileExtension)) {
+        if (['jpg', 'jpeg', 'png', 'gif', 'heif', 'heic', 'webp', 'bmp', 'tiff'].includes(fileExtension)) {
           type = `image/${fileExtension}`;
           // Cambiar 'images' a un nombre de campo único
           formData.append(`images`, {
@@ -289,7 +289,7 @@ export const publishPost = async (postData, token) => {
           });
         }
         // Verificar si el archivo es un video
-        else if (['mp4', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
+        else if (['mp4', 'mov', 'avi', 'mkv', 'mpeg', 'webm', 'flv', 'wmv', '3gp', 'ogg'].includes(fileExtension)) {
           type = `video/${fileExtension}`;
           // Cambiar 'videos' a un nombre de campo único
           formData.append(`videos`, {
