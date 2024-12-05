@@ -48,7 +48,6 @@ const PostHeader = ({
         if (onFollowChange) onFollowChange(newState);
       }
     } catch (error) {
-      console.error('Error:', error);
       setFollowState(currentState);
       Alert.alert('Error', 'No se pudo completar la acción');
     } finally {

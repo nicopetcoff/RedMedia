@@ -60,8 +60,7 @@ const ImagePickerScreen = ({navigation}) => {
       const response = await getUserData(token);
       setUserData(response.data);
     } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
+      }
   };
 
   useFocusEffect(
@@ -139,7 +138,6 @@ const ImagePickerScreen = ({navigation}) => {
 
       return cameraGranted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      console.warn(err);
       return false;
     }
   };
@@ -158,7 +156,6 @@ const ImagePickerScreen = ({navigation}) => {
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      console.warn(err);
       return false;
     }
   };
@@ -314,7 +311,6 @@ const ImagePickerScreen = ({navigation}) => {
         Alert.alert('Error', result.message || 'Failed to publish post');
       }
     } catch (error) {
-      console.error('Error en handlePush:', error);
       Alert.alert('Error', 'Failed to publish post');
     } finally {
       setLoading(false);

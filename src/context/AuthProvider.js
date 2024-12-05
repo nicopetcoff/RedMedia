@@ -44,7 +44,6 @@ export const AuthProvider = ({ children }) => {
           });
         }
       } catch (error) {
-        console.error('Error al recuperar los datos de autenticación:', error);
       } finally {
         setLoading(false);
       }
@@ -91,8 +90,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: false,
       });
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
+      }
   };
 
   return (

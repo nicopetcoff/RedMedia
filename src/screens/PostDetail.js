@@ -56,7 +56,6 @@ const PostDetail = ({route, navigation}) => {
       );
       return JSON.parse(jsonPayload).id;
     } catch (error) {
-      console.error('Error getting user ID:', error);
       return null;
     }
   }, [token]);
@@ -90,7 +89,6 @@ const PostDetail = ({route, navigation}) => {
         setIsFollowing(isCurrentUserFollowing);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
     }
@@ -133,7 +131,6 @@ const PostDetail = ({route, navigation}) => {
           : (prev.followers || []).filter(id => id !== getCurrentUserId()),
       }));
     } catch (error) {
-      console.error('Error al seguir/dejar de seguir:', error);
     }
   };
 
@@ -164,7 +161,6 @@ const PostDetail = ({route, navigation}) => {
           ? [...(prev.likes || []), userData.usernickname]
           : (prev.likes || []).filter(like => like !== userData.usernickname),
       }));
-      console.error('Error al dar/quitar like:', error);
     }
   };
 
@@ -200,7 +196,6 @@ const PostDetail = ({route, navigation}) => {
       setComments(prev =>
         prev.filter(comment => comment._id !== optimisticComment._id),
       );
-      console.error('Error al agregar comentario:', error);
     }
   };
 

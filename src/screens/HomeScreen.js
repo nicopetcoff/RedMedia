@@ -82,8 +82,7 @@ const HomeScreen = () => {
           setPage(prevPage => prevPage + 1);
         }
       } catch (error) {
-        console.error('Error al cargar los datos:', error);
-      } finally {
+        } finally {
         setLoading(false);
         setLoadingMore(false);
         setRefreshing(false);

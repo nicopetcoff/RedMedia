@@ -35,10 +35,6 @@ export const getUserPosts = async token => {
     });
 
     if (!response.ok) {
-      console.error(
-        '❌ Error en respuesta de getUserPosts, código:',
-        response.status,
-      );
       throw new Error(
         'Error al obtener los posts del usuario: ' + response.status,
       );
@@ -48,7 +44,6 @@ export const getUserPosts = async token => {
 
     return data;
   } catch (error) {
-    console.error('❌ Error en getUserPosts:', error);
     throw error;
   }
 };
@@ -148,7 +143,6 @@ export const getTimelinePosts = async token => {
       data: followingData.data || [],
     };
   } catch (error) {
-    console.error('Error en getTimelinePosts:', error);
     throw error;
   }
 };
@@ -169,13 +163,11 @@ export const signUp = async userData => {
     let data = await response.json();
 
     if (data.status === 400) {
-      console.error('Error del servidor:', data.message); // Log del mensaje de error del servidor
       throw new Error(data.message);
     }
 
     return data;
   } catch (error) {
-    console.error('Error en signUp:', error); // Log del error capturado
     throw error;
   }
 };
@@ -342,7 +334,6 @@ export const publishPost = async (postData, token) => {
       throw new Error(responseData.message || 'Failed to publish post');
     }
   } catch (error) {
-    console.error('Error en publishPost:', error);
     return {
       success: false,
       message: error.message || 'Error connecting to server',
@@ -394,7 +385,6 @@ export const getUsers = async token => {
 
     return data;
   } catch (error) {
-    console.error('Error en getUsers:', error);
     throw error;
   }
 };
@@ -456,7 +446,6 @@ export const updateUserProfile = async (userData, token) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Server error response:', errorData);
         throw new Error(errorData.message || 'Error updating profile');
       }
 
@@ -479,7 +468,6 @@ export const updateUserProfile = async (userData, token) => {
       throw fetchError;
     }
   } catch (error) {
-    console.error('❌ Full error:', error);
 
     // Manejo específico de errores comunes
     if (error.message.includes('Network request failed')) {
@@ -536,7 +524,6 @@ export const handleFollowUser = async function (userId, token, isFollowing) {
 
     return data;
   } catch (error) {
-    console.error('Error en handleFollowUser:', error);
     throw error;
   }
 };
@@ -572,7 +559,6 @@ export const interactWithPost = async (
 
     return data; // Datos actualizados del post
   } catch (error) {
-    console.error('Error en interactWithPost:', error);
     throw error;
   }
 };
@@ -609,7 +595,6 @@ export const searchUsers = async (query, token) => {
 
     return data.data; // Retorna los usuarios encontrados
   } catch (error) {
-    console.error('Error en searchUsers:', error);
     return []; // En caso de un error de red o cualquier otro problema, devolvemos una lista vacía
   }
 };
@@ -633,7 +618,6 @@ export const deleteUserAccount = async token => {
 
     return true; // Si se elimina correctamente
   } catch (error) {
-    console.error('Error en deleteUserAccount:', error);
     throw error;
   }
 };
@@ -653,13 +637,11 @@ export const markPostAsFavorite = async (postId, token) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Error adding post to favorites:', data.message);
       throw new Error(data.message || 'Error adding to favorites');
     }
 
     return data;
   } catch (error) {
-    console.error('Error in addPostToFavorites:', error);
     throw error;
   }
 };
@@ -677,14 +659,12 @@ export const getFavoritePosts = async token => {
     });
 
     if (!response.ok) {
-      console.error('Error al obtener los posts favoritos:', response.status);
       throw new Error('Error al obtener los posts favoritos');
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error al obtener los posts favoritos:', error);
     throw error;
   }
 };

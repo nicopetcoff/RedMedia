@@ -50,7 +50,6 @@ const ProfileScreen = ({ route, navigation }) => {
       );
       return JSON.parse(jsonPayload).id;
     } catch (error) {
-      console.error('Error getting user ID:', error);
       return null;
     }
   }, [token]);
@@ -111,7 +110,6 @@ const ProfileScreen = ({ route, navigation }) => {
 
       setUserPosts(userPosts);
     } catch (error) {
-      console.error('ProfileScreen - Error loading data:', error);
       setError('Error al cargar los datos del usuario');
     } finally {
       setLoading(false);
@@ -161,8 +159,7 @@ const ProfileScreen = ({ route, navigation }) => {
         await fetchUserData();
       }
     } catch (error) {
-      console.error('Error al seguir/dejar de seguir:', error);
-    } finally {
+      } finally {
       setFollowLoading(false);
     }
   };
@@ -303,7 +300,7 @@ const ProfileScreen = ({ route, navigation }) => {
       {/* Agregar Nivel abajo de la Bio */}
       {user.level && (
         <View style={styles.levelContainer}>
-          <Text style={[styles.levelText,{color:colors.details}]}>Level: {user.level}</Text>
+          <Text style={[styles.levelText,{color:colors.detailes}]}>Level: {user.level}</Text>
         </View>
       )}
 

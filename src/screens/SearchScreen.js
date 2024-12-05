@@ -47,7 +47,6 @@ const SearchScreen = () => {
       setFilteredUsers(users);
       setError(null);
     } catch (err) {
-      console.error('Error al buscar usuarios:', err);
       setError(err.message || 'Error al buscar usuarios');
       setFilteredUsers([]);
     } finally {

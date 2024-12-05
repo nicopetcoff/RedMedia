@@ -71,7 +71,6 @@ const FavoriteScreen = () => {
         setPosts([]);
       }
     } catch (error) {
-      console.error('Error al cargar los posts favoritos:', error);
       setPosts([]);
     } finally {
       setLoading(false);

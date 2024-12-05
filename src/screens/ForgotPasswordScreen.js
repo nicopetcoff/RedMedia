@@ -13,7 +13,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
   const handleSendInstructions = async () => {
     if (!isValidEmail(email)) {
-      Alert.alert('E-mail invalido', 'Por favor, introduce una dirección de correo electrónico válida.');
+      Alert.alert('E-mail invalid', 'Please enter a valid address e-mail.');
       return;
     }
 
@@ -29,9 +29,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container,{backgroundColor:colors.background}]}>
-      <Text style={styles.title}>Forgot your password?</Text>
-      <Text style={[styles.subtitle,{color:colors.details}]}>Don't worry, we will send you instructions</Text>
-      <Text style={styles.instructionText}>
+      <Text style={[styles.title,{color:colors.detailes}]}>Forgot your password?</Text>
+      <Text style={[styles.subtitle,{color:colors.detailes}]}>Don't worry, we will send you instructions</Text>
+      <Text style={[styles.instructionText,{color:colors.text}]}>
           Please enter your email address. You will receive a link to create a new password via email.
       </Text>
 

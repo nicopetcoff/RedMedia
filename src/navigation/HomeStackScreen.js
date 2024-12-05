@@ -47,7 +47,12 @@ const HomeStackScreen = () => {
           headerTintColor: colors.text,
         })}
       />
-      <Stack.Screen name="FullScreen" component={FullScreen} />
+      <Stack.Screen name="FullScreen" component={FullScreen} options={({navigation}) => ({
+          headerStyle: {
+            backgroundColor: colors.background, 
+          },
+          headerTintColor: colors.text,
+        })} />
     </Stack.Navigator>
   );
 };

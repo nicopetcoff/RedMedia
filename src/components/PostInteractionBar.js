@@ -41,7 +41,6 @@ const PostInteractionBar = ({
         }
       }
     } catch (error) {
-      console.error('Error detallado:', error);
       setIsFavorite(!newFavoriteState);
       Alert.alert(
         'Error',

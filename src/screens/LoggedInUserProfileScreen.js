@@ -79,8 +79,7 @@ const LoggedInUserProfileScreen = () => {
         setUserData(userDataResponse.data);
       }
     } catch (error) {
-      console.error('Error al obtener datos del usuario:', error);
-    }
+      }
   }, [token]);
 
   const fetchUserPosts = useCallback(async () => {
@@ -98,7 +97,6 @@ const LoggedInUserProfileScreen = () => {
         setUserPosts([]); // Si no hay posts, asigna un array vacío
       }
     } catch (error) {
-      console.error('Error al obtener posts:', error);
       setUserPosts([]); // Si ocurre un error (por ejemplo 404), asigna un array vacío
     }
   }, [token]);

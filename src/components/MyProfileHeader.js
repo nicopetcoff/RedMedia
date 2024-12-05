@@ -59,7 +59,6 @@ const MyProfileHeader = ({
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      console.warn(err);
       return false;
     }
   };
@@ -95,7 +94,6 @@ const MyProfileHeader = ({
             }
           }
         } catch (error) {
-          console.error('Error details:', error);
           Alert.alert('Error', 'Failed to update cover image');
         } finally {
           setLoading(false);
@@ -103,8 +101,7 @@ const MyProfileHeader = ({
       }
     } catch (error) {
       Alert.alert('Error', 'Error selecting image');
-      console.error(error);
-    }
+      }
   };
 
   const handleViewFavorites = () => {
