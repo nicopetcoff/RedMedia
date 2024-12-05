@@ -25,7 +25,6 @@ const PostInteractionBar = ({
 
   const handleFavoritePress = async () => {
     if (!postId || !token || isLoading) {
-      console.log('Falta postId o token:', {postId, hasToken: !!token});
       return;
     }
 
@@ -33,9 +32,7 @@ const PostInteractionBar = ({
     const newFavoriteState = !isFavorite;
 
     try {
-      console.log('Intentando marcar como favorito:', {postId, token});
       const response = await markPostAsFavorite(postId, token);
-      console.log('Respuesta del servidor:', response);
 
       if (response && response.message) {
         setIsFavorite(newFavoriteState);
