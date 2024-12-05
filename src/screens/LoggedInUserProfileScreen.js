@@ -114,11 +114,9 @@ const LoggedInUserProfileScreen = () => {
     useCallback(() => {
       if (token) {
         setLoading(true);
-        fetchUserData()
-          .then(() => fetchUserPosts())
-          .finally(() => setLoading(false));
+        fetchUserData().finally(() => setLoading(false));
       }
-    }, [token, fetchUserData, fetchUserPosts]),
+    }, [token, fetchUserData]),
   );
 
   useEffect(() => {
