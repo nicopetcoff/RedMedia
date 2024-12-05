@@ -7,6 +7,12 @@ jest.mock('../src/context/AuthProvider', () => ({
   useToggleContext: jest.fn(),
 }));
 
+jest.mock('../src/context/ThemeContext', () => ({
+  useToggleMode: jest.fn(() => ({
+    colors: { primary: 'blue', secondary: 'red' },
+  })),
+}));
+
 const mockNavigation = { navigate: jest.fn() };
 
 beforeEach(() => {
