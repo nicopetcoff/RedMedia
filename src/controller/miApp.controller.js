@@ -460,8 +460,6 @@ export const updateUserProfile = async (userData, token) => {
     if (userData.bio) formData.append('bio', userData.bio);
     if (userData.genero) formData.append('genero', userData.genero);
 
-    console.log('Attempting to connect to:', url);
-    console.log('Data being sent:', userData);
 
     // Agregamos un timeout a la petición fetch
     const timeoutDuration = 15000; // 15 segundos
@@ -489,7 +487,6 @@ export const updateUserProfile = async (userData, token) => {
       }
 
       const data = await response.json();
-      console.log('✅ Success response:', data);
       return data;
     } catch (fetchError) {
       if (fetchError.name === 'AbortError') {

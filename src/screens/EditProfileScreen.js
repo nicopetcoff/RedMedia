@@ -37,8 +37,6 @@ const EditProfileScreen = ({ navigation, route }) => {
     try {
       setLoading(true);
       const userData = await getUserData(token);
-      console.log('Complete user data:', userData.data);
-      console.log('Gender from backend:', userData.data.genero);
 
       setNickname(userData.data.usernickname || '');
       setName(userData.data.nombre || '');
@@ -47,7 +45,6 @@ const EditProfileScreen = ({ navigation, route }) => {
       
       const backendGender = userData.data.genero;
       if (backendGender) {
-        console.log('Setting gender to:', backendGender);
         setGender(backendGender);
       }
     } catch (error) {
@@ -105,9 +102,7 @@ const EditProfileScreen = ({ navigation, route }) => {
         genero: gender,
       };
 
-      console.log('Data being sent to backend:', updateData);
       const result = await updateUserProfile(updateData, token);
-      console.log('Backend response:', result);
       
       if (result?.data?.genero) {
         setGender(result.data.genero);
@@ -262,7 +257,6 @@ const EditProfileScreen = ({ navigation, route }) => {
               selectedValue={gender}
               style={styles.picker}
               onValueChange={(itemValue) => {
-                console.log('Selected gender:', itemValue);
                 setGender(itemValue);
               }}
               enabled={!loading}
